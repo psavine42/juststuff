@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/../isolation-nn/.idea/AIND-Isolation.iml" filepath="$PROJECT_DIR$/../isolation-nn/.idea/AIND-Isolation.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/layout.iml" filepath="$PROJECT_DIR$/.idea/layout.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../pytorch-dnc/.idea/pytorch-dnc.iml" filepath="$PROJECT_DIR$/../pytorch-dnc/.idea/pytorch-dnc.iml" />
+    </modules>
+  </component>
+</project>

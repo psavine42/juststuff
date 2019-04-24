@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="VcsDirectoryMappings">
+    <mapping directory="$PROJECT_DIR$/../dnc" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../dni-pytorch" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../isolation-nn" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/lib/Spaceplanning_ADSK_PW" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/lib/hessian" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/lib/pythonocc-utils" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../pytorch-dnc" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../viper" vcs="Git" />
+  </component>
+</project>
