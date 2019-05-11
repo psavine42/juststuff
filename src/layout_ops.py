@@ -11,24 +11,17 @@ import random
 
 random.seed(1)
 
-class Partitioner:
-    def __call__(self, layout, spec):
-        """"""
-        pass
-
-
-class ConcretePartitioner:
-    def __call__(self, layout, spec):
-        """"""
-        r1, r2 = sorted(spec.rooms, key=lambda x: len(x.neighbors))[0:2]
-
-
-
-
-
 
 # Constraints -------------------------------------------
 class Constraint(ABC):
+    """
+    Constraints that are functions of Layout (L)
+
+    forward: L -> (0, 1)
+    reward:  L -> (-1, 1)
+
+    stubs for to LP, IP, QP for the constraint
+    """
     def __init__(self, ent):
         self._ent = ent
 
@@ -71,7 +64,6 @@ class Constraint(ABC):
     @property
     def upper_bound(self):
         return 1.
-
 
 
 class _BoundConstraint(Constraint):

@@ -1,546 +1,46 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="BookmarkManager">
+    <bookmark url="file://$USER_HOME$/anaconda3/envs/layout/lib/python3.6/site-packages/torchnet/meter/averagevaluemeter.py" description="    def __init__(self):&#10;        super(AverageValue..." line="6" />
+  </component>
   <component name="ChangeListManager">
     <list default="true" id="771e5915-3dd4-4610-8ec7-e40bf3b700d8" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/layout.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/1.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.5, 0.5], 'max_branch': 10, 'chk_inters': False} - 0 :: 35.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.5, 0.5], 'max_branch': 10, 'chk_inters': False} - 1 :: 36.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.5, 0.5], 'max_branch': 10, 'chk_inters': False} - 2 :: 37.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.5, 0.5], 'max_branch': 10, 'chk_inters': False} - 3 :: 38.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.5, 0.5], 'max_branch': 10, 'chk_inters': False} - 4 :: 39.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.5, 0.5], 'max_branch': 10, 'chk_inters': True} - 0 :: 15.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.5, 0.5], 'max_branch': 10, 'chk_inters': True} - 1 :: 16.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.5, 0.5], 'max_branch': 10, 'chk_inters': True} - 2 :: 17.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.5, 0.5], 'max_branch': 10, 'chk_inters': True} - 3 :: 18.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.5, 0.5], 'max_branch': 10, 'chk_inters': True} - 4 :: 19.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.5, 0.5], 'max_branch': 3, 'chk_inters': False} - 0 :: 20.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.5, 0.5], 'max_branch': 3, 'chk_inters': False} - 1 :: 21.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.5, 0.5], 'max_branch': 3, 'chk_inters': False} - 2 :: 22.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.5, 0.5], 'max_branch': 3, 'chk_inters': False} - 3 :: 23.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.5, 0.5], 'max_branch': 3, 'chk_inters': False} - 4 :: 24.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.5, 0.5], 'max_branch': 3, 'chk_inters': True} - 0 :: 0.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.5, 0.5], 'max_branch': 3, 'chk_inters': True} - 1 :: 1.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.5, 0.5], 'max_branch': 3, 'chk_inters': True} - 2 :: 2.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.5, 0.5], 'max_branch': 3, 'chk_inters': True} - 3 :: 3.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.5, 0.5], 'max_branch': 3, 'chk_inters': True} - 4 :: 4.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.5, 0.5], 'max_branch': 5, 'chk_inters': False} - 0 :: 25.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.5, 0.5], 'max_branch': 5, 'chk_inters': False} - 1 :: 26.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.5, 0.5], 'max_branch': 5, 'chk_inters': False} - 2 :: 27.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.5, 0.5], 'max_branch': 5, 'chk_inters': False} - 3 :: 28.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.5, 0.5], 'max_branch': 5, 'chk_inters': False} - 4 :: 29.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.5, 0.5], 'max_branch': 5, 'chk_inters': True} - 0 :: 5.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.5, 0.5], 'max_branch': 5, 'chk_inters': True} - 1 :: 6.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.5, 0.5], 'max_branch': 5, 'chk_inters': True} - 2 :: 7.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.5, 0.5], 'max_branch': 5, 'chk_inters': True} - 3 :: 8.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.5, 0.5], 'max_branch': 5, 'chk_inters': True} - 4 :: 9.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.5, 0.5], 'max_branch': 7, 'chk_inters': False} - 0 :: 30.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.5, 0.5], 'max_branch': 7, 'chk_inters': False} - 1 :: 31.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.5, 0.5], 'max_branch': 7, 'chk_inters': False} - 2 :: 32.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.5, 0.5], 'max_branch': 7, 'chk_inters': False} - 3 :: 33.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.5, 0.5], 'max_branch': 7, 'chk_inters': False} - 4 :: 34.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.5, 0.5], 'max_branch': 7, 'chk_inters': True} - 0 :: 10.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.5, 0.5], 'max_branch': 7, 'chk_inters': True} - 1 :: 11.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.5, 0.5], 'max_branch': 7, 'chk_inters': True} - 2 :: 12.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.5, 0.5], 'max_branch': 7, 'chk_inters': True} - 3 :: 13.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.5, 0.5], 'max_branch': 7, 'chk_inters': True} - 4 :: 14.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.7, 0.2, 0.1], 'max_branch': 10, 'chk_inters': False} - 0 :: 155.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.7, 0.2, 0.1], 'max_branch': 10, 'chk_inters': False} - 1 :: 156.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.7, 0.2, 0.1], 'max_branch': 10, 'chk_inters': False} - 2 :: 157.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.7, 0.2, 0.1], 'max_branch': 10, 'chk_inters': False} - 3 :: 158.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.7, 0.2, 0.1], 'max_branch': 10, 'chk_inters': False} - 4 :: 159.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.7, 0.2, 0.1], 'max_branch': 10, 'chk_inters': True} - 0 :: 135.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.7, 0.2, 0.1], 'max_branch': 10, 'chk_inters': True} - 1 :: 136.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.7, 0.2, 0.1], 'max_branch': 10, 'chk_inters': True} - 2 :: 137.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.7, 0.2, 0.1], 'max_branch': 10, 'chk_inters': True} - 3 :: 138.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.7, 0.2, 0.1], 'max_branch': 10, 'chk_inters': True} - 4 :: 139.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.7, 0.2, 0.1], 'max_branch': 3, 'chk_inters': False} - 0 :: 140.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.7, 0.2, 0.1], 'max_branch': 3, 'chk_inters': False} - 1 :: 141.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.7, 0.2, 0.1], 'max_branch': 3, 'chk_inters': False} - 2 :: 142.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.7, 0.2, 0.1], 'max_branch': 3, 'chk_inters': False} - 3 :: 143.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.7, 0.2, 0.1], 'max_branch': 3, 'chk_inters': False} - 4 :: 144.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.7, 0.2, 0.1], 'max_branch': 3, 'chk_inters': True} - 0 :: 120.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.7, 0.2, 0.1], 'max_branch': 3, 'chk_inters': True} - 1 :: 121.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.7, 0.2, 0.1], 'max_branch': 3, 'chk_inters': True} - 2 :: 122.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.7, 0.2, 0.1], 'max_branch': 3, 'chk_inters': True} - 3 :: 123.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.7, 0.2, 0.1], 'max_branch': 3, 'chk_inters': True} - 4 :: 124.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.7, 0.2, 0.1], 'max_branch': 5, 'chk_inters': False} - 0 :: 145.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.7, 0.2, 0.1], 'max_branch': 5, 'chk_inters': False} - 1 :: 146.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.7, 0.2, 0.1], 'max_branch': 5, 'chk_inters': False} - 2 :: 147.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.7, 0.2, 0.1], 'max_branch': 5, 'chk_inters': False} - 3 :: 148.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.7, 0.2, 0.1], 'max_branch': 5, 'chk_inters': False} - 4 :: 149.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.7, 0.2, 0.1], 'max_branch': 5, 'chk_inters': True} - 0 :: 125.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.7, 0.2, 0.1], 'max_branch': 5, 'chk_inters': True} - 1 :: 126.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.7, 0.2, 0.1], 'max_branch': 5, 'chk_inters': True} - 2 :: 127.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.7, 0.2, 0.1], 'max_branch': 5, 'chk_inters': True} - 3 :: 128.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.7, 0.2, 0.1], 'max_branch': 5, 'chk_inters': True} - 4 :: 129.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.7, 0.2, 0.1], 'max_branch': 7, 'chk_inters': False} - 0 :: 150.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.7, 0.2, 0.1], 'max_branch': 7, 'chk_inters': False} - 1 :: 151.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.7, 0.2, 0.1], 'max_branch': 7, 'chk_inters': False} - 2 :: 152.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.7, 0.2, 0.1], 'max_branch': 7, 'chk_inters': False} - 3 :: 153.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.7, 0.2, 0.1], 'max_branch': 7, 'chk_inters': False} - 4 :: 154.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.7, 0.2, 0.1], 'max_branch': 7, 'chk_inters': True} - 0 :: 130.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.7, 0.2, 0.1], 'max_branch': 7, 'chk_inters': True} - 1 :: 131.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.7, 0.2, 0.1], 'max_branch': 7, 'chk_inters': True} - 2 :: 132.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.7, 0.2, 0.1], 'max_branch': 7, 'chk_inters': True} - 3 :: 133.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.7, 0.2, 0.1], 'max_branch': 7, 'chk_inters': True} - 4 :: 134.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.7, 0.3], 'max_branch': 10, 'chk_inters': False} - 0 :: 75.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.7, 0.3], 'max_branch': 10, 'chk_inters': False} - 1 :: 76.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.7, 0.3], 'max_branch': 10, 'chk_inters': False} - 2 :: 77.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.7, 0.3], 'max_branch': 10, 'chk_inters': False} - 3 :: 78.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.7, 0.3], 'max_branch': 10, 'chk_inters': False} - 4 :: 79.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.7, 0.3], 'max_branch': 10, 'chk_inters': True} - 0 :: 55.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.7, 0.3], 'max_branch': 10, 'chk_inters': True} - 1 :: 56.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.7, 0.3], 'max_branch': 10, 'chk_inters': True} - 2 :: 57.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.7, 0.3], 'max_branch': 10, 'chk_inters': True} - 3 :: 58.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.7, 0.3], 'max_branch': 10, 'chk_inters': True} - 4 :: 59.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.7, 0.3], 'max_branch': 3, 'chk_inters': False} - 0 :: 60.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.7, 0.3], 'max_branch': 3, 'chk_inters': False} - 1 :: 61.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.7, 0.3], 'max_branch': 3, 'chk_inters': False} - 2 :: 62.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.7, 0.3], 'max_branch': 3, 'chk_inters': False} - 3 :: 63.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.7, 0.3], 'max_branch': 3, 'chk_inters': False} - 4 :: 64.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.7, 0.3], 'max_branch': 3, 'chk_inters': True} - 0 :: 40.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.7, 0.3], 'max_branch': 3, 'chk_inters': True} - 1 :: 41.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.7, 0.3], 'max_branch': 3, 'chk_inters': True} - 2 :: 42.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.7, 0.3], 'max_branch': 3, 'chk_inters': True} - 3 :: 43.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.7, 0.3], 'max_branch': 3, 'chk_inters': True} - 4 :: 44.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.7, 0.3], 'max_branch': 5, 'chk_inters': False} - 0 :: 65.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.7, 0.3], 'max_branch': 5, 'chk_inters': False} - 1 :: 66.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.7, 0.3], 'max_branch': 5, 'chk_inters': False} - 2 :: 67.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.7, 0.3], 'max_branch': 5, 'chk_inters': False} - 3 :: 68.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.7, 0.3], 'max_branch': 5, 'chk_inters': False} - 4 :: 69.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.7, 0.3], 'max_branch': 5, 'chk_inters': True} - 0 :: 45.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.7, 0.3], 'max_branch': 5, 'chk_inters': True} - 1 :: 46.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.7, 0.3], 'max_branch': 5, 'chk_inters': True} - 2 :: 47.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.7, 0.3], 'max_branch': 5, 'chk_inters': True} - 3 :: 48.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.7, 0.3], 'max_branch': 5, 'chk_inters': True} - 4 :: 49.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.7, 0.3], 'max_branch': 7, 'chk_inters': False} - 0 :: 70.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.7, 0.3], 'max_branch': 7, 'chk_inters': False} - 1 :: 71.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.7, 0.3], 'max_branch': 7, 'chk_inters': False} - 2 :: 72.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.7, 0.3], 'max_branch': 7, 'chk_inters': False} - 3 :: 73.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.7, 0.3], 'max_branch': 7, 'chk_inters': False} - 4 :: 74.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.7, 0.3], 'max_branch': 7, 'chk_inters': True} - 0 :: 50.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.7, 0.3], 'max_branch': 7, 'chk_inters': True} - 1 :: 51.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.7, 0.3], 'max_branch': 7, 'chk_inters': True} - 2 :: 52.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.7, 0.3], 'max_branch': 7, 'chk_inters': True} - 3 :: 53.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.7, 0.3], 'max_branch': 7, 'chk_inters': True} - 4 :: 54.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.85, 0.15], 'max_branch': 10, 'chk_inters': False} - 0 :: 115.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.85, 0.15], 'max_branch': 10, 'chk_inters': False} - 1 :: 116.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.85, 0.15], 'max_branch': 10, 'chk_inters': False} - 2 :: 117.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.85, 0.15], 'max_branch': 10, 'chk_inters': False} - 3 :: 118.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.85, 0.15], 'max_branch': 10, 'chk_inters': False} - 4 :: 119.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.85, 0.15], 'max_branch': 10, 'chk_inters': True} - 0 :: 95.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.85, 0.15], 'max_branch': 10, 'chk_inters': True} - 1 :: 96.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.85, 0.15], 'max_branch': 10, 'chk_inters': True} - 2 :: 97.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.85, 0.15], 'max_branch': 10, 'chk_inters': True} - 3 :: 98.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.85, 0.15], 'max_branch': 10, 'chk_inters': True} - 4 :: 99.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.85, 0.15], 'max_branch': 3, 'chk_inters': False} - 0 :: 100.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.85, 0.15], 'max_branch': 3, 'chk_inters': False} - 1 :: 101.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.85, 0.15], 'max_branch': 3, 'chk_inters': False} - 2 :: 102.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.85, 0.15], 'max_branch': 3, 'chk_inters': False} - 3 :: 103.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.85, 0.15], 'max_branch': 3, 'chk_inters': False} - 4 :: 104.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.85, 0.15], 'max_branch': 3, 'chk_inters': True} - 0 :: 80.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.85, 0.15], 'max_branch': 3, 'chk_inters': True} - 1 :: 81.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.85, 0.15], 'max_branch': 3, 'chk_inters': True} - 2 :: 82.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.85, 0.15], 'max_branch': 3, 'chk_inters': True} - 3 :: 83.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.85, 0.15], 'max_branch': 3, 'chk_inters': True} - 4 :: 84.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.85, 0.15], 'max_branch': 5, 'chk_inters': False} - 0 :: 105.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.85, 0.15], 'max_branch': 5, 'chk_inters': False} - 1 :: 106.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.85, 0.15], 'max_branch': 5, 'chk_inters': False} - 2 :: 107.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.85, 0.15], 'max_branch': 5, 'chk_inters': False} - 3 :: 108.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.85, 0.15], 'max_branch': 5, 'chk_inters': False} - 4 :: 109.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.85, 0.15], 'max_branch': 5, 'chk_inters': True} - 0 :: 85.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.85, 0.15], 'max_branch': 5, 'chk_inters': True} - 1 :: 86.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.85, 0.15], 'max_branch': 5, 'chk_inters': True} - 2 :: 87.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.85, 0.15], 'max_branch': 5, 'chk_inters': True} - 3 :: 88.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.85, 0.15], 'max_branch': 5, 'chk_inters': True} - 4 :: 89.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.85, 0.15], 'max_branch': 7, 'chk_inters': False} - 0 :: 110.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.85, 0.15], 'max_branch': 7, 'chk_inters': False} - 1 :: 111.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.85, 0.15], 'max_branch': 7, 'chk_inters': False} - 2 :: 112.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.85, 0.15], 'max_branch': 7, 'chk_inters': False} - 3 :: 113.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.85, 0.15], 'max_branch': 7, 'chk_inters': False} - 4 :: 114.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.85, 0.15], 'max_branch': 7, 'chk_inters': True} - 0 :: 90.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.85, 0.15], 'max_branch': 7, 'chk_inters': True} - 1 :: 91.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.85, 0.15], 'max_branch': 7, 'chk_inters': True} - 2 :: 92.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.85, 0.15], 'max_branch': 7, 'chk_inters': True} - 3 :: 93.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/img/{'split_prob': [0.85, 0.15], 'max_branch': 7, 'chk_inters': True} - 4 :: 94.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/0 - 0 :: {'split_prob': [0.5, 0.5], 'max_branch': 3, 'chk_inters': True}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/1 - 1 :: {'split_prob': [0.5, 0.5], 'max_branch': 3, 'chk_inters': True}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/10 - 0 :: {'split_prob': [0.5, 0.5], 'max_branch': 7, 'chk_inters': True}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/100 - 0 :: {'split_prob': [0.85, 0.15], 'max_branch': 3, 'chk_inters': False}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/101 - 1 :: {'split_prob': [0.85, 0.15], 'max_branch': 3, 'chk_inters': False}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/102 - 2 :: {'split_prob': [0.85, 0.15], 'max_branch': 3, 'chk_inters': False}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/103 - 3 :: {'split_prob': [0.85, 0.15], 'max_branch': 3, 'chk_inters': False}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/104 - 4 :: {'split_prob': [0.85, 0.15], 'max_branch': 3, 'chk_inters': False}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/105 - 0 :: {'split_prob': [0.85, 0.15], 'max_branch': 5, 'chk_inters': False}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/106 - 1 :: {'split_prob': [0.85, 0.15], 'max_branch': 5, 'chk_inters': False}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/107 - 2 :: {'split_prob': [0.85, 0.15], 'max_branch': 5, 'chk_inters': False}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/108 - 3 :: {'split_prob': [0.85, 0.15], 'max_branch': 5, 'chk_inters': False}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/109 - 4 :: {'split_prob': [0.85, 0.15], 'max_branch': 5, 'chk_inters': False}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/11 - 1 :: {'split_prob': [0.5, 0.5], 'max_branch': 7, 'chk_inters': True}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/110 - 0 :: {'split_prob': [0.85, 0.15], 'max_branch': 7, 'chk_inters': False}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/111 - 1 :: {'split_prob': [0.85, 0.15], 'max_branch': 7, 'chk_inters': False}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/112 - 2 :: {'split_prob': [0.85, 0.15], 'max_branch': 7, 'chk_inters': False}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/113 - 3 :: {'split_prob': [0.85, 0.15], 'max_branch': 7, 'chk_inters': False}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/114 - 4 :: {'split_prob': [0.85, 0.15], 'max_branch': 7, 'chk_inters': False}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/115 - 0 :: {'split_prob': [0.85, 0.15], 'max_branch': 10, 'chk_inters': False}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/116 - 1 :: {'split_prob': [0.85, 0.15], 'max_branch': 10, 'chk_inters': False}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/117 - 2 :: {'split_prob': [0.85, 0.15], 'max_branch': 10, 'chk_inters': False}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/118 - 3 :: {'split_prob': [0.85, 0.15], 'max_branch': 10, 'chk_inters': False}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/119 - 4 :: {'split_prob': [0.85, 0.15], 'max_branch': 10, 'chk_inters': False}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/12 - 2 :: {'split_prob': [0.5, 0.5], 'max_branch': 7, 'chk_inters': True}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/120 - 0 :: {'split_prob': [0.7, 0.2, 0.1], 'max_branch': 3, 'chk_inters': True}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/121 - 1 :: {'split_prob': [0.7, 0.2, 0.1], 'max_branch': 3, 'chk_inters': True}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/122 - 2 :: {'split_prob': [0.7, 0.2, 0.1], 'max_branch': 3, 'chk_inters': True}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/123 - 3 :: {'split_prob': [0.7, 0.2, 0.1], 'max_branch': 3, 'chk_inters': True}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/124 - 4 :: {'split_prob': [0.7, 0.2, 0.1], 'max_branch': 3, 'chk_inters': True}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/125 - 0 :: {'split_prob': [0.7, 0.2, 0.1], 'max_branch': 5, 'chk_inters': True}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/126 - 1 :: {'split_prob': [0.7, 0.2, 0.1], 'max_branch': 5, 'chk_inters': True}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/13 - 3 :: {'split_prob': [0.5, 0.5], 'max_branch': 7, 'chk_inters': True}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/14 - 4 :: {'split_prob': [0.5, 0.5], 'max_branch': 7, 'chk_inters': True}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/15 - 0 :: {'split_prob': [0.5, 0.5], 'max_branch': 10, 'chk_inters': True}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/16 - 1 :: {'split_prob': [0.5, 0.5], 'max_branch': 10, 'chk_inters': True}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/17 - 2 :: {'split_prob': [0.5, 0.5], 'max_branch': 10, 'chk_inters': True}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/18 - 3 :: {'split_prob': [0.5, 0.5], 'max_branch': 10, 'chk_inters': True}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/19 - 4 :: {'split_prob': [0.5, 0.5], 'max_branch': 10, 'chk_inters': True}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/2 - 2 :: {'split_prob': [0.5, 0.5], 'max_branch': 3, 'chk_inters': True}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/2 - {}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/2.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/20 - 0 :: {'split_prob': [0.5, 0.5], 'max_branch': 3, 'chk_inters': False}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/21 - 1 :: {'split_prob': [0.5, 0.5], 'max_branch': 3, 'chk_inters': False}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/22 - 2 :: {'split_prob': [0.5, 0.5], 'max_branch': 3, 'chk_inters': False}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/23 - 3 :: {'split_prob': [0.5, 0.5], 'max_branch': 3, 'chk_inters': False}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/24 - 4 :: {'split_prob': [0.5, 0.5], 'max_branch': 3, 'chk_inters': False}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/25 - 0 :: {'split_prob': [0.5, 0.5], 'max_branch': 5, 'chk_inters': False}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/26 - 1 :: {'split_prob': [0.5, 0.5], 'max_branch': 5, 'chk_inters': False}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/27 - 2 :: {'split_prob': [0.5, 0.5], 'max_branch': 5, 'chk_inters': False}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/28 - 3 :: {'split_prob': [0.5, 0.5], 'max_branch': 5, 'chk_inters': False}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/29 - 4 :: {'split_prob': [0.5, 0.5], 'max_branch': 5, 'chk_inters': False}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/2inters.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/3 - 3 :: {'split_prob': [0.5, 0.5], 'max_branch': 3, 'chk_inters': True}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/3 - {'split_prob': [0.5, 0.5], 'max_branch': 10, 'chk_inters': False}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/3 - {'split_prob': [0.5, 0.5], 'max_branch': 10, 'chk_inters': True}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/3 - {'split_prob': [0.5, 0.5], 'max_branch': 3, 'chk_inters': False}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/3 - {'split_prob': [0.5, 0.5], 'max_branch': 3, 'chk_inters': True}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/3 - {'split_prob': [0.5, 0.5], 'max_branch': 5, 'chk_inters': False}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/3 - {'split_prob': [0.5, 0.5], 'max_branch': 5, 'chk_inters': True}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/3 - {'split_prob': [0.5, 0.5], 'max_branch': 7, 'chk_inters': False}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/3 - {'split_prob': [0.5, 0.5], 'max_branch': 7, 'chk_inters': True}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/3 - {'split_prob': [0.7, 0.2, 0.1], 'max_branch': 10, 'chk_inters': False}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/3 - {'split_prob': [0.7, 0.2, 0.1], 'max_branch': 10, 'chk_inters': True}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/3 - {'split_prob': [0.7, 0.2, 0.1], 'max_branch': 3, 'chk_inters': False}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/3 - {'split_prob': [0.7, 0.2, 0.1], 'max_branch': 3, 'chk_inters': True}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/3 - {'split_prob': [0.7, 0.2, 0.1], 'max_branch': 5, 'chk_inters': False}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/3 - {'split_prob': [0.7, 0.2, 0.1], 'max_branch': 5, 'chk_inters': True}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/3 - {'split_prob': [0.7, 0.2, 0.1], 'max_branch': 7, 'chk_inters': False}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/3 - {'split_prob': [0.7, 0.2, 0.1], 'max_branch': 7, 'chk_inters': True}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/3 - {'split_prob': [0.7, 0.3], 'max_branch': 10, 'chk_inters': False}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/3 - {'split_prob': [0.7, 0.3], 'max_branch': 10, 'chk_inters': True}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/3 - {'split_prob': [0.7, 0.3], 'max_branch': 3, 'chk_inters': False}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/3 - {'split_prob': [0.7, 0.3], 'max_branch': 3, 'chk_inters': True}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/3 - {'split_prob': [0.7, 0.3], 'max_branch': 5, 'chk_inters': False}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/3 - {'split_prob': [0.7, 0.3], 'max_branch': 5, 'chk_inters': True}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/3 - {'split_prob': [0.7, 0.3], 'max_branch': 7, 'chk_inters': False}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/3 - {'split_prob': [0.7, 0.3], 'max_branch': 7, 'chk_inters': True}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/3 - {'split_prob': [0.85, 0.15], 'max_branch': 10, 'chk_inters': False}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/3 - {'split_prob': [0.85, 0.15], 'max_branch': 10, 'chk_inters': True}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/3 - {'split_prob': [0.85, 0.15], 'max_branch': 3, 'chk_inters': False}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/3 - {'split_prob': [0.85, 0.15], 'max_branch': 3, 'chk_inters': True}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/3 - {'split_prob': [0.85, 0.15], 'max_branch': 5, 'chk_inters': False}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/3 - {'split_prob': [0.85, 0.15], 'max_branch': 5, 'chk_inters': True}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/3 - {'split_prob': [0.85, 0.15], 'max_branch': 7, 'chk_inters': False}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/3 - {'split_prob': [0.85, 0.15], 'max_branch': 7, 'chk_inters': True}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/30 - 0 :: {'split_prob': [0.5, 0.5], 'max_branch': 7, 'chk_inters': False}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/31 - 1 :: {'split_prob': [0.5, 0.5], 'max_branch': 7, 'chk_inters': False}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/32 - 2 :: {'split_prob': [0.5, 0.5], 'max_branch': 7, 'chk_inters': False}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/33 - 3 :: {'split_prob': [0.5, 0.5], 'max_branch': 7, 'chk_inters': False}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/34 - 4 :: {'split_prob': [0.5, 0.5], 'max_branch': 7, 'chk_inters': False}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/35 - 0 :: {'split_prob': [0.5, 0.5], 'max_branch': 10, 'chk_inters': False}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/36 - 1 :: {'split_prob': [0.5, 0.5], 'max_branch': 10, 'chk_inters': False}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/37 - 2 :: {'split_prob': [0.5, 0.5], 'max_branch': 10, 'chk_inters': False}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/38 - 3 :: {'split_prob': [0.5, 0.5], 'max_branch': 10, 'chk_inters': False}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/39 - 4 :: {'split_prob': [0.5, 0.5], 'max_branch': 10, 'chk_inters': False}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/4 - 4 :: {'split_prob': [0.5, 0.5], 'max_branch': 3, 'chk_inters': True}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/40 - 0 :: {'split_prob': [0.7, 0.3], 'max_branch': 3, 'chk_inters': True}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/41 - 1 :: {'split_prob': [0.7, 0.3], 'max_branch': 3, 'chk_inters': True}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/42 - 2 :: {'split_prob': [0.7, 0.3], 'max_branch': 3, 'chk_inters': True}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/43 - 3 :: {'split_prob': [0.7, 0.3], 'max_branch': 3, 'chk_inters': True}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/44 - 4 :: {'split_prob': [0.7, 0.3], 'max_branch': 3, 'chk_inters': True}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/45 - 0 :: {'split_prob': [0.7, 0.3], 'max_branch': 5, 'chk_inters': True}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/46 - 1 :: {'split_prob': [0.7, 0.3], 'max_branch': 5, 'chk_inters': True}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/47 - 2 :: {'split_prob': [0.7, 0.3], 'max_branch': 5, 'chk_inters': True}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/48 - 3 :: {'split_prob': [0.7, 0.3], 'max_branch': 5, 'chk_inters': True}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/49 - 4 :: {'split_prob': [0.7, 0.3], 'max_branch': 5, 'chk_inters': True}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/5 - 0 :: {'split_prob': [0.5, 0.5], 'max_branch': 5, 'chk_inters': True}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/50 - 0 :: {'split_prob': [0.7, 0.3], 'max_branch': 7, 'chk_inters': True}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/51 - 1 :: {'split_prob': [0.7, 0.3], 'max_branch': 7, 'chk_inters': True}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/52 - 2 :: {'split_prob': [0.7, 0.3], 'max_branch': 7, 'chk_inters': True}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/53 - 3 :: {'split_prob': [0.7, 0.3], 'max_branch': 7, 'chk_inters': True}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/54 - 4 :: {'split_prob': [0.7, 0.3], 'max_branch': 7, 'chk_inters': True}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/55 - 0 :: {'split_prob': [0.7, 0.3], 'max_branch': 10, 'chk_inters': True}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/56 - 1 :: {'split_prob': [0.7, 0.3], 'max_branch': 10, 'chk_inters': True}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/57 - 2 :: {'split_prob': [0.7, 0.3], 'max_branch': 10, 'chk_inters': True}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/58 - 3 :: {'split_prob': [0.7, 0.3], 'max_branch': 10, 'chk_inters': True}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/59 - 4 :: {'split_prob': [0.7, 0.3], 'max_branch': 10, 'chk_inters': True}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/6 - 1 :: {'split_prob': [0.5, 0.5], 'max_branch': 5, 'chk_inters': True}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/60 - 0 :: {'split_prob': [0.7, 0.3], 'max_branch': 3, 'chk_inters': False}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/61 - 1 :: {'split_prob': [0.7, 0.3], 'max_branch': 3, 'chk_inters': False}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/62 - 2 :: {'split_prob': [0.7, 0.3], 'max_branch': 3, 'chk_inters': False}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/63 - 3 :: {'split_prob': [0.7, 0.3], 'max_branch': 3, 'chk_inters': False}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/64 - 4 :: {'split_prob': [0.7, 0.3], 'max_branch': 3, 'chk_inters': False}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/65 - 0 :: {'split_prob': [0.7, 0.3], 'max_branch': 5, 'chk_inters': False}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/66 - 1 :: {'split_prob': [0.7, 0.3], 'max_branch': 5, 'chk_inters': False}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/67 - 2 :: {'split_prob': [0.7, 0.3], 'max_branch': 5, 'chk_inters': False}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/68 - 3 :: {'split_prob': [0.7, 0.3], 'max_branch': 5, 'chk_inters': False}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/69 - 4 :: {'split_prob': [0.7, 0.3], 'max_branch': 5, 'chk_inters': False}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/7 - 2 :: {'split_prob': [0.5, 0.5], 'max_branch': 5, 'chk_inters': True}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/70 - 0 :: {'split_prob': [0.7, 0.3], 'max_branch': 7, 'chk_inters': False}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/71 - 1 :: {'split_prob': [0.7, 0.3], 'max_branch': 7, 'chk_inters': False}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/72 - 2 :: {'split_prob': [0.7, 0.3], 'max_branch': 7, 'chk_inters': False}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/73 - 3 :: {'split_prob': [0.7, 0.3], 'max_branch': 7, 'chk_inters': False}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/74 - 4 :: {'split_prob': [0.7, 0.3], 'max_branch': 7, 'chk_inters': False}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/75 - 0 :: {'split_prob': [0.7, 0.3], 'max_branch': 10, 'chk_inters': False}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/76 - 1 :: {'split_prob': [0.7, 0.3], 'max_branch': 10, 'chk_inters': False}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/77 - 2 :: {'split_prob': [0.7, 0.3], 'max_branch': 10, 'chk_inters': False}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/78 - 3 :: {'split_prob': [0.7, 0.3], 'max_branch': 10, 'chk_inters': False}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/79 - 4 :: {'split_prob': [0.7, 0.3], 'max_branch': 10, 'chk_inters': False}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/8 - 3 :: {'split_prob': [0.5, 0.5], 'max_branch': 5, 'chk_inters': True}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/80 - 0 :: {'split_prob': [0.85, 0.15], 'max_branch': 3, 'chk_inters': True}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/81 - 1 :: {'split_prob': [0.85, 0.15], 'max_branch': 3, 'chk_inters': True}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/82 - 2 :: {'split_prob': [0.85, 0.15], 'max_branch': 3, 'chk_inters': True}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/83 - 3 :: {'split_prob': [0.85, 0.15], 'max_branch': 3, 'chk_inters': True}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/84 - 4 :: {'split_prob': [0.85, 0.15], 'max_branch': 3, 'chk_inters': True}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/85 - 0 :: {'split_prob': [0.85, 0.15], 'max_branch': 5, 'chk_inters': True}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/86 - 1 :: {'split_prob': [0.85, 0.15], 'max_branch': 5, 'chk_inters': True}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/87 - 2 :: {'split_prob': [0.85, 0.15], 'max_branch': 5, 'chk_inters': True}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/88 - 3 :: {'split_prob': [0.85, 0.15], 'max_branch': 5, 'chk_inters': True}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/89 - 4 :: {'split_prob': [0.85, 0.15], 'max_branch': 5, 'chk_inters': True}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/9 - 4 :: {'split_prob': [0.5, 0.5], 'max_branch': 5, 'chk_inters': True}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/90 - 0 :: {'split_prob': [0.85, 0.15], 'max_branch': 7, 'chk_inters': True}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/91 - 1 :: {'split_prob': [0.85, 0.15], 'max_branch': 7, 'chk_inters': True}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/92 - 2 :: {'split_prob': [0.85, 0.15], 'max_branch': 7, 'chk_inters': True}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/93 - 3 :: {'split_prob': [0.85, 0.15], 'max_branch': 7, 'chk_inters': True}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/94 - 4 :: {'split_prob': [0.85, 0.15], 'max_branch': 7, 'chk_inters': True}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/95 - 0 :: {'split_prob': [0.85, 0.15], 'max_branch': 10, 'chk_inters': True}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/96 - 1 :: {'split_prob': [0.85, 0.15], 'max_branch': 10, 'chk_inters': True}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/97 - 2 :: {'split_prob': [0.85, 0.15], 'max_branch': 10, 'chk_inters': True}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/98 - 3 :: {'split_prob': [0.85, 0.15], 'max_branch': 10, 'chk_inters': True}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/99 - 4 :: {'split_prob': [0.85, 0.15], 'max_branch': 10, 'chk_inters': True}.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.5, 0.5], 'max_branch': 10, 'chk_inters': False} - 0 :: 35.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.5, 0.5], 'max_branch': 10, 'chk_inters': False} - 1 :: 36.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.5, 0.5], 'max_branch': 10, 'chk_inters': False} - 2 :: 37.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.5, 0.5], 'max_branch': 10, 'chk_inters': False} - 3 :: 38.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.5, 0.5], 'max_branch': 10, 'chk_inters': False} - 4 :: 39.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.5, 0.5], 'max_branch': 10, 'chk_inters': True} - 0 :: 15.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.5, 0.5], 'max_branch': 10, 'chk_inters': True} - 1 :: 16.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.5, 0.5], 'max_branch': 10, 'chk_inters': True} - 2 :: 17.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.5, 0.5], 'max_branch': 10, 'chk_inters': True} - 3 :: 18.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.5, 0.5], 'max_branch': 10, 'chk_inters': True} - 4 :: 19.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.5, 0.5], 'max_branch': 3, 'chk_inters': False} - 0 :: 20.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.5, 0.5], 'max_branch': 3, 'chk_inters': False} - 1 :: 21.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.5, 0.5], 'max_branch': 3, 'chk_inters': False} - 2 :: 22.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.5, 0.5], 'max_branch': 3, 'chk_inters': False} - 3 :: 23.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.5, 0.5], 'max_branch': 3, 'chk_inters': False} - 4 :: 24.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.5, 0.5], 'max_branch': 3, 'chk_inters': True} - 0 :: 0.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.5, 0.5], 'max_branch': 3, 'chk_inters': True} - 1 :: 1.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.5, 0.5], 'max_branch': 3, 'chk_inters': True} - 2 :: 2.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.5, 0.5], 'max_branch': 3, 'chk_inters': True} - 3 :: 3.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.5, 0.5], 'max_branch': 3, 'chk_inters': True} - 4 :: 4.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.5, 0.5], 'max_branch': 5, 'chk_inters': False} - 0 :: 25.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.5, 0.5], 'max_branch': 5, 'chk_inters': False} - 1 :: 26.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.5, 0.5], 'max_branch': 5, 'chk_inters': False} - 2 :: 27.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.5, 0.5], 'max_branch': 5, 'chk_inters': False} - 3 :: 28.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.5, 0.5], 'max_branch': 5, 'chk_inters': False} - 4 :: 29.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.5, 0.5], 'max_branch': 5, 'chk_inters': True} - 0 :: 5.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.5, 0.5], 'max_branch': 5, 'chk_inters': True} - 1 :: 6.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.5, 0.5], 'max_branch': 5, 'chk_inters': True} - 2 :: 7.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.5, 0.5], 'max_branch': 5, 'chk_inters': True} - 3 :: 8.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.5, 0.5], 'max_branch': 5, 'chk_inters': True} - 4 :: 9.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.5, 0.5], 'max_branch': 7, 'chk_inters': False} - 0 :: 30.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.5, 0.5], 'max_branch': 7, 'chk_inters': False} - 1 :: 31.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.5, 0.5], 'max_branch': 7, 'chk_inters': False} - 2 :: 32.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.5, 0.5], 'max_branch': 7, 'chk_inters': False} - 3 :: 33.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.5, 0.5], 'max_branch': 7, 'chk_inters': False} - 4 :: 34.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.5, 0.5], 'max_branch': 7, 'chk_inters': True} - 0 :: 10.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.5, 0.5], 'max_branch': 7, 'chk_inters': True} - 1 :: 11.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.5, 0.5], 'max_branch': 7, 'chk_inters': True} - 2 :: 12.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.5, 0.5], 'max_branch': 7, 'chk_inters': True} - 3 :: 13.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.5, 0.5], 'max_branch': 7, 'chk_inters': True} - 4 :: 14.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.7, 0.2, 0.1], 'max_branch': 10, 'chk_inters': False} - 0 :: 155.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.7, 0.2, 0.1], 'max_branch': 10, 'chk_inters': False} - 1 :: 156.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.7, 0.2, 0.1], 'max_branch': 10, 'chk_inters': False} - 2 :: 157.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.7, 0.2, 0.1], 'max_branch': 10, 'chk_inters': False} - 3 :: 158.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.7, 0.2, 0.1], 'max_branch': 10, 'chk_inters': False} - 4 :: 159.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.7, 0.2, 0.1], 'max_branch': 10, 'chk_inters': True} - 0 :: 135.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.7, 0.2, 0.1], 'max_branch': 10, 'chk_inters': True} - 1 :: 136.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.7, 0.2, 0.1], 'max_branch': 10, 'chk_inters': True} - 2 :: 137.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.7, 0.2, 0.1], 'max_branch': 10, 'chk_inters': True} - 3 :: 138.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.7, 0.2, 0.1], 'max_branch': 10, 'chk_inters': True} - 4 :: 139.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.7, 0.2, 0.1], 'max_branch': 3, 'chk_inters': False} - 0 :: 140.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.7, 0.2, 0.1], 'max_branch': 3, 'chk_inters': False} - 1 :: 141.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.7, 0.2, 0.1], 'max_branch': 3, 'chk_inters': False} - 2 :: 142.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.7, 0.2, 0.1], 'max_branch': 3, 'chk_inters': False} - 3 :: 143.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.7, 0.2, 0.1], 'max_branch': 3, 'chk_inters': False} - 4 :: 144.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.7, 0.2, 0.1], 'max_branch': 3, 'chk_inters': True} - 0 :: 120.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.7, 0.2, 0.1], 'max_branch': 3, 'chk_inters': True} - 1 :: 121.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.7, 0.2, 0.1], 'max_branch': 3, 'chk_inters': True} - 2 :: 122.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.7, 0.2, 0.1], 'max_branch': 3, 'chk_inters': True} - 3 :: 123.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.7, 0.2, 0.1], 'max_branch': 3, 'chk_inters': True} - 4 :: 124.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.7, 0.2, 0.1], 'max_branch': 5, 'chk_inters': False} - 0 :: 145.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.7, 0.2, 0.1], 'max_branch': 5, 'chk_inters': False} - 1 :: 146.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.7, 0.2, 0.1], 'max_branch': 5, 'chk_inters': False} - 2 :: 147.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.7, 0.2, 0.1], 'max_branch': 5, 'chk_inters': False} - 3 :: 148.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.7, 0.2, 0.1], 'max_branch': 5, 'chk_inters': False} - 4 :: 149.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.7, 0.2, 0.1], 'max_branch': 5, 'chk_inters': True} - 0 :: 125.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.7, 0.2, 0.1], 'max_branch': 5, 'chk_inters': True} - 1 :: 126.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.7, 0.2, 0.1], 'max_branch': 5, 'chk_inters': True} - 2 :: 127.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.7, 0.2, 0.1], 'max_branch': 5, 'chk_inters': True} - 3 :: 128.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.7, 0.2, 0.1], 'max_branch': 5, 'chk_inters': True} - 4 :: 129.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.7, 0.2, 0.1], 'max_branch': 7, 'chk_inters': False} - 0 :: 150.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.7, 0.2, 0.1], 'max_branch': 7, 'chk_inters': False} - 1 :: 151.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.7, 0.2, 0.1], 'max_branch': 7, 'chk_inters': False} - 2 :: 152.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.7, 0.2, 0.1], 'max_branch': 7, 'chk_inters': False} - 3 :: 153.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.7, 0.2, 0.1], 'max_branch': 7, 'chk_inters': False} - 4 :: 154.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.7, 0.2, 0.1], 'max_branch': 7, 'chk_inters': True} - 0 :: 130.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.7, 0.2, 0.1], 'max_branch': 7, 'chk_inters': True} - 1 :: 131.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.7, 0.2, 0.1], 'max_branch': 7, 'chk_inters': True} - 2 :: 132.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.7, 0.2, 0.1], 'max_branch': 7, 'chk_inters': True} - 3 :: 133.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.7, 0.2, 0.1], 'max_branch': 7, 'chk_inters': True} - 4 :: 134.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.7, 0.3], 'max_branch': 10, 'chk_inters': False} - 0 :: 75.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.7, 0.3], 'max_branch': 10, 'chk_inters': False} - 1 :: 76.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.7, 0.3], 'max_branch': 10, 'chk_inters': False} - 2 :: 77.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.7, 0.3], 'max_branch': 10, 'chk_inters': False} - 3 :: 78.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.7, 0.3], 'max_branch': 10, 'chk_inters': False} - 4 :: 79.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.7, 0.3], 'max_branch': 10, 'chk_inters': True} - 0 :: 55.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.7, 0.3], 'max_branch': 10, 'chk_inters': True} - 1 :: 56.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.7, 0.3], 'max_branch': 10, 'chk_inters': True} - 2 :: 57.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.7, 0.3], 'max_branch': 10, 'chk_inters': True} - 3 :: 58.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.7, 0.3], 'max_branch': 10, 'chk_inters': True} - 4 :: 59.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.7, 0.3], 'max_branch': 3, 'chk_inters': False} - 0 :: 60.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.7, 0.3], 'max_branch': 3, 'chk_inters': False} - 1 :: 61.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.7, 0.3], 'max_branch': 3, 'chk_inters': False} - 2 :: 62.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.7, 0.3], 'max_branch': 3, 'chk_inters': False} - 3 :: 63.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.7, 0.3], 'max_branch': 3, 'chk_inters': False} - 4 :: 64.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.7, 0.3], 'max_branch': 3, 'chk_inters': True} - 0 :: 40.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.7, 0.3], 'max_branch': 3, 'chk_inters': True} - 1 :: 41.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.7, 0.3], 'max_branch': 3, 'chk_inters': True} - 2 :: 42.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.7, 0.3], 'max_branch': 3, 'chk_inters': True} - 3 :: 43.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.7, 0.3], 'max_branch': 3, 'chk_inters': True} - 4 :: 44.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.7, 0.3], 'max_branch': 5, 'chk_inters': False} - 0 :: 65.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.7, 0.3], 'max_branch': 5, 'chk_inters': False} - 1 :: 66.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.7, 0.3], 'max_branch': 5, 'chk_inters': False} - 2 :: 67.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.7, 0.3], 'max_branch': 5, 'chk_inters': False} - 3 :: 68.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.7, 0.3], 'max_branch': 5, 'chk_inters': False} - 4 :: 69.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.7, 0.3], 'max_branch': 5, 'chk_inters': True} - 0 :: 45.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.7, 0.3], 'max_branch': 5, 'chk_inters': True} - 1 :: 46.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.7, 0.3], 'max_branch': 5, 'chk_inters': True} - 2 :: 47.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.7, 0.3], 'max_branch': 5, 'chk_inters': True} - 3 :: 48.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.7, 0.3], 'max_branch': 5, 'chk_inters': True} - 4 :: 49.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.7, 0.3], 'max_branch': 7, 'chk_inters': False} - 0 :: 70.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.7, 0.3], 'max_branch': 7, 'chk_inters': False} - 1 :: 71.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.7, 0.3], 'max_branch': 7, 'chk_inters': False} - 2 :: 72.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.7, 0.3], 'max_branch': 7, 'chk_inters': False} - 3 :: 73.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.7, 0.3], 'max_branch': 7, 'chk_inters': False} - 4 :: 74.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.7, 0.3], 'max_branch': 7, 'chk_inters': True} - 0 :: 50.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.7, 0.3], 'max_branch': 7, 'chk_inters': True} - 1 :: 51.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.7, 0.3], 'max_branch': 7, 'chk_inters': True} - 2 :: 52.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.7, 0.3], 'max_branch': 7, 'chk_inters': True} - 3 :: 53.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.7, 0.3], 'max_branch': 7, 'chk_inters': True} - 4 :: 54.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.85, 0.15], 'max_branch': 10, 'chk_inters': False} - 0 :: 115.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.85, 0.15], 'max_branch': 10, 'chk_inters': False} - 1 :: 116.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.85, 0.15], 'max_branch': 10, 'chk_inters': False} - 2 :: 117.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.85, 0.15], 'max_branch': 10, 'chk_inters': False} - 3 :: 118.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.85, 0.15], 'max_branch': 10, 'chk_inters': False} - 4 :: 119.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.85, 0.15], 'max_branch': 10, 'chk_inters': True} - 0 :: 95.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.85, 0.15], 'max_branch': 10, 'chk_inters': True} - 1 :: 96.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.85, 0.15], 'max_branch': 10, 'chk_inters': True} - 2 :: 97.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.85, 0.15], 'max_branch': 10, 'chk_inters': True} - 3 :: 98.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.85, 0.15], 'max_branch': 10, 'chk_inters': True} - 4 :: 99.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.85, 0.15], 'max_branch': 3, 'chk_inters': False} - 0 :: 100.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.85, 0.15], 'max_branch': 3, 'chk_inters': False} - 1 :: 101.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.85, 0.15], 'max_branch': 3, 'chk_inters': False} - 2 :: 102.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.85, 0.15], 'max_branch': 3, 'chk_inters': False} - 3 :: 103.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.85, 0.15], 'max_branch': 3, 'chk_inters': False} - 4 :: 104.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.85, 0.15], 'max_branch': 3, 'chk_inters': True} - 0 :: 80.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.85, 0.15], 'max_branch': 3, 'chk_inters': True} - 1 :: 81.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.85, 0.15], 'max_branch': 3, 'chk_inters': True} - 2 :: 82.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.85, 0.15], 'max_branch': 3, 'chk_inters': True} - 3 :: 83.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.85, 0.15], 'max_branch': 3, 'chk_inters': True} - 4 :: 84.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.85, 0.15], 'max_branch': 5, 'chk_inters': False} - 0 :: 105.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.85, 0.15], 'max_branch': 5, 'chk_inters': False} - 1 :: 106.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.85, 0.15], 'max_branch': 5, 'chk_inters': False} - 2 :: 107.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.85, 0.15], 'max_branch': 5, 'chk_inters': False} - 3 :: 108.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.85, 0.15], 'max_branch': 5, 'chk_inters': False} - 4 :: 109.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.85, 0.15], 'max_branch': 5, 'chk_inters': True} - 0 :: 85.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.85, 0.15], 'max_branch': 5, 'chk_inters': True} - 1 :: 86.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.85, 0.15], 'max_branch': 5, 'chk_inters': True} - 2 :: 87.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.85, 0.15], 'max_branch': 5, 'chk_inters': True} - 3 :: 88.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.85, 0.15], 'max_branch': 5, 'chk_inters': True} - 4 :: 89.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.85, 0.15], 'max_branch': 7, 'chk_inters': False} - 0 :: 110.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.85, 0.15], 'max_branch': 7, 'chk_inters': False} - 1 :: 111.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.85, 0.15], 'max_branch': 7, 'chk_inters': False} - 2 :: 112.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.85, 0.15], 'max_branch': 7, 'chk_inters': False} - 3 :: 113.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.85, 0.15], 'max_branch': 7, 'chk_inters': False} - 4 :: 114.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.85, 0.15], 'max_branch': 7, 'chk_inters': True} - 0 :: 90.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.85, 0.15], 'max_branch': 7, 'chk_inters': True} - 1 :: 91.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.85, 0.15], 'max_branch': 7, 'chk_inters': True} - 2 :: 92.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.85, 0.15], 'max_branch': 7, 'chk_inters': True} - 3 :: 93.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/pkl/{'split_prob': [0.85, 0.15], 'max_branch': 7, 'chk_inters': True} - 4 :: 94.pickle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/reinforce1,lr=1e-5.pkl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/reinforce_adv,lr=1e-4.pkl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/reinforce_stop_soft.pkl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/reinforce_stopping.pkl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/sl2.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/Spaceplanning_ADSK_PW" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/hessian" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/hs71_Python.zip" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/hs71_Python/apm.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/hs71_Python/hs71.apm" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/hs71_Python/hs71.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/pythonocc-utils" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/sql.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lib/svdalg.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/notebook/rn1.ipynb" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/readme.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/run.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/spec/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/spec/cvxopt_sample.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/spec/envtests.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/spec/testshp.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/actions/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/actions/basic.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/algo/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/algo/branchbound.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/algo/grg.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/algo/kd.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/algo/metroplis_hastings.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/algo/nns.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/algo/prob.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/algo/sample_loss.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/algo/sarsa.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/building.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/envs.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/experiment.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/geom/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/geom/cg.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/interfaces.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/layout.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/layout_ops.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/metrics/meters.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/objectives.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/problem/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/problem/base.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/problem/example.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/problem/initial_state.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/structs/floating_tree.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/utils.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/other.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/algo/draw.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/algo/hrl.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/algo/init_custom.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/algo/layers.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/metrics/custom.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/model/arguments.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/model/storage.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/probablistic/funcs.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/problem/encoders.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/problem/terminal_conditions.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../DeepRL/deep_rl/component/replay.py" beforeDir="false" afterPath="$PROJECT_DIR$/../DeepRL/deep_rl/component/replay.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../DeepRL/examples.py" beforeDir="false" afterPath="$PROJECT_DIR$/../DeepRL/examples.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../draw_pytorch/draw_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/../draw_pytorch/draw_model.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../isolation-nn/aindnn/MCTS" beforeDir="false" afterPath="$PROJECT_DIR$/../isolation-nn/aindnn/MCTS" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/layout.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/layout.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/spec/testshp.py" beforeDir="false" afterPath="$PROJECT_DIR$/spec/testshp.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/actions/basic.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/actions/basic.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/algo/grg.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/algo/grg.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/algo/nns.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/algo/nns.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/envs.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/envs.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/geom/cg.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/geom/cg.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/layout.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/layout.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/layout_ops.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/layout_ops.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/metrics/meters.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/metrics/meters.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/objectives.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/objectives.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/problem/base.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/problem/base.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/utils.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../pytorch-a2c-ppo-acktr-gail/a2c_ppo_acktr/algo/gail.py" beforeDir="false" afterPath="$PROJECT_DIR$/../pytorch-a2c-ppo-acktr-gail/a2c_ppo_acktr/algo/gail.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../pytorch-a2c-ppo-acktr-gail/a2c_ppo_acktr/algo/ppo.py" beforeDir="false" afterPath="$PROJECT_DIR$/../pytorch-a2c-ppo-acktr-gail/a2c_ppo_acktr/algo/ppo.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../pytorch-a2c-ppo-acktr-gail/a2c_ppo_acktr/storage.py" beforeDir="false" afterPath="$PROJECT_DIR$/../pytorch-a2c-ppo-acktr-gail/a2c_ppo_acktr/storage.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../pytorch-a2c-ppo-acktr-gail/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/../pytorch-a2c-ppo-acktr-gail/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../pytorch-a3c/train.py" beforeDir="false" afterPath="$PROJECT_DIR$/../pytorch-a3c/train.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../pytorch-dnc/core/circuit.py" beforeDir="false" afterPath="$PROJECT_DIR$/../pytorch-dnc/core/circuit.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../pytorch-dnc/core/env.py" beforeDir="false" afterPath="$PROJECT_DIR$/../pytorch-dnc/core/env.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../pytorch-dnc/core/heads/dynamic_head.py" beforeDir="false" afterPath="$PROJECT_DIR$/../pytorch-dnc/core/heads/dynamic_head.py" afterDir="false" />
@@ -571,111 +71,132 @@
     <session id="-2145042105">
       <usages-collector id="statistics.lifecycle.project">
         <counts>
-          <entry key="project.closed" value="2" />
+          <entry key="project.closed" value="5" />
           <entry key="project.open.time.112" value="1" />
+          <entry key="project.open.time.12" value="1" />
           <entry key="project.open.time.38" value="1" />
           <entry key="project.open.time.43" value="1" />
+          <entry key="project.open.time.45" value="1" />
           <entry key="project.open.time.52" value="1" />
           <entry key="project.open.time.57" value="1" />
           <entry key="project.open.time.7" value="2" />
-          <entry key="project.opened" value="7" />
+          <entry key="project.open.time.9" value="1" />
+          <entry key="project.opened" value="10" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.open">
         <counts>
           <entry key="gitignore" value="1" />
-          <entry key="md" value="3" />
-          <entry key="py" value="312" />
-          <entry key="pyi" value="4" />
+          <entry key="md" value="5" />
+          <entry key="py" value="475" />
+          <entry key="pyi" value="8" />
           <entry key="rst" value="1" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.open">
         <counts>
-          <entry key="Markdown" value="3" />
+          <entry key="Markdown" value="5" />
           <entry key="PLAIN_TEXT" value="1" />
-          <entry key="Python" value="312" />
-          <entry key="PythonStub" value="4" />
+          <entry key="Python" value="475" />
+          <entry key="PythonStub" value="8" />
           <entry key="ReST" value="1" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
-          <entry key="Python Console" value="3194" />
+          <entry key="Python Console" value="6537" />
           <entry key="gitignore" value="45" />
           <entry key="md" value="307" />
-          <entry key="py" value="85457" />
+          <entry key="py" value="139027" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
           <entry key="Markdown" value="307" />
           <entry key="PLAIN_TEXT" value="45" />
-          <entry key="Python" value="88651" />
+          <entry key="Python" value="145564" />
         </counts>
       </usages-collector>
     </session>
   </component>
   <component name="FileEditorManager">
-    <splitter split-orientation="horizontal" split-proportion="0.26894864">
+    <splitter split-orientation="horizontal" split-proportion="0.32659933">
       <split-first>
-        <splitter split-orientation="vertical" split-proportion="0.39958805">
+        <splitter split-orientation="vertical" split-proportion="0.72644377">
           <split-first>
             <leaf SIDE_TABS_SIZE_LIMIT_KEY="375">
               <file pinned="false" current-in-tab="false">
-                <entry file="file://$PROJECT_DIR$/src/algo/kd.py">
+                <entry file="file://$PROJECT_DIR$/../DeepRL/examples.py">
                   <provider selected="true" editor-type-id="text-editor">
-                    <state relative-caret-position="702">
-                      <caret line="41" selection-start-line="41" selection-end-line="41" />
+                    <state relative-caret-position="925">
+                      <caret line="251" column="17" lean-forward="true" selection-start-line="251" selection-start-column="17" selection-end-line="251" selection-end-column="17" />
+                    </state>
+                  </provider>
+                </entry>
+              </file>
+              <file pinned="false" current-in-tab="false">
+                <entry file="file://$PROJECT_DIR$/src/probablistic/funcs.py">
+                  <provider selected="true" editor-type-id="text-editor">
+                    <state relative-caret-position="939">
+                      <caret line="145" column="56" lean-forward="true" selection-start-line="145" selection-start-column="56" selection-end-line="145" selection-end-column="56" />
                       <folding>
-                        <marker date="1555982457067" expanded="true" signature="100:135" ph="..." />
-                        <marker date="1555982457067" expanded="true" signature="425:733" ph="..." />
+                        <marker date="1557452859865" expanded="true" signature="2752:2757" ph="..." />
+                        <marker date="1557452859865" expanded="true" signature="2782:2888" ph="..." />
                       </folding>
                     </state>
                   </provider>
                 </entry>
               </file>
               <file pinned="false" current-in-tab="true">
+                <entry file="file://$PROJECT_DIR$/src/algo/nns.py">
+                  <provider selected="true" editor-type-id="text-editor">
+                    <state relative-caret-position="396">
+                      <caret line="654" column="47" lean-forward="true" selection-start-line="654" selection-start-column="47" selection-end-line="654" selection-end-column="47" />
+                      <folding>
+                        <element signature="e#8326#9747#0" />
+                        <element signature="e#12101#14489#0" />
+                        <element signature="e#18172#21757#0" />
+                        <element signature="e#21789#21806#1" expanded="true" />
+                        <element signature="e#26572#28787#0" />
+                        <element signature="e#28840#29123#0" />
+                        <element signature="e#29169#31406#0" />
+                        <marker date="1557533520351" expanded="true" signature="733:738" ph="..." />
+                        <marker date="1557533520351" expanded="true" signature="1980:8248" ph="..." />
+                        <marker date="1557533520351" expanded="true" signature="23499:23520" ph="..." />
+                        <marker date="1557533520351" expanded="true" signature="23550:23571" ph="..." />
+                      </folding>
+                    </state>
+                  </provider>
+                </entry>
+              </file>
+              <file pinned="false" current-in-tab="false">
                 <entry file="file://$PROJECT_DIR$/src/metrics/meters.py">
                   <provider selected="true" editor-type-id="text-editor">
-                    <state relative-caret-position="504">
-                      <caret line="28" column="26" selection-start-line="28" selection-start-column="13" selection-end-line="28" selection-end-column="26" />
-                    </state>
-                  </provider>
-                </entry>
-              </file>
-              <file pinned="false" current-in-tab="false">
-                <entry file="file://$PROJECT_DIR$/src/problem/example.py">
-                  <provider selected="true" editor-type-id="text-editor">
-                    <state relative-caret-position="504">
-                      <caret line="67" column="60" selection-start-line="67" selection-start-column="60" selection-end-line="67" selection-end-column="60" />
+                    <state relative-caret-position="1266">
+                      <caret line="136" lean-forward="true" selection-start-line="136" selection-end-line="136" />
                       <folding>
-                        <marker date="1556069990901" expanded="true" signature="1442:1454" ph="..." />
+                        <marker date="1557527958994" expanded="true" signature="2193:2232" ph="..." />
+                        <marker date="1557527958994" expanded="true" signature="2340:2404" ph="..." />
+                        <marker date="1557527958994" expanded="true" signature="2466:2475" ph="..." />
                       </folding>
                     </state>
                   </provider>
                 </entry>
               </file>
               <file pinned="false" current-in-tab="false">
-                <entry file="file://$PROJECT_DIR$/src/algo/sarsa.py">
+                <entry file="file://$PROJECT_DIR$/../DeepRL/deep_rl/agent/A2C_agent.py">
                   <provider selected="true" editor-type-id="text-editor">
-                    <state relative-caret-position="504">
-                      <caret line="55" column="10" selection-start-line="55" selection-start-column="10" selection-end-line="55" selection-end-column="10" />
-                      <folding>
-                        <marker date="1555716906497" expanded="true" signature="427:481" ph="..." />
-                      </folding>
+                    <state relative-caret-position="360">
+                      <caret line="52" column="36" selection-start-line="52" selection-start-column="29" selection-end-line="52" selection-end-column="36" />
                     </state>
                   </provider>
                 </entry>
               </file>
               <file pinned="false" current-in-tab="false">
-                <entry file="file://$PROJECT_DIR$/src/actions/basic.py">
+                <entry file="file://$PROJECT_DIR$/../draw_pytorch/utility.py">
                   <provider selected="true" editor-type-id="text-editor">
-                    <state relative-caret-position="519">
-                      <caret line="100" column="22" lean-forward="true" selection-start-line="100" selection-start-column="22" selection-end-line="100" selection-end-column="22" />
-                      <folding>
-                        <marker date="1556063926849" expanded="true" signature="849:854" ph="..." />
-                      </folding>
+                    <state>
+                      <caret selection-end-column="21" />
                     </state>
                   </provider>
                 </entry>
@@ -683,33 +204,40 @@
             </leaf>
           </split-first>
           <split-second>
-            <leaf>
-              <file pinned="false" current-in-tab="false">
-                <entry file="file://$PROJECT_DIR$/src/problem/base.py">
+            <leaf SIDE_TABS_SIZE_LIMIT_KEY="375">
+              <file pinned="false" current-in-tab="true">
+                <entry file="file://$PROJECT_DIR$/spec/testshp.py">
                   <provider selected="true" editor-type-id="text-editor">
-                    <state relative-caret-position="737">
-                      <caret line="65" column="35" lean-forward="true" selection-start-line="65" selection-start-column="35" selection-end-line="65" selection-end-column="35" />
+                    <state relative-caret-position="119">
+                      <caret line="530" column="28" selection-start-line="530" selection-start-column="28" selection-end-line="530" selection-end-column="28" />
                       <folding>
-                        <marker date="1556069990869" expanded="true" signature="1046:1097" ph="..." />
-                        <marker date="1556069990869" expanded="true" signature="1591:1633" ph="..." />
+                        <element signature="e#6103#9657#0" />
+                        <element signature="e#9715#10463#0" />
+                        <element signature="e#10494#11153#0" />
+                        <element signature="e#11184#11822#0" />
+                        <element signature="e#11887#12368#0" />
+                        <element signature="e#13550#13746#0" />
+                        <element signature="e#12829#13316#0" />
+                        <element signature="e#13026#14821#0" />
+                        <element signature="e#14044#15471#0" />
+                        <marker date="1557457214369" expanded="true" signature="7500:7812" ph="..." />
+                        <marker date="1557457214369" expanded="true" signature="13116:13125" ph="..." />
+                        <marker date="1557457214369" expanded="true" signature="14288:16177" ph="..." />
+                        <marker date="1557457214369" expanded="true" signature="17685:17692" ph="..." />
                       </folding>
                     </state>
                   </provider>
                 </entry>
               </file>
-              <file pinned="false" current-in-tab="true">
-                <entry file="file://$PROJECT_DIR$/spec/testshp.py">
+              <file pinned="false" current-in-tab="false">
+                <entry file="file://$PROJECT_DIR$/src/model/arguments.py">
                   <provider selected="true" editor-type-id="text-editor">
-                    <state relative-caret-position="344">
-                      <caret line="268" column="35" selection-start-line="268" selection-start-column="35" selection-end-line="268" selection-end-column="35" />
+                    <state relative-caret-position="72">
+                      <caret line="4" column="8" selection-start-line="4" selection-start-column="8" selection-end-line="4" selection-end-column="8" />
                       <folding>
-                        <element signature="e#4707#5114#0" />
-                        <element signature="e#5423#5764#0" />
-                        <element signature="e#5433#5987#0" />
-                        <element signature="e#6713#7010#0" />
-                        <element signature="e#6181#6418#0" />
-                        <marker date="1556144326287" expanded="true" signature="5487:5843" ph="..." />
-                        <marker date="1556144326287" expanded="true" signature="7462:7774" ph="..." />
+                        <marker date="1556579218421" expanded="true" signature="165:199" ph="..." />
+                        <marker date="1556579218421" expanded="true" signature="676:710" ph="..." />
+                        <marker date="1556579218421" expanded="true" signature="783:806" ph="..." />
                       </folding>
                     </state>
                   </provider>
@@ -720,153 +248,264 @@
         </splitter>
       </split-first>
       <split-second>
-        <splitter split-orientation="horizontal" split-proportion="0.4739941">
+        <splitter split-orientation="horizontal" split-proportion="0.4826164">
           <split-first>
-            <leaf SIDE_TABS_SIZE_LIMIT_KEY="375">
-              <file pinned="false" current-in-tab="false">
-                <entry file="file://$PROJECT_DIR$/src/algo/grg.py">
-                  <provider selected="true" editor-type-id="text-editor">
-                    <state relative-caret-position="1506">
-                      <caret line="924" selection-start-line="924" selection-end-line="924" />
-                      <folding>
-                        <element signature="e#1678#1892#0" />
-                        <element signature="e#2038#2981#0" />
-                        <element signature="e#2237#2320#0" />
-                        <element signature="e#3001#3116#0" />
-                        <element signature="e#3135#3246#0" />
-                        <element signature="e#3284#4282#0" />
-                        <element signature="e#4862#5436#0" />
-                        <element signature="e#5064#5436#0" />
-                        <element signature="e#5472#9141#0" />
-                        <element signature="e#10000#12559#0" />
-                        <element signature="e#15486#26483#0" />
-                        <element signature="e#17821#18626#0" />
-                        <element signature="e#19015#19481#0" />
-                        <element signature="e#19643#20374#0" />
-                        <element signature="e#20414#23114#0" />
-                        <element signature="e#23169#26483#0" />
-                        <element signature="e#26519#27212#0" />
-                        <element signature="e#30568#30686#0" />
-                        <element signature="e#29462#29529#0" />
-                        <element signature="e#32858#33625#0" />
-                        <element signature="e#33605#34758#0" />
-                        <element signature="e#37252#41387#0" />
-                        <marker date="1556144326239" expanded="true" signature="13164:13231" ph="..." />
-                        <marker date="1556144326239" expanded="true" signature="13377:13505" ph="..." />
-                        <marker date="1556144326239" expanded="true" signature="13642:13651" ph="..." />
-                        <marker date="1556144326239" expanded="true" signature="14233:14309" ph="..." />
-                        <marker date="1556144326239" expanded="true" signature="18663:18669" ph="..." />
-                        <marker date="1556144326239" expanded="true" signature="30178:30338" ph="..." />
-                        <marker date="1556144326239" expanded="true" signature="34801:35428" ph="..." />
-                        <marker date="1556144326239" expanded="true" signature="36684:39514" ph="..." />
-                        <marker date="1556144326239" expanded="true" signature="37605:37611" ph="..." />
-                      </folding>
-                    </state>
-                  </provider>
-                </entry>
-              </file>
-              <file pinned="false" current-in-tab="true">
-                <entry file="file://$PROJECT_DIR$/.gitignore">
-                  <provider selected="true" editor-type-id="text-editor">
-                    <state relative-caret-position="126">
-                      <caret line="7" lean-forward="true" selection-start-line="7" selection-end-line="7" />
-                    </state>
-                  </provider>
-                </entry>
-              </file>
-              <file pinned="false" current-in-tab="false">
-                <entry file="file://$PROJECT_DIR$/src/layout.py">
-                  <provider selected="true" editor-type-id="text-editor">
-                    <state relative-caret-position="450">
-                      <caret line="161" column="25" lean-forward="true" selection-start-line="161" selection-start-column="25" selection-end-line="161" selection-end-column="25" />
-                      <folding>
-                        <marker date="1555976820857" expanded="true" signature="1555:1561" ph="..." />
-                        <marker date="1555976820857" expanded="true" signature="3556:3562" ph="..." />
-                        <marker date="1555976820857" expanded="true" signature="6275:6279" ph="..." />
-                        <marker date="1555976820857" expanded="true" signature="6783:6965" ph="..." />
-                      </folding>
-                    </state>
-                  </provider>
-                </entry>
-              </file>
-              <file pinned="false" current-in-tab="false">
-                <entry file="file://$PROJECT_DIR$/src/objectives.py">
-                  <provider selected="true" editor-type-id="text-editor">
-                    <state relative-caret-position="1192">
-                      <caret line="138" column="35" selection-start-line="138" selection-start-column="35" selection-end-line="138" selection-end-column="35" />
-                      <folding>
-                        <marker date="1556072727804" expanded="true" signature="1730:1731" ph="..." />
-                        <marker date="1556072727804" expanded="true" signature="1730:1736" ph="..." />
-                        <marker date="1556072727804" expanded="true" signature="3261:3267" ph="..." />
-                        <marker date="1556072727804" expanded="true" signature="3466:3490" ph="..." />
-                        <marker date="1556072727804" expanded="true" signature="5086:5108" ph="..." />
-                        <marker date="1556072727804" expanded="true" signature="5127:5136" ph="..." />
-                        <marker date="1556072727804" expanded="true" signature="5269:5273" ph="..." />
-                      </folding>
-                    </state>
-                  </provider>
-                </entry>
-              </file>
-            </leaf>
+            <splitter split-orientation="vertical" split-proportion="0.4397163">
+              <split-first>
+                <leaf SIDE_TABS_SIZE_LIMIT_KEY="375">
+                  <file pinned="false" current-in-tab="false">
+                    <entry file="file://$PROJECT_DIR$/src/algo/hrl.py">
+                      <provider selected="true" editor-type-id="text-editor">
+                        <state relative-caret-position="846">
+                          <caret line="137" column="18" lean-forward="true" selection-start-line="137" selection-start-column="18" selection-end-line="137" selection-end-column="18" />
+                          <folding>
+                            <element signature="e#235#3045#0" />
+                            <marker date="1557445879117" expanded="true" signature="2300:2306" ph="..." />
+                          </folding>
+                        </state>
+                      </provider>
+                    </entry>
+                  </file>
+                  <file pinned="false" current-in-tab="true">
+                    <entry file="file://$PROJECT_DIR$/src/algo/draw.py">
+                      <provider selected="true" editor-type-id="text-editor">
+                        <state relative-caret-position="450">
+                          <caret line="82" column="34" lean-forward="true" selection-start-line="82" selection-start-column="34" selection-end-line="82" selection-end-column="34" />
+                        </state>
+                      </provider>
+                    </entry>
+                  </file>
+                  <file pinned="false" current-in-tab="false">
+                    <entry file="file://$PROJECT_DIR$/src/algo/init_custom.py">
+                      <provider selected="true" editor-type-id="text-editor">
+                        <state relative-caret-position="594">
+                          <caret line="33" column="25" selection-start-line="33" selection-start-column="25" selection-end-line="33" selection-end-column="25" />
+                        </state>
+                      </provider>
+                    </entry>
+                  </file>
+                  <file pinned="false" current-in-tab="false">
+                    <entry file="file://$PROJECT_DIR$/src/algo/grg.py">
+                      <provider selected="true" editor-type-id="text-editor">
+                        <state relative-caret-position="81">
+                          <caret line="1760" column="45" selection-start-line="1760" selection-start-column="45" selection-end-line="1760" selection-end-column="45" />
+                          <folding>
+                            <element signature="e#5581#9250#0" />
+                            <element signature="e#16938#27952#0" />
+                            <element signature="e#27978#34767#0" />
+                            <element signature="e#34797#35484#0" />
+                            <element signature="e#35509#44054#0" />
+                            <element signature="e#44077#51869#0" />
+                            <element signature="e#47809#48211#0" />
+                            <element signature="e#48280#48542#0" />
+                            <element signature="e#48589#48888#0" />
+                            <element signature="e#48925#49181#0" />
+                            <element signature="e#49239#49432#0" />
+                            <element signature="e#49487#50693#0" />
+                            <element signature="e#50737#51869#0" />
+                            <element signature="e#52015#52828#0" />
+                            <element signature="e#52865#53110#0" />
+                            <element signature="e#53159#54261#0" />
+                            <element signature="e#53318#53794#0" />
+                            <element signature="e#54310#54575#0" />
+                            <element signature="e#54618#55420#0" />
+                            <element signature="e#55501#58252#0" />
+                            <element signature="e#58357#58876#0" />
+                            <element signature="e#58913#59352#0" />
+                            <element signature="e#59400#59802#0" />
+                            <element signature="e#59959#60460#0" />
+                            <element signature="e#64831#65350#0" />
+                            <element signature="e#65387#65826#0" />
+                            <element signature="e#64887#65034#1" expanded="true" />
+                            <element signature="e#65034#67907#0" />
+                            <marker date="1557527958946" expanded="true" signature="13352:13419" ph="..." />
+                            <marker date="1557527958946" expanded="true" signature="13565:13693" ph="..." />
+                            <marker date="1557527958946" expanded="true" signature="13830:13839" ph="..." />
+                            <marker date="1557527958946" expanded="true" signature="14421:14497" ph="..." />
+                            <marker date="1557527958946" expanded="true" signature="15097:15292" ph="..." />
+                            <marker date="1557527958946" expanded="true" signature="15986:15991" ph="..." />
+                            <marker date="1557527958946" expanded="true" signature="20247:20253" ph="..." />
+                            <marker date="1557527958946" expanded="true" signature="24736:24741" ph="..." />
+                            <marker date="1557527958946" expanded="true" signature="32173:32179" ph="..." />
+                            <marker date="1557527958946" expanded="true" signature="37947:38107" ph="..." />
+                            <marker date="1557527958946" expanded="true" signature="42396:43025" ph="..." />
+                            <marker date="1557527958946" expanded="true" signature="52069:52112" ph="..." />
+                            <marker date="1557527958946" expanded="true" signature="52999:53286" ph="..." />
+                            <marker date="1557527958946" expanded="true" signature="55559:55560" ph="..." />
+                            <marker date="1557527958946" expanded="true" signature="67492:67572" ph="..." />
+                          </folding>
+                        </state>
+                      </provider>
+                    </entry>
+                  </file>
+                  <file pinned="false" current-in-tab="false">
+                    <entry file="file://$USER_HOME$/anaconda3/envs/layout/lib/python3.6/site-packages/skimage/transform/_warps.py">
+                      <provider selected="true" editor-type-id="text-editor">
+                        <state relative-caret-position="-72">
+                          <caret line="32" column="4" selection-start-line="32" selection-start-column="4" selection-end-line="32" selection-end-column="4" />
+                        </state>
+                      </provider>
+                    </entry>
+                  </file>
+                  <file pinned="false" current-in-tab="false">
+                    <entry file="file://$PROJECT_DIR$/src/layout.py">
+                      <provider selected="true" editor-type-id="text-editor">
+                        <state relative-caret-position="216">
+                          <caret line="585" column="64" lean-forward="true" selection-start-line="585" selection-start-column="64" selection-end-line="585" selection-end-column="64" />
+                          <folding>
+                            <element signature="e#17031#17175#1" expanded="true" />
+                            <element signature="e#18944#19826#0" />
+                            <element signature="e#20135#20160#1" expanded="true" />
+                            <element signature="e#20142#20477#0" />
+                            <element signature="e#20102#20610#0" />
+                            <element signature="e#20655#21341#0" />
+                            <element signature="e#19861#20330#0" />
+                            <element signature="e#21895#22467#0" />
+                            <marker date="1557443999889" expanded="true" signature="2174:2241" ph="..." />
+                            <marker date="1557443999889" expanded="true" signature="3758:3760" ph="..." />
+                            <marker date="1557443999889" expanded="true" signature="5489:5495" ph="..." />
+                            <marker date="1557443999889" expanded="true" signature="8208:8212" ph="..." />
+                            <marker date="1557443999889" expanded="true" signature="8716:8898" ph="..." />
+                            <marker date="1557443999889" expanded="true" signature="13066:13347" ph="..." />
+                            <marker date="1557443999889" expanded="true" signature="13347:13351" ph="..." />
+                            <marker date="1557443999889" expanded="true" signature="13643:14827" ph="..." />
+                            <marker date="1557443999889" expanded="true" signature="18407:18413" ph="..." />
+                            <marker date="1557443999889" expanded="true" signature="18560:18700" ph="..." />
+                            <marker date="1557443999889" expanded="true" signature="20345:20378" ph="..." />
+                            <marker date="1557443999889" expanded="true" signature="21313:22570" ph="..." />
+                            <marker date="1557443999889" expanded="true" signature="22092:22185" ph="..." />
+                            <marker date="1557443999889" expanded="true" signature="22370:22372" ph="..." />
+                          </folding>
+                        </state>
+                      </provider>
+                    </entry>
+                  </file>
+                  <file pinned="false" current-in-tab="false">
+                    <entry file="file://$PROJECT_DIR$/src/geom/cg.py">
+                      <provider selected="true" editor-type-id="text-editor">
+                        <state relative-caret-position="757">
+                          <caret line="110" column="25" selection-start-line="110" selection-start-column="20" selection-end-line="110" selection-end-column="25" />
+                          <folding>
+                            <element signature="e#1513#1530#1" expanded="true" />
+                          </folding>
+                        </state>
+                      </provider>
+                    </entry>
+                  </file>
+                  <file pinned="false" current-in-tab="false">
+                    <entry file="file://$PROJECT_DIR$/src/model/storage.py">
+                      <provider selected="true" editor-type-id="text-editor">
+                        <state relative-caret-position="269">
+                          <caret line="159" column="55" lean-forward="true" selection-start-line="159" selection-start-column="55" selection-end-line="159" selection-end-column="55" />
+                          <folding>
+                            <marker date="1556769686486" expanded="true" signature="1922:1928" ph="..." />
+                            <marker date="1556769686486" expanded="true" signature="2699:3382" ph="..." />
+                            <marker date="1556769686486" expanded="true" signature="4676:4707" ph="..." />
+                            <marker date="1556769686486" expanded="true" signature="4676:4776" ph="..." />
+                          </folding>
+                        </state>
+                      </provider>
+                    </entry>
+                  </file>
+                </leaf>
+              </split-first>
+              <split-second>
+                <leaf>
+                  <file pinned="false" current-in-tab="true">
+                    <entry file="file://$PROJECT_DIR$/src/algo/layers.py">
+                      <provider selected="true" editor-type-id="text-editor">
+                        <state relative-caret-position="576">
+                          <caret line="92" column="18" selection-start-line="92" selection-start-column="15" selection-end-line="92" selection-end-column="18" />
+                          <folding>
+                            <element signature="e#2695#2788#1" expanded="true" />
+                          </folding>
+                        </state>
+                      </provider>
+                    </entry>
+                  </file>
+                  <file pinned="false" current-in-tab="false">
+                    <entry file="file://$USER_HOME$/anaconda3/envs/layout/lib/python3.6/site-packages/torch/nn/modules/linear.py">
+                      <provider selected="true" editor-type-id="text-editor">
+                        <state relative-caret-position="306">
+                          <caret line="66" column="23" selection-start-line="66" selection-start-column="17" selection-end-line="66" selection-end-column="23" />
+                        </state>
+                      </provider>
+                    </entry>
+                  </file>
+                  <file pinned="false" current-in-tab="false">
+                    <entry file="file://$USER_HOME$/anaconda3/envs/layout/lib/python3.6/site-packages/torch/nn/functional.py">
+                      <provider selected="true" editor-type-id="text-editor">
+                        <state relative-caret-position="556">
+                          <caret line="1353" column="29" selection-start-line="1353" selection-start-column="23" selection-end-line="1353" selection-end-column="29" />
+                        </state>
+                      </provider>
+                    </entry>
+                  </file>
+                </leaf>
+              </split-second>
+            </splitter>
           </split-first>
           <split-second>
-            <leaf SIDE_TABS_SIZE_LIMIT_KEY="375">
+            <leaf>
               <file pinned="false" current-in-tab="false">
-                <entry file="file://$PROJECT_DIR$/src/layout_ops.py">
+                <entry file="file://$PROJECT_DIR$/src/envs.py">
                   <provider selected="true" editor-type-id="text-editor">
-                    <state relative-caret-position="1210">
-                      <caret line="411" selection-start-line="411" selection-end-line="411" />
+                    <state relative-caret-position="625">
+                      <caret line="269" column="40" selection-start-line="269" selection-start-column="30" selection-end-line="269" selection-end-column="40" />
                       <folding>
-                        <element signature="e#2677#3362#0" />
-                        <element signature="e#3125#3190#1" expanded="true" />
-                        <element signature="e#9451#9797#0" />
-                        <element signature="e#10170#10450#0" />
-                        <element signature="e#10492#10758#0" />
-                        <marker date="1556070107366" expanded="true" signature="570:573" ph="..." />
-                        <marker date="1556070107366" expanded="true" signature="731:767" ph="..." />
-                        <marker date="1556070107366" expanded="true" signature="1100:1186" ph="..." />
-                        <marker date="1556070107366" expanded="true" signature="8642:8891" ph="..." />
-                        <marker date="1556070107366" expanded="true" signature="11265:11271" ph="..." />
-                        <marker date="1556070107366" expanded="true" signature="11307:11331" ph="..." />
+                        <element signature="e#1730#1847#0" />
+                        <element signature="e#1895#1939#0" />
+                        <element signature="e#1979#2391#0" />
+                        <element signature="e#2456#2668#0" />
+                        <element signature="e#2755#3241#0" />
+                        <element signature="e#3325#4066#0" />
+                        <marker date="1557350461979" expanded="true" signature="5337:5372" ph="..." />
+                        <marker date="1557350461979" expanded="true" signature="5408:5454" ph="..." />
+                        <marker date="1557350461979" expanded="true" signature="5408:5468" ph="..." />
+                        <marker date="1557350461979" expanded="true" signature="5552:6432" ph="..." />
+                        <marker date="1557350461979" expanded="true" signature="9555:9560" ph="..." />
+                        <marker date="1557350461979" expanded="true" signature="9684:9726" ph="..." />
+                      </folding>
+                    </state>
+                  </provider>
+                </entry>
+              </file>
+              <file pinned="false" current-in-tab="false">
+                <entry file="file://$PROJECT_DIR$/src/problem/terminal_conditions.py">
+                  <provider selected="true" editor-type-id="text-editor">
+                    <state relative-caret-position="1520">
+                      <caret line="76" column="36" selection-start-line="76" selection-start-column="36" selection-end-line="76" selection-end-column="36" />
+                      <folding>
+                        <marker date="1557372943651" expanded="true" signature="199:229" ph="..." />
+                        <marker date="1557372943651" expanded="true" signature="734:739" ph="..." />
                       </folding>
                     </state>
                   </provider>
                 </entry>
               </file>
               <file pinned="false" current-in-tab="true">
-                <entry file="file://$PROJECT_DIR$/src/algo/nns.py">
+                <entry file="file://$PROJECT_DIR$/src/objectives.py">
                   <provider selected="true" editor-type-id="text-editor">
-                    <state relative-caret-position="1297">
-                      <caret line="153" column="37" selection-start-line="153" selection-start-column="37" selection-end-line="153" selection-end-column="37" />
+                    <state relative-caret-position="1242">
+                      <caret line="444" column="45" selection-start-line="444" selection-start-column="45" selection-end-line="444" selection-end-column="45" />
                       <folding>
-                        <element signature="e#1864#4133#0" />
-                        <marker date="1556144195140" expanded="true" signature="476:481" ph="..." />
-                        <marker date="1556144195140" expanded="true" signature="4139:4179" ph="..." />
-                      </folding>
-                    </state>
-                  </provider>
-                </entry>
-              </file>
-              <file pinned="false" current-in-tab="false">
-                <entry file="file://$PROJECT_DIR$/src/utils.py">
-                  <provider selected="true" editor-type-id="text-editor">
-                    <state relative-caret-position="954">
-                      <caret line="53" column="8" selection-start-line="53" selection-start-column="8" selection-end-line="53" selection-end-column="8" />
-                      <folding>
-                        <marker date="1555822204579" expanded="true" signature="1639:1651" ph="..." />
-                      </folding>
-                    </state>
-                  </provider>
-                </entry>
-              </file>
-              <file pinned="false" current-in-tab="false">
-                <entry file="file://$PROJECT_DIR$/src/building.py">
-                  <provider selected="true" editor-type-id="text-editor">
-                    <state relative-caret-position="1872">
-                      <caret line="107" column="29" selection-start-line="107" selection-start-column="29" selection-end-line="107" selection-end-column="29" />
-                      <folding>
-                        <marker date="1555808775359" expanded="true" signature="4339:4862" ph="..." />
-                        <marker date="1555808775359" expanded="true" signature="4962:4968" ph="..." />
+                        <marker date="1557527128377" expanded="true" signature="1809:1810" ph="..." />
+                        <marker date="1557527128377" expanded="true" signature="1809:1815" ph="..." />
+                        <marker date="1557527128377" expanded="true" signature="3340:3346" ph="..." />
+                        <marker date="1557527128377" expanded="true" signature="3545:3564" ph="..." />
+                        <marker date="1557527128377" expanded="true" signature="4144:4150" ph="..." />
+                        <marker date="1557527128377" expanded="true" signature="5175:5179" ph="..." />
+                        <marker date="1557527128377" expanded="false" signature="5198:5207" ph="..." />
+                        <marker date="1557527128377" expanded="true" signature="5556:15516" ph="..." />
+                        <marker date="1557527128377" expanded="true" signature="8141:8180" ph="..." />
+                        <marker date="1557527128377" expanded="true" signature="8466:10367" ph="..." />
+                        <marker date="1557527128377" expanded="true" signature="8518:8523" ph="..." />
+                        <marker date="1557527128377" expanded="true" signature="9034:10367" ph="..." />
+                        <marker date="1557527128377" expanded="true" signature="9828:9894" ph="..." />
+                        <marker date="1557527128377" expanded="true" signature="9913:9948" ph="..." />
+                        <marker date="1557527128377" expanded="true" signature="10385:10390" ph="..." />
+                        <marker date="1557527128377" expanded="true" signature="11656:11858" ph="..." />
+                        <marker date="1557527128377" expanded="true" signature="11874:12183" ph="..." />
                       </folding>
                     </state>
                   </provider>
@@ -888,6 +527,11 @@
   <component name="FindInProjectRecents">
     <findStrings>
       <find>action_net</find>
+      <find>__in</find>
+      <find>draw_networkx</find>
+      <find>detach</find>
+      <find>_max_repeat</find>
+      <find>normalSample</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -896,14 +540,6 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/src/__init__.py" />
-        <option value="$PROJECT_DIR$/envtests.py" />
-        <option value="$PROJECT_DIR$/src/algo/__init__.py" />
-        <option value="$PROJECT_DIR$/src/interfaces.py" />
-        <option value="$PROJECT_DIR$/run.py" />
-        <option value="$PROJECT_DIR$/src/actions/__init__.py" />
-        <option value="$PROJECT_DIR$/src/problem/__init__.py" />
-        <option value="$PROJECT_DIR$/src/algo/svdalg.py" />
         <option value="$PROJECT_DIR$/spec/envtests.py" />
         <option value="$PROJECT_DIR$/lib/sql.py" />
         <option value="$PROJECT_DIR$/src/geom/__init__.py" />
@@ -913,7 +549,6 @@
         <option value="$PROJECT_DIR$/src/algo/prob.py" />
         <option value="$PROJECT_DIR$/readme.md" />
         <option value="$PROJECT_DIR$/../pytorch-dnc/core/env.py" />
-        <option value="$PROJECT_DIR$/src/envs.py" />
         <option value="$PROJECT_DIR$/src/algo/sample_loss.py" />
         <option value="$PROJECT_DIR$/src/experiment.py" />
         <option value="$PROJECT_DIR$/src/structs/floating_tree.py" />
@@ -921,20 +556,41 @@
         <option value="$PROJECT_DIR$/src/problem/initial_state.py" />
         <option value="$PROJECT_DIR$/src/algo/sarsa.py" />
         <option value="$PROJECT_DIR$/src/building.py" />
-        <option value="$PROJECT_DIR$/src/utils.py" />
-        <option value="$PROJECT_DIR$/src/geom/cg.py" />
-        <option value="$PROJECT_DIR$/src/layout.py" />
         <option value="$PROJECT_DIR$/src/algo/kd.py" />
-        <option value="$PROJECT_DIR$/src/actions/basic.py" />
-        <option value="$PROJECT_DIR$/src/problem/base.py" />
         <option value="$PROJECT_DIR$/src/problem/example.py" />
+        <option value="$PROJECT_DIR$/.gitignore" />
+        <option value="$PROJECT_DIR$/lib/floorpacking.py" />
         <option value="$PROJECT_DIR$/src/layout_ops.py" />
+        <option value="$PROJECT_DIR$/../pytorch-a2c-ppo-acktr-gail/a2c_ppo_acktr/storage.py" />
+        <option value="$PROJECT_DIR$/../pytorch-a2c-ppo-acktr-gail/a2c_ppo_acktr/algo/gail.py" />
+        <option value="$PROJECT_DIR$/../pytorch-a2c-ppo-acktr-gail/main.py" />
+        <option value="$PROJECT_DIR$/../pytorch-a2c-ppo-acktr-gail/a2c_ppo_acktr/algo/ppo.py" />
+        <option value="$PROJECT_DIR$/../pytorch-a3c/train.py" />
+        <option value="$PROJECT_DIR$/src/utils.py" />
+        <option value="$PROJECT_DIR$/src/model/arguments.py" />
+        <option value="$PROJECT_DIR$/src/problem/encoders.py" />
+        <option value="$PROJECT_DIR$/src/problem/base.py" />
+        <option value="$PROJECT_DIR$/../draw_pytorch/draw_model.py" />
+        <option value="$PROJECT_DIR$/../DeepRL/deep_rl/component/replay.py" />
+        <option value="$PROJECT_DIR$/src/model/storage.py" />
+        <option value="$PROJECT_DIR$/src/metrics/custom.py" />
+        <option value="$PROJECT_DIR$/src/interfaces.py" />
+        <option value="$PROJECT_DIR$/src/actions/basic.py" />
+        <option value="$PROJECT_DIR$/src/geom/cg.py" />
+        <option value="$PROJECT_DIR$/src/envs.py" />
+        <option value="$PROJECT_DIR$/src/problem/terminal_conditions.py" />
+        <option value="$PROJECT_DIR$/src/layout.py" />
+        <option value="$PROJECT_DIR$/src/algo/hrl.py" />
+        <option value="$PROJECT_DIR$/../DeepRL/examples.py" />
+        <option value="$PROJECT_DIR$/src/algo/draw.py" />
+        <option value="$PROJECT_DIR$/src/probablistic/funcs.py" />
+        <option value="$PROJECT_DIR$/spec/testshp.py" />
         <option value="$PROJECT_DIR$/src/objectives.py" />
         <option value="$PROJECT_DIR$/src/metrics/meters.py" />
-        <option value="$PROJECT_DIR$/src/algo/nns.py" />
-        <option value="$PROJECT_DIR$/spec/testshp.py" />
         <option value="$PROJECT_DIR$/src/algo/grg.py" />
-        <option value="$PROJECT_DIR$/.gitignore" />
+        <option value="$PROJECT_DIR$/src/algo/init_custom.py" />
+        <option value="$PROJECT_DIR$/src/algo/layers.py" />
+        <option value="$PROJECT_DIR$/src/algo/nns.py" />
       </list>
     </option>
   </component>
@@ -945,17 +601,19 @@
     <sorting>DEFINITION_ORDER</sorting>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="4731" />
-    <option name="width" value="2919" />
-    <option name="height" value="2093" />
+    <option name="x" value="4943" />
+    <option name="y" value="2" />
+    <option name="width" value="2729" />
+    <option name="height" value="2125" />
   </component>
-  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
   <component name="ProjectView">
     <navigator proportions="" version="1">
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -967,6 +625,12 @@
               <item name="layout" type="b2602c69:ProjectViewProjectNode" />
               <item name="layout" type="462c0819:PsiDirectoryNode" />
               <item name="src" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="layout" type="b2602c69:ProjectViewProjectNode" />
+              <item name="layout" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="actions" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="layout" type="b2602c69:ProjectViewProjectNode" />
@@ -990,36 +654,63 @@
               <item name="layout" type="b2602c69:ProjectViewProjectNode" />
               <item name="layout" type="462c0819:PsiDirectoryNode" />
               <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="probablistic" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="layout" type="b2602c69:ProjectViewProjectNode" />
+              <item name="layout" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
               <item name="problem" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="layout" type="b2602c69:ProjectViewProjectNode" />
-              <item name="pytorch-dnc" type="462c0819:PsiDirectoryNode" />
+              <item name="DeepRL" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="layout" type="b2602c69:ProjectViewProjectNode" />
-              <item name="pytorch-dnc" type="462c0819:PsiDirectoryNode" />
-              <item name="core" type="462c0819:PsiDirectoryNode" />
+              <item name="DeepRL" type="462c0819:PsiDirectoryNode" />
+              <item name="deep_rl" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="layout" type="b2602c69:ProjectViewProjectNode" />
+              <item name="DeepRL" type="462c0819:PsiDirectoryNode" />
+              <item name="deep_rl" type="462c0819:PsiDirectoryNode" />
+              <item name="component" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="layout" type="b2602c69:ProjectViewProjectNode" />
+              <item name="DeepRL" type="462c0819:PsiDirectoryNode" />
+              <item name="deep_rl" type="462c0819:PsiDirectoryNode" />
+              <item name="network" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="layout" type="b2602c69:ProjectViewProjectNode" />
+              <item name="DeepRL" type="462c0819:PsiDirectoryNode" />
+              <item name="deep_rl" type="462c0819:PsiDirectoryNode" />
+              <item name="utils" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="layout" type="b2602c69:ProjectViewProjectNode" />
+              <item name="draw_pytorch" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="layout" type="b2602c69:ProjectViewProjectNode" />
+              <item name="pytorch-a3c" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
         </subPane>
       </pane>
+      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
+    <property name="SearchEverywhereHistoryKey" value="&#9;FILE&#9;file:///home/psavine/source/layout/src/algo/draw.py" />
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/../isolation-nn" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../draw_pytorch" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
     <property name="nodejs_npm_path_reset_for_default_project" value="true" />
     <property name="settings.editor.selected.configurable" value="configurable.group.tools" />
-  </component>
-  <component name="PyConsoleOptionsProvider">
-    <option name="myPythonConsoleState">
-      <console-settings>
-        <option name="useSoftWraps" value="true" />
-      </console-settings>
-    </option>
   </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
@@ -1054,10 +745,10 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="4731" y="0" width="2919" height="2093" extended-state="0" />
+    <frame x="4943" y="2" width="2729" height="2125" extended-state="0" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" x="2430" y="583" width="477" height="1455" id="Project" order="0" type="FLOATING" visible="true" weight="0.19339895" />
+      <window_info content_ui="combo" x="1078" y="1047" width="426" height="1078" id="Project" order="0" type="FLOATING" visible="true" weight="0.19339895" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
@@ -1071,7 +762,7 @@
       <window_info anchor="bottom" id="Version Control" order="8" show_stripe_button="false" />
       <window_info anchor="bottom" id="Event Log" order="9" side_tool="true" weight="0.32955715" />
       <window_info anchor="bottom" id="Terminal" order="10" />
-      <window_info anchor="bottom" x="2191" y="828" width="1397" height="1239" id="Python Console" order="11" type="FLOATING" weight="0.32978722" />
+      <window_info active="true" anchor="bottom" x="3076" y="586" width="683" height="1492" id="Python Console" order="11" type="FLOATING" visible="true" weight="0.32978722" />
       <window_info anchor="right" id="Commander" order="0" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
@@ -1085,133 +776,169 @@
     <option name="myLimit" value="2678400000" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/src/algo/metroplis_hastings.py">
+    <entry file="file://$PROJECT_DIR$/../DeepRL/deep_rl/agent/BaseAgent.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2154">
-          <caret line="146" column="18" lean-forward="true" selection-start-line="146" selection-start-column="18" selection-end-line="146" selection-end-column="18" />
+        <state relative-caret-position="-1445">
+          <caret line="14" column="6" selection-start-line="14" selection-start-column="6" selection-end-line="14" selection-end-column="6" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$USER_HOME$/anaconda3/envs/layout/lib/python3.6/site-packages/numpy/linalg/linalg.py">
+    <entry file="file://$USER_HOME$/anaconda3/envs/layout/lib/python3.6/site-packages/torch/distributions/multivariate_normal.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="9756">
-          <caret line="1301" column="4" selection-start-line="1301" selection-start-column="4" selection-end-line="1301" selection-end-column="4" />
+        <state relative-caret-position="654">
+          <caret line="98" column="45" selection-start-line="98" selection-start-column="28" selection-end-line="98" selection-end-column="45" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/anaconda3/envs/layout/lib/python3.6/site-packages/torch/distributions/multinomial.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-35">
+          <caret line="4" column="23" lean-forward="true" selection-start-line="4" selection-start-column="23" selection-end-line="4" selection-end-column="23" />
           <folding>
-            <element signature="e#34547#38628#1" expanded="true" />
-            <element signature="e#39339#43390#1" expanded="true" />
+            <element signature="e#304#1450#1" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/../pytorch-dnc/main.py">
+    <entry file="file://$USER_HOME$/anaconda3/envs/layout/lib/python3.6/site-packages/torch/__init__.pyi">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="414">
-          <caret line="23" selection-start-line="23" selection-end-line="23" />
+        <state relative-caret-position="1009">
+          <caret line="461" column="55" selection-start-line="461" selection-start-column="44" selection-end-line="461" selection-end-column="55" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$USER_HOME$/.PyCharm2018.2/system/python_stubs/-1781115921/numpy/random/mtrand.py">
+    <entry file="file://$USER_HOME$/anaconda3/envs/layout/lib/python3.6/site-packages/torch/tensor.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="639">
-          <caret line="2023" column="4" selection-start-line="2023" selection-start-column="4" selection-end-line="2023" selection-end-column="4" />
+        <state relative-caret-position="1346">
+          <caret line="489" column="61" selection-start-line="489" selection-start-column="55" selection-end-line="489" selection-end-column="61" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../DeepRL/deep_rl/agent/NStepDQN_agent.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="450">
+          <caret line="25" column="19" selection-start-line="25" selection-start-column="19" selection-end-line="25" selection-end-column="19" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/model/arguments.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="72">
+          <caret line="4" column="8" selection-start-line="4" selection-start-column="8" selection-end-line="4" selection-end-column="8" />
           <folding>
-            <element signature="e#85448#87974#1" expanded="true" />
+            <marker date="1556579218421" expanded="true" signature="165:199" ph="..." />
+            <marker date="1556579218421" expanded="true" signature="676:710" ph="..." />
+            <marker date="1556579218421" expanded="true" signature="783:806" ph="..." />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/../isolation-nn/aindnn/layers.py">
+    <entry file="file://$USER_HOME$/anaconda3/envs/layout/lib/python3.6/site-packages/torch/functional.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="544">
-          <caret line="45" column="48" lean-forward="true" selection-start-line="45" selection-start-column="48" selection-end-line="45" selection-end-column="48" />
+        <state relative-caret-position="997">
+          <caret line="73" column="12" selection-start-line="73" selection-start-column="12" selection-end-line="73" selection-end-column="12" />
+          <folding>
+            <element signature="e#1143#1902#1" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/../pytorch-dnc/utils/factory.py">
+    <entry file="file://$PROJECT_DIR$/src/interfaces.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="864">
+          <caret line="66" selection-start-line="66" selection-end-line="66" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/anaconda3/envs/layout/lib/python3.6/site-packages/numpy/core/fromnumeric.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="654">
+          <caret line="1903" column="4" selection-start-line="1903" selection-start-column="4" selection-end-line="1903" selection-end-column="4" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/actions/basic.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="506">
+          <caret line="194" column="13" selection-start-line="194" selection-start-column="8" selection-end-line="194" selection-end-column="13" />
+          <folding>
+            <marker date="1556850372053" expanded="true" signature="862:867" ph="..." />
+            <marker date="1556850372053" expanded="true" signature="4574:4818" ph="..." />
+            <marker date="1556850372053" expanded="true" signature="5027:5033" ph="..." />
+            <marker date="1556850372053" expanded="true" signature="5069:5154" ph="..." />
+            <marker date="1556850372053" expanded="true" signature="5199:5208" ph="..." />
+            <marker date="1556850372053" expanded="true" signature="5875:5880" ph="..." />
+            <marker date="1556850372053" expanded="true" signature="5915:5924" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/layout_ops.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="18">
+          <caret line="63" column="13" selection-start-line="63" selection-start-column="13" selection-end-line="63" selection-end-column="13" />
+          <folding>
+            <element signature="e#5920#8517#0" />
+            <marker date="1556248688732" expanded="true" signature="327:328" ph="..." />
+            <marker date="1556248688732" expanded="true" signature="651:687" ph="..." />
+            <marker date="1556248688732" expanded="true" signature="1020:1106" ph="..." />
+            <marker date="1556248688732" expanded="true" signature="8561:8810" ph="..." />
+            <marker date="1556248688732" expanded="true" signature="11184:11190" ph="..." />
+            <marker date="1556248688732" expanded="true" signature="11226:11250" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../DeepRL/deep_rl/network/network_heads.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1659">
+          <caret line="213" column="8" selection-start-line="213" selection-start-column="8" selection-end-line="217" selection-end-column="46" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/problem/example.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="738">
+          <caret line="86" lean-forward="true" selection-start-line="86" selection-end-line="86" />
+          <folding>
+            <marker date="1556069990901" expanded="true" signature="1442:1454" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/anaconda3/envs/layout/lib/python3.6/site-packages/torchnet/meter/averagevaluemeter.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="90">
+          <caret line="5" lean-forward="true" selection-start-line="5" selection-end-line="41" selection-end-column="25" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/anaconda3/envs/layout/lib/python3.6/site-packages/torchnet/meter/__init__.py">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
-    <entry file="file://$USER_HOME$/anaconda3/envs/layout/lib/python3.6/site-packages/shapely/geometry/base.py">
+    <entry file="file://$USER_HOME$/anaconda3/envs/layout/lib/python3.6/site-packages/torch/distributions/normal.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="369">
-          <caret line="645" column="8" selection-start-line="645" selection-start-column="8" selection-end-line="645" selection-end-column="8" />
+        <state relative-caret-position="-245">
+          <caret line="42" column="33" selection-start-line="42" selection-start-column="28" selection-end-line="42" selection-end-column="33" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/problem/base.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="468">
+          <caret line="26" lean-forward="true" selection-start-line="26" selection-end-line="26" />
           <folding>
-            <element signature="e#21222#21314#1" expanded="true" />
+            <element signature="e#810#1015#0" />
+            <marker date="1556583535456" expanded="true" signature="1046:1097" ph="..." />
+            <marker date="1556583535456" expanded="true" signature="1533:1575" ph="..." />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/lib/svdalg.py">
+    <entry file="file://$PROJECT_DIR$/src/metrics/custom.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1876">
-          <caret line="228" column="35" selection-start-line="228" selection-start-column="35" selection-end-line="228" selection-end-column="35" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/../viper/src/misc/utils.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1188">
-          <caret line="81" column="48" selection-start-line="81" selection-start-column="48" selection-end-line="81" selection-end-column="48" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/algo/branchbound.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1054">
-          <caret line="155" column="26" lean-forward="true" selection-start-line="155" selection-start-column="26" selection-end-line="155" selection-end-column="26" />
-          <folding>
-            <element signature="e#248#869#0" />
-            <element signature="e#1157#1252#0" />
-            <element signature="e#1272#1408#0" />
-            <element signature="e#1159#1891#0" />
-            <element signature="e#2486#2556#0" />
-            <element signature="e#2600#2627#0" />
-            <element signature="e#2696#2949#0" />
-            <element signature="e#3542#4092#0" />
-            <element signature="e#4827#5541#0" />
-            <element signature="e#5740#5757#1" expanded="true" />
-            <marker date="1555195186860" expanded="true" signature="372:391" ph="..." />
-            <marker date="1555195186860" expanded="true" signature="639:755" ph="..." />
-            <marker date="1555195186860" expanded="true" signature="1445:5711" ph="..." />
-            <marker date="1555195186860" expanded="true" signature="3215:3224" ph="..." />
-            <marker date="1555195186860" expanded="true" signature="3547:3737" ph="..." />
-            <marker date="1555195186860" expanded="true" signature="4447:5012" ph="..." />
-            <marker date="1555195186860" expanded="true" signature="6364:7127" ph="..." />
-            <marker date="1555195186860" expanded="true" signature="7150:7159" ph="..." />
-            <marker date="1555195186860" expanded="true" signature="7277:7281" ph="..." />
-            <marker date="1555195186860" expanded="true" signature="7299:7404" ph="..." />
-            <marker date="1555195186860" expanded="true" signature="7402:7403" ph="..." />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/../isolation-nn/aindnn/slnn.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="551">
-          <caret line="137" column="30" lean-forward="true" selection-start-line="137" selection-start-column="30" selection-end-line="137" selection-end-column="30" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/../isolation-nn/spec.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-648" />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/problem/initial_state.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-849">
-          <caret line="45" column="37" lean-forward="true" selection-start-line="45" selection-start-column="37" selection-end-line="45" selection-end-column="37" />
-          <folding>
-            <element signature="e#272#294#1" expanded="true" />
-            <element signature="e#1768#1938#1" expanded="true" />
-            <marker date="1555463427841" expanded="true" signature="396:537" ph="..." />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/.PyCharmCE2017.3/system/python_stubs/-2086213682/itertools.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="494">
-          <caret line="240" column="6" selection-start-line="240" selection-start-column="6" selection-end-line="240" selection-end-column="6" />
+        <state relative-caret-position="36">
+          <caret line="2" selection-start-line="2" selection-end-line="2" />
         </state>
       </provider>
     </entry>
@@ -1219,175 +946,18 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="918">
           <caret line="75" column="22" selection-start-line="75" selection-start-column="22" selection-end-line="75" selection-end-column="22" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/envs.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="203">
-          <caret line="36" column="52" selection-start-line="36" selection-start-column="52" selection-end-line="36" selection-end-column="52" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/anaconda3/envs/layout/lib/python3.6/site-packages/visdom/__init__.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1189">
-          <caret line="1394" selection-start-line="1394" selection-end-line="1394" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/run.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="162">
-          <caret line="9" selection-start-line="9" selection-end-line="9" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/experiment.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1044">
-          <caret line="58" selection-start-line="58" selection-end-line="58" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/anaconda3/envs/layout/lib/python3.6/site-packages/torch/optim/lbfgs.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="738">
-          <caret line="129" column="72" selection-start-line="129" selection-start-column="72" selection-end-line="129" selection-end-column="72" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/anaconda3/envs/layout/lib/python3.6/site-packages/torch/__init__.pyi">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="307">
-          <caret line="1410" column="40" lean-forward="true" selection-start-line="1410" selection-start-column="40" selection-end-line="1410" selection-end-column="40" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/.PyCharm2018.2/system/python_stubs/-1781115921/numpy/core/_multiarray_umath.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="660">
-          <caret line="195" column="4" selection-start-line="195" selection-start-column="4" selection-end-line="195" selection-end-column="4" />
           <folding>
-            <element signature="e#5114#7452#1" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/anaconda3/envs/layout/lib/python3.6/site-packages/torchnet/meter/averagevaluemeter.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="108">
-          <caret line="6" column="8" selection-start-line="6" selection-start-column="8" selection-end-line="6" selection-end-column="8" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/anaconda3/envs/layout/lib/python3.6/site-packages/torchnet/logger/visdomlogger.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="660">
-          <caret line="132" column="8" selection-start-line="132" selection-start-column="8" selection-end-line="132" selection-end-column="8" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/anaconda3/envs/layout/lib/python3.6/site-packages/torchnet/meter/__init__.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="108">
-          <caret line="6" column="30" selection-start-line="6" selection-start-column="22" selection-end-line="6" selection-end-column="30" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/geom/cg.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="249">
-          <caret line="79" lean-forward="true" selection-start-line="79" selection-end-line="79" />
-          <folding>
-            <element signature="e#490#780#0" />
-            <marker date="1555878500709" expanded="true" signature="1492:1505" ph="..." />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/anaconda3/envs/layout/lib/python3.6/site-packages/torch/nn/functional.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1020">
-          <caret line="2129" column="39" lean-forward="true" selection-start-line="2129" selection-start-column="39" selection-end-line="2129" selection-end-column="39" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/../pytorch-dnc/core/controller.py">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$USER_HOME$/anaconda3/envs/layout/lib/python3.6/site-packages/torch/nn/modules/normalization.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="462">
-          <caret line="134" column="69" selection-start-line="134" selection-start-column="51" selection-end-line="134" selection-end-column="69" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/anaconda3/envs/layout/lib/python3.6/site-packages/torch/nn/modules/batchnorm.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-252">
-          <caret line="13" column="6" selection-start-line="13" selection-start-column="6" selection-end-line="13" selection-end-column="6" />
-          <folding>
-            <element signature="e#3984#7180#1" expanded="true" />
-            <element signature="e#7467#10585#1" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/anaconda3/envs/layout/lib/python3.6/site-packages/torch/nn/modules/linear.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="306">
-          <caret line="48" column="24" selection-start-line="48" selection-start-column="13" selection-end-line="48" selection-end-column="24" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/anaconda3/envs/layout/lib/python3.6/site-packages/torch/nn/modules/conv.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="72">
-          <caret line="49" column="41" lean-forward="true" selection-start-line="49" selection-start-column="41" selection-end-line="49" selection-end-column="41" />
-          <folding>
-            <element signature="e#7813#13593#1" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/anaconda3/envs/layout/lib/python3.6/site-packages/torch/nn/modules/utils.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="216">
-          <caret line="12" column="12" lean-forward="true" selection-start-line="12" selection-start-column="12" selection-end-line="12" selection-end-column="12" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/algo/sarsa.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="504">
-          <caret line="55" column="10" selection-start-line="55" selection-start-column="10" selection-end-line="55" selection-end-column="10" />
-          <folding>
-            <marker date="1555716906497" expanded="true" signature="427:481" ph="..." />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/anaconda3/envs/layout/lib/python3.6/site-packages/torch/tensor.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="252">
-          <caret line="14" column="6" selection-start-line="14" selection-start-column="6" selection-end-line="14" selection-end-column="6" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/utils.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="954">
-          <caret line="53" column="8" selection-start-line="53" selection-start-column="8" selection-end-line="53" selection-end-column="8" />
-          <folding>
-            <marker date="1555822204579" expanded="true" signature="1639:1651" ph="..." />
+            <marker date="1555259842649" expanded="true" signature="421:422" ph="..." />
+            <marker date="1555259842649" expanded="true" signature="1130:1152" ph="..." />
+            <marker date="1555259842649" expanded="true" signature="2768:3086" ph="..." />
+            <marker date="1555259842649" expanded="true" signature="3110:3880" ph="..." />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/building.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1872">
+        <state relative-caret-position="1143">
           <caret line="107" column="29" selection-start-line="107" selection-start-column="29" selection-end-line="107" selection-end-column="29" />
           <folding>
             <marker date="1555808775359" expanded="true" signature="4339:4862" ph="..." />
@@ -1396,194 +966,376 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/algo/kd.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="702">
-          <caret line="41" selection-start-line="41" selection-end-line="41" />
-          <folding>
-            <marker date="1555982457067" expanded="true" signature="100:135" ph="..." />
-            <marker date="1555982457067" expanded="true" signature="425:733" ph="..." />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/anaconda3/envs/layout/lib/python3.6/site-packages/scipy/ndimage/filters.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="660">
-          <caret line="585" column="4" selection-start-line="585" selection-start-column="4" selection-end-line="585" selection-end-column="4" />
-          <folding>
-            <element signature="e#21161#21536#1" expanded="true" />
-            <element signature="e#21780#24775#1" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/actions/basic.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="519">
-          <caret line="100" column="22" lean-forward="true" selection-start-line="100" selection-start-column="22" selection-end-line="100" selection-end-column="22" />
-          <folding>
-            <marker date="1556063926849" expanded="true" signature="849:854" ph="..." />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$USER_HOME$/anaconda3/envs/layout/lib/python3.6/site-packages/torch/distributions/categorical.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="900">
-          <caret line="80" selection-start-line="80" selection-end-line="80" />
+        <state relative-caret-position="234">
+          <caret line="43" column="8" selection-start-line="43" selection-start-column="8" selection-end-line="43" selection-end-column="8" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/problem/base.py">
+    <entry file="file://$PROJECT_DIR$/src/geom/cg.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="737">
-          <caret line="65" column="35" lean-forward="true" selection-start-line="65" selection-start-column="35" selection-end-line="65" selection-end-column="35" />
+        <state relative-caret-position="757">
+          <caret line="110" column="25" selection-start-line="110" selection-start-column="20" selection-end-line="110" selection-end-column="25" />
           <folding>
-            <marker date="1556069990869" expanded="true" signature="1046:1097" ph="..." />
-            <marker date="1556069990869" expanded="true" signature="1591:1633" ph="..." />
+            <element signature="e#1513#1530#1" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/problem/example.py">
+    <entry file="file://$PROJECT_DIR$/src/model/storage.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="504">
-          <caret line="67" column="60" selection-start-line="67" selection-start-column="60" selection-end-line="67" selection-end-column="60" />
+        <state relative-caret-position="269">
+          <caret line="159" column="55" lean-forward="true" selection-start-line="159" selection-start-column="55" selection-end-line="159" selection-end-column="55" />
           <folding>
-            <marker date="1556069990901" expanded="true" signature="1442:1454" ph="..." />
+            <marker date="1556769686486" expanded="true" signature="1922:1928" ph="..." />
+            <marker date="1556769686486" expanded="true" signature="2699:3382" ph="..." />
+            <marker date="1556769686486" expanded="true" signature="4676:4707" ph="..." />
+            <marker date="1556769686486" expanded="true" signature="4676:4776" ph="..." />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/layout_ops.py">
+    <entry file="file://$USER_HOME$/anaconda3/envs/layout/lib/python3.6/site-packages/scipy/ndimage/morphology.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1210">
-          <caret line="411" selection-start-line="411" selection-end-line="411" />
+        <state relative-caret-position="-110">
+          <caret line="1212" column="4" selection-start-line="1212" selection-start-column="4" selection-end-line="1212" selection-end-column="4" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/anaconda3/envs/layout/lib/python3.6/site-packages/visdom/__init__.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="648">
+          <caret line="930" column="8" selection-start-line="930" selection-start-column="8" selection-end-line="930" selection-end-column="8" />
           <folding>
-            <element signature="e#2677#3362#0" />
-            <element signature="e#3125#3190#1" expanded="true" />
-            <element signature="e#9451#9797#0" />
-            <element signature="e#10170#10450#0" />
-            <element signature="e#10492#10758#0" />
-            <marker date="1556070107366" expanded="true" signature="570:573" ph="..." />
-            <marker date="1556070107366" expanded="true" signature="731:767" ph="..." />
-            <marker date="1556070107366" expanded="true" signature="1100:1186" ph="..." />
-            <marker date="1556070107366" expanded="true" signature="8642:8891" ph="..." />
-            <marker date="1556070107366" expanded="true" signature="11265:11271" ph="..." />
-            <marker date="1556070107366" expanded="true" signature="11307:11331" ph="..." />
+            <element signature="e#30301#30505#1" expanded="true" />
+            <element signature="e#31725#32022#1" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/layout.py">
+    <entry file="file://$PROJECT_DIR$/../DeepRL/deep_rl/agent/A2C_agent.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="450">
-          <caret line="161" column="25" lean-forward="true" selection-start-line="161" selection-start-column="25" selection-end-line="161" selection-end-column="25" />
+        <state relative-caret-position="360">
+          <caret line="52" column="36" selection-start-line="52" selection-start-column="29" selection-end-line="52" selection-end-column="36" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/envs.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="625">
+          <caret line="269" column="40" selection-start-line="269" selection-start-column="30" selection-end-line="269" selection-end-column="40" />
           <folding>
-            <marker date="1555976820857" expanded="true" signature="1555:1561" ph="..." />
-            <marker date="1555976820857" expanded="true" signature="3556:3562" ph="..." />
-            <marker date="1555976820857" expanded="true" signature="6275:6279" ph="..." />
-            <marker date="1555976820857" expanded="true" signature="6783:6965" ph="..." />
+            <element signature="e#1730#1847#0" />
+            <element signature="e#1895#1939#0" />
+            <element signature="e#1979#2391#0" />
+            <element signature="e#2456#2668#0" />
+            <element signature="e#2755#3241#0" />
+            <element signature="e#3325#4066#0" />
+            <marker date="1557350461979" expanded="true" signature="5337:5372" ph="..." />
+            <marker date="1557350461979" expanded="true" signature="5408:5454" ph="..." />
+            <marker date="1557350461979" expanded="true" signature="5408:5468" ph="..." />
+            <marker date="1557350461979" expanded="true" signature="5552:6432" ph="..." />
+            <marker date="1557350461979" expanded="true" signature="9555:9560" ph="..." />
+            <marker date="1557350461979" expanded="true" signature="9684:9726" ph="..." />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/objectives.py">
+    <entry file="file://$PROJECT_DIR$/src/problem/terminal_conditions.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1192">
-          <caret line="138" column="35" selection-start-line="138" selection-start-column="35" selection-end-line="138" selection-end-column="35" />
+        <state relative-caret-position="1520">
+          <caret line="76" column="36" selection-start-line="76" selection-start-column="36" selection-end-line="76" selection-end-column="36" />
           <folding>
-            <marker date="1556072727804" expanded="true" signature="1730:1731" ph="..." />
-            <marker date="1556072727804" expanded="true" signature="1730:1736" ph="..." />
-            <marker date="1556072727804" expanded="true" signature="3261:3267" ph="..." />
-            <marker date="1556072727804" expanded="true" signature="3466:3490" ph="..." />
-            <marker date="1556072727804" expanded="true" signature="5086:5108" ph="..." />
-            <marker date="1556072727804" expanded="true" signature="5127:5136" ph="..." />
-            <marker date="1556072727804" expanded="true" signature="5269:5273" ph="..." />
+            <marker date="1557372943651" expanded="true" signature="199:229" ph="..." />
+            <marker date="1557372943651" expanded="true" signature="734:739" ph="..." />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/metrics/meters.py">
+    <entry file="file://$PROJECT_DIR$/../DeepRL/deep_rl/agent/OptionCritic_agent.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="504">
-          <caret line="28" column="26" selection-start-line="28" selection-start-column="13" selection-end-line="28" selection-end-column="26" />
+        <state relative-caret-position="846">
+          <caret line="47" column="59" lean-forward="true" selection-start-line="47" selection-start-column="59" selection-end-line="47" selection-end-column="59" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/algo/nns.py">
+    <entry file="file://$PROJECT_DIR$/../draw_pytorch/draw_model.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1297">
-          <caret line="153" column="37" selection-start-line="153" selection-start-column="37" selection-end-line="153" selection-end-column="37" />
+        <state relative-caret-position="702">
+          <caret line="39" column="24" lean-forward="true" selection-start-line="39" selection-start-column="24" selection-end-line="39" selection-end-column="24" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../draw_pytorch/utility.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <caret selection-end-column="21" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../draw_pytorch/config.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../draw_pytorch/train.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="306">
+          <caret line="17" column="30" selection-start-line="17" selection-start-column="24" selection-end-line="17" selection-end-column="30" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/anaconda3/envs/layout/lib/python3.6/site-packages/skimage/morphology/grey.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="2628">
+          <caret line="257" column="4" lean-forward="true" selection-start-line="257" selection-start-column="4" selection-end-line="257" selection-end-column="4" />
           <folding>
-            <element signature="e#1864#4133#0" />
-            <marker date="1556144195140" expanded="true" signature="476:481" ph="..." />
-            <marker date="1556144195140" expanded="true" signature="4139:4179" ph="..." />
+            <element signature="e#3666#5444#1" expanded="true" />
+            <element signature="e#8261#9729#1" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../DeepRL/examples.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="925">
+          <caret line="251" column="17" lean-forward="true" selection-start-line="251" selection-start-column="17" selection-end-line="251" selection-end-column="17" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/algo/hrl.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="846">
+          <caret line="137" column="18" lean-forward="true" selection-start-line="137" selection-start-column="18" selection-end-line="137" selection-end-column="18" />
+          <folding>
+            <element signature="e#235#3045#0" />
+            <marker date="1557445879117" expanded="true" signature="2300:2306" ph="..." />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/spec/testshp.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="344">
-          <caret line="268" column="35" selection-start-line="268" selection-start-column="35" selection-end-line="268" selection-end-column="35" />
+        <state relative-caret-position="119">
+          <caret line="530" column="28" selection-start-line="530" selection-start-column="28" selection-end-line="530" selection-end-column="28" />
           <folding>
-            <element signature="e#4707#5114#0" />
-            <element signature="e#5423#5764#0" />
-            <element signature="e#5433#5987#0" />
-            <element signature="e#6713#7010#0" />
-            <element signature="e#6181#6418#0" />
-            <marker date="1556144326287" expanded="true" signature="5487:5843" ph="..." />
-            <marker date="1556144326287" expanded="true" signature="7462:7774" ph="..." />
+            <element signature="e#6103#9657#0" />
+            <element signature="e#9715#10463#0" />
+            <element signature="e#10494#11153#0" />
+            <element signature="e#11184#11822#0" />
+            <element signature="e#11887#12368#0" />
+            <element signature="e#13550#13746#0" />
+            <element signature="e#12829#13316#0" />
+            <element signature="e#13026#14821#0" />
+            <element signature="e#14044#15471#0" />
+            <marker date="1557457214369" expanded="true" signature="7500:7812" ph="..." />
+            <marker date="1557457214369" expanded="true" signature="13116:13125" ph="..." />
+            <marker date="1557457214369" expanded="true" signature="14288:16177" ph="..." />
+            <marker date="1557457214369" expanded="true" signature="17685:17692" ph="..." />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/objectives.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1242">
+          <caret line="444" column="45" selection-start-line="444" selection-start-column="45" selection-end-line="444" selection-end-column="45" />
+          <folding>
+            <marker date="1557527128377" expanded="true" signature="1809:1810" ph="..." />
+            <marker date="1557527128377" expanded="true" signature="1809:1815" ph="..." />
+            <marker date="1557527128377" expanded="true" signature="3340:3346" ph="..." />
+            <marker date="1557527128377" expanded="true" signature="3545:3564" ph="..." />
+            <marker date="1557527128377" expanded="true" signature="4144:4150" ph="..." />
+            <marker date="1557527128377" expanded="true" signature="5175:5179" ph="..." />
+            <marker date="1557527128377" expanded="false" signature="5198:5207" ph="..." />
+            <marker date="1557527128377" expanded="true" signature="5556:15516" ph="..." />
+            <marker date="1557527128377" expanded="true" signature="8141:8180" ph="..." />
+            <marker date="1557527128377" expanded="true" signature="8466:10367" ph="..." />
+            <marker date="1557527128377" expanded="true" signature="8518:8523" ph="..." />
+            <marker date="1557527128377" expanded="true" signature="9034:10367" ph="..." />
+            <marker date="1557527128377" expanded="true" signature="9828:9894" ph="..." />
+            <marker date="1557527128377" expanded="true" signature="9913:9948" ph="..." />
+            <marker date="1557527128377" expanded="true" signature="10385:10390" ph="..." />
+            <marker date="1557527128377" expanded="true" signature="11656:11858" ph="..." />
+            <marker date="1557527128377" expanded="true" signature="11874:12183" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/anaconda3/envs/layout/lib/python3.6/site-packages/skimage/transform/_warps.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-72">
+          <caret line="32" column="4" selection-start-line="32" selection-start-column="4" selection-end-line="32" selection-end-column="4" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/metrics/meters.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1266">
+          <caret line="136" lean-forward="true" selection-start-line="136" selection-end-line="136" />
+          <folding>
+            <marker date="1557527958994" expanded="true" signature="2193:2232" ph="..." />
+            <marker date="1557527958994" expanded="true" signature="2340:2404" ph="..." />
+            <marker date="1557527958994" expanded="true" signature="2466:2475" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/probablistic/funcs.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="939">
+          <caret line="145" column="56" lean-forward="true" selection-start-line="145" selection-start-column="56" selection-end-line="145" selection-end-column="56" />
+          <folding>
+            <marker date="1557452859865" expanded="true" signature="2752:2757" ph="..." />
+            <marker date="1557452859865" expanded="true" signature="2782:2888" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/layout.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="216">
+          <caret line="585" column="64" lean-forward="true" selection-start-line="585" selection-start-column="64" selection-end-line="585" selection-end-column="64" />
+          <folding>
+            <element signature="e#17031#17175#1" expanded="true" />
+            <element signature="e#18944#19826#0" />
+            <element signature="e#20135#20160#1" expanded="true" />
+            <element signature="e#20142#20477#0" />
+            <element signature="e#20102#20610#0" />
+            <element signature="e#20655#21341#0" />
+            <element signature="e#19861#20330#0" />
+            <element signature="e#21895#22467#0" />
+            <marker date="1557443999889" expanded="true" signature="2174:2241" ph="..." />
+            <marker date="1557443999889" expanded="true" signature="3758:3760" ph="..." />
+            <marker date="1557443999889" expanded="true" signature="5489:5495" ph="..." />
+            <marker date="1557443999889" expanded="true" signature="8208:8212" ph="..." />
+            <marker date="1557443999889" expanded="true" signature="8716:8898" ph="..." />
+            <marker date="1557443999889" expanded="true" signature="13066:13347" ph="..." />
+            <marker date="1557443999889" expanded="true" signature="13347:13351" ph="..." />
+            <marker date="1557443999889" expanded="true" signature="13643:14827" ph="..." />
+            <marker date="1557443999889" expanded="true" signature="18407:18413" ph="..." />
+            <marker date="1557443999889" expanded="true" signature="18560:18700" ph="..." />
+            <marker date="1557443999889" expanded="true" signature="20345:20378" ph="..." />
+            <marker date="1557443999889" expanded="true" signature="21313:22570" ph="..." />
+            <marker date="1557443999889" expanded="true" signature="22092:22185" ph="..." />
+            <marker date="1557443999889" expanded="true" signature="22370:22372" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/algo/init_custom.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="594">
+          <caret line="33" column="25" selection-start-line="33" selection-start-column="25" selection-end-line="33" selection-end-column="25" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/anaconda3/envs/layout/lib/python3.6/site-packages/torch/nn/modules/module.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="467">
+          <caret line="202" column="8" selection-start-line="202" selection-start-column="8" selection-end-line="202" selection-end-column="8" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/algo/grg.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1506">
-          <caret line="924" selection-start-line="924" selection-end-line="924" />
+        <state relative-caret-position="81">
+          <caret line="1760" column="45" selection-start-line="1760" selection-start-column="45" selection-end-line="1760" selection-end-column="45" />
           <folding>
-            <element signature="e#1678#1892#0" />
-            <element signature="e#2038#2981#0" />
-            <element signature="e#2237#2320#0" />
-            <element signature="e#3001#3116#0" />
-            <element signature="e#3135#3246#0" />
-            <element signature="e#3284#4282#0" />
-            <element signature="e#4862#5436#0" />
-            <element signature="e#5064#5436#0" />
-            <element signature="e#5472#9141#0" />
-            <element signature="e#10000#12559#0" />
-            <element signature="e#15486#26483#0" />
-            <element signature="e#17821#18626#0" />
-            <element signature="e#19015#19481#0" />
-            <element signature="e#19643#20374#0" />
-            <element signature="e#20414#23114#0" />
-            <element signature="e#23169#26483#0" />
-            <element signature="e#26519#27212#0" />
-            <element signature="e#30568#30686#0" />
-            <element signature="e#29462#29529#0" />
-            <element signature="e#32858#33625#0" />
-            <element signature="e#33605#34758#0" />
-            <element signature="e#37252#41387#0" />
-            <marker date="1556144326239" expanded="true" signature="13164:13231" ph="..." />
-            <marker date="1556144326239" expanded="true" signature="13377:13505" ph="..." />
-            <marker date="1556144326239" expanded="true" signature="13642:13651" ph="..." />
-            <marker date="1556144326239" expanded="true" signature="14233:14309" ph="..." />
-            <marker date="1556144326239" expanded="true" signature="18663:18669" ph="..." />
-            <marker date="1556144326239" expanded="true" signature="30178:30338" ph="..." />
-            <marker date="1556144326239" expanded="true" signature="34801:35428" ph="..." />
-            <marker date="1556144326239" expanded="true" signature="36684:39514" ph="..." />
-            <marker date="1556144326239" expanded="true" signature="37605:37611" ph="..." />
+            <element signature="e#5581#9250#0" />
+            <element signature="e#16938#27952#0" />
+            <element signature="e#27978#34767#0" />
+            <element signature="e#34797#35484#0" />
+            <element signature="e#35509#44054#0" />
+            <element signature="e#44077#51869#0" />
+            <element signature="e#47809#48211#0" />
+            <element signature="e#48280#48542#0" />
+            <element signature="e#48589#48888#0" />
+            <element signature="e#48925#49181#0" />
+            <element signature="e#49239#49432#0" />
+            <element signature="e#49487#50693#0" />
+            <element signature="e#50737#51869#0" />
+            <element signature="e#52015#52828#0" />
+            <element signature="e#52865#53110#0" />
+            <element signature="e#53159#54261#0" />
+            <element signature="e#53318#53794#0" />
+            <element signature="e#54310#54575#0" />
+            <element signature="e#54618#55420#0" />
+            <element signature="e#55501#58252#0" />
+            <element signature="e#58357#58876#0" />
+            <element signature="e#58913#59352#0" />
+            <element signature="e#59400#59802#0" />
+            <element signature="e#59959#60460#0" />
+            <element signature="e#64831#65350#0" />
+            <element signature="e#65387#65826#0" />
+            <element signature="e#64887#65034#1" expanded="true" />
+            <element signature="e#65034#67907#0" />
+            <marker date="1557527958946" expanded="true" signature="13352:13419" ph="..." />
+            <marker date="1557527958946" expanded="true" signature="13565:13693" ph="..." />
+            <marker date="1557527958946" expanded="true" signature="13830:13839" ph="..." />
+            <marker date="1557527958946" expanded="true" signature="14421:14497" ph="..." />
+            <marker date="1557527958946" expanded="true" signature="15097:15292" ph="..." />
+            <marker date="1557527958946" expanded="true" signature="15986:15991" ph="..." />
+            <marker date="1557527958946" expanded="true" signature="20247:20253" ph="..." />
+            <marker date="1557527958946" expanded="true" signature="24736:24741" ph="..." />
+            <marker date="1557527958946" expanded="true" signature="32173:32179" ph="..." />
+            <marker date="1557527958946" expanded="true" signature="37947:38107" ph="..." />
+            <marker date="1557527958946" expanded="true" signature="42396:43025" ph="..." />
+            <marker date="1557527958946" expanded="true" signature="52069:52112" ph="..." />
+            <marker date="1557527958946" expanded="true" signature="52999:53286" ph="..." />
+            <marker date="1557527958946" expanded="true" signature="55559:55560" ph="..." />
+            <marker date="1557527958946" expanded="true" signature="67492:67572" ph="..." />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/.gitignore">
+    <entry file="file://$USER_HOME$/anaconda3/envs/layout/lib/python3.6/site-packages/torch/nn/functional.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="126">
-          <caret line="7" lean-forward="true" selection-start-line="7" selection-end-line="7" />
+        <state relative-caret-position="556">
+          <caret line="1353" column="29" selection-start-line="1353" selection-start-column="23" selection-end-line="1353" selection-end-column="29" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/anaconda3/envs/layout/lib/python3.6/site-packages/torch/nn/modules/linear.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="306">
+          <caret line="66" column="23" selection-start-line="66" selection-start-column="17" selection-end-line="66" selection-end-column="23" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/algo/layers.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="576">
+          <caret line="92" column="18" selection-start-line="92" selection-start-column="15" selection-end-line="92" selection-end-column="18" />
+          <folding>
+            <element signature="e#2695#2788#1" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/algo/draw.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="450">
+          <caret line="82" column="34" lean-forward="true" selection-start-line="82" selection-start-column="34" selection-end-line="82" selection-end-column="34" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/algo/nns.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="396">
+          <caret line="654" column="47" lean-forward="true" selection-start-line="654" selection-start-column="47" selection-end-line="654" selection-end-column="47" />
+          <folding>
+            <element signature="e#8326#9747#0" />
+            <element signature="e#12101#14489#0" />
+            <element signature="e#18172#21757#0" />
+            <element signature="e#21789#21806#1" expanded="true" />
+            <element signature="e#26572#28787#0" />
+            <element signature="e#28840#29123#0" />
+            <element signature="e#29169#31406#0" />
+            <marker date="1557533520351" expanded="true" signature="733:738" ph="..." />
+            <marker date="1557533520351" expanded="true" signature="1980:8248" ph="..." />
+            <marker date="1557533520351" expanded="true" signature="23499:23520" ph="..." />
+            <marker date="1557533520351" expanded="true" signature="23550:23571" ph="..." />
+          </folding>
         </state>
       </provider>
     </entry>

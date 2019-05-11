@@ -58,7 +58,6 @@ class Problem:
 
     @property
     def footprint(self):
-        # fp = self.constraints(lops.FootPrintConstraint)
         return self._footprint
 
     @footprint.setter
@@ -76,20 +75,6 @@ class Problem:
             self._adj[constraint._ent].add(constraint._ent2)
             self._adj[constraint._ent2].add(constraint._ent)
         self._constraints.append(constraint)
-
-    def to_vec(self):
-        """
-        constraints become equations
-        bounds are dimensions
-        """
-        in_size = 4 * len(self)
-
-        for i in range(len(self._index_to_name)):
-            name = self._index_to_name[i]
-            prog = self[name]
-            for const in self.constraints():
-                if const.ent == name:
-                    pass
 
 
 class ProgramEntity(object):

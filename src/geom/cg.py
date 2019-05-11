@@ -77,7 +77,39 @@ def discretize_segment(p1, p2):
         return _line_high(x0, y0, x1, y1)
 
 
+def generate_hatches(size, num):
+    """
+    generate num planes of size with
+    Horizantal, vertical, diag, dot_freq
 
+    todo - good nuff for now, need more bitmaks
+    """
+    H = 4
+    nx, ny = 1 + size[1] // 3, 1 + size[2] // 3
+
+    bmaps = np.zeros((6, 3, 3))
+
+    bmaps[0, 2, :] = 1  # 1) vert
+    bmaps[0, 0, :] = 1
+
+    bmaps[1, :, 0] = 1  # 2) horz
+    bmaps[1, :, 2] = 1
+
+    bmaps[2, :, 1] = 1  # 3) h and vertical
+    bmaps[2, 1, :] = 1
+
+    bmaps[3, :, :] = np.eye(3)  # 4) diag 1
+    bmaps[3, 2, 0] = 1
+    bmaps[3, 0, 2] = 1
+
+    bmaps[4, :, 0] = 1  # 5) L-shape
+    bmaps[4, 0, :] = 1
+
+    bmaps[5, 0, 0] = 1      # 6) box
+    bmaps[5, 1:, 1:] = 1
+
+    tiles = np.tile(bmaps, (nx, ny))[:num, :size[1], :size[2]]
+    return tiles
 
 
 def expand_line(mat):

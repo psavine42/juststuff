@@ -11,18 +11,21 @@ import networkx as nx
 from math import pi
 import math
 import numpy as np
+import torch.nn as nn
 
 import src.problem.example as prob
 from src.problem import Problem, PointsInBound
 import src.objectives as objectives
+from src.model.arguments import Arguments
 
 import src.algo.nns as nns
 import src.algo.branchbound as bnb
 import src.algo.grg as gr
 
 from src.actions.basic import *
+from src.envs import *
 from src.building import Area, Room
-from src.layout import BuildingLayout
+from src.layout import *
 import src.layout_ops as lops
 
 import src.utils as utils
@@ -31,6 +34,7 @@ from src.utils import plotpoly
 import matplotlib.pyplot as plt
 import visdom
 import torchnet as tnt
+
 
 s = 10
 random.seed(s)
@@ -142,78 +146,104 @@ def sl_args(num_exper=5):
             yield i, dict(split_prob=spl, max_branch=mxb, chk_inters=ints)
 
 
-class MockEnv(object):
-    def __init__(self, problem, init):
-        self.initialize = init
-        self.problem = problem
-        self.loss = objectives.ConstraintsHeur(
-            problem, wmap=dict(AreaConstraint=5, FootPrintConstraint=0)
-        )
-        self.__ub = self.loss.upper_bound
-        self.action = MoveWall(allow_out=False)
-        self.num_actions = 3
-
-    def initial_state(self, batch_size=1):
-        layouts = []
-        for i in range(batch_size):
-            layouts.append(self.initialize())
-        return layouts
-
-    def step(self, layout, **params):
-        return self.action.forward(layout, **params)
-
-    def reward(self, layout):
-        # (-1, 1)
-        if layout is None:
-            return -1
-        try:
-            # if goal is not reached, its negative, else 1
-            normed = self.loss.reward(layout)
-            if (normed - 1.) > 1e-2:
-                return normed
-            return normed - 1
-            # return self.loss.reward(layout)
-            # return (3 -  self.loss(layout)) / 3
-        except:
-            return 0
-
-    def reward2(self, layout, encode=False, **kwargs):
-        """(-1, 1)"""
-        if layout is None:
-            if encode is True:
-                return -.5, np.zeros(self.loss.size)
-            return -.5
-        return self.loss.reward(layout, encode=encode)
-
-    def _transition(self, layout, action, room_index=None, item_index=None):
-        size = self.num_actions // 2
-
-        sign = 1 if action == size else -1
-        mag = -1 * action if action < size else action - size
-
-        room_name = layout[room_index].name
-        params = dict(room=room_name, item=item_index, mag=mag, sign=sign)
-        next_layout = self.action.forward(layout, **params)
-        return next_layout
-
-    def step_enc(self, layout, action, room_index=None, item_index=None):
-        """ case 1 - output is right or left or Noop (0) HA !  [0, 1, 3]"""
-        next_layout = self._transition(layout, action, room_index, item_index)
-        reward, mat = self.reward2(next_layout, encode=True)
-        fail = True if next_layout is None else False
-        return dict(layout=next_layout, reward=reward, fail=fail, feats=mat)
-
-    def step_norm(self, layout, action, room_index=None, item_index=None):
-        """ case 1 - output is right or left or Noop (0) HA !  [0, 1, 3]"""
-        next_layout = self._transition(layout, action, room_index, item_index)
-        reward = self.reward2(next_layout)
-        fail = True if next_layout is None else False
-        return dict(layout=next_layout, reward=reward, fail=fail)
 
 
 def make_env():
     problem = prob.setup_2room_rect()
     return MockEnv(problem, PointsInBound(problem, None))
+
+
+def test_run(self):
+    # how input is encoded
+    #
+    enc = gr.NNEncoder
+    input_confs = [enc.encode_constraints, enc.edges]
+
+    # secondary inputs with goal state
+    input_hints = [True, False]
+
+    # neural net mdoel
+    # todo Refinenet
+    # Model outputs
+    # 1) action logits
+    # 2) value
+    # 3) hidden states
+    # 4) index of element
+    # 5) location of element (x,y) - then need to interpolate to element
+    # 6) point (x, y) to place something
+    # 7) magnitude (eg how far to move something
+    #
+    nn_models = [nns.DQN, nns.DQNC, nns.ActorCritic, nns.ContinuousActor, ]
+
+    # 1) discrete {up,down,left,right}
+    # 2) continuous { x, y }
+    # 3) discrete { pos , neg } - to move in positive or negative direction
+    action_schemes = [DrawLineUDLR, MoveWall, MoveWallUDLR]
+
+    # whether or not there is a 'do nothing' action
+    # and whether a magnitidue is specified
+    use_distance = [True, False]
+    allow_pass = [True, False]
+
+    # 1) {-1, 1}, {-1, 0, 1},
+    # 2) numgoals, numgoals-with-reward/penalty
+    # 3) reward at end of episode
+    # 4) (-1, 1)(continuous)
+    reward_schemes = []
+
+    # penalty for an illegal action
+    # if None, then interpolate to nearest legal
+    illegal_action = [-1, None]
+
+    # trainer class
+    # REINFORCE, DQN,
+    # todo AC3, PPO, DNC
+    trainers = [gr.Reinforced, gr.DQNTrainer,  # tested
+                gr.DrawLSTM
+                ]
+
+    opts = dict(trainers=trainers,
+                illegal_action=illegal_action,
+                reward_schemes=reward_schemes,
+                allow_pass=allow_pass,
+                use_distance=use_distance,
+                action_schemes=action_schemes,
+                nn_models=nn_models,
+                input_schemes=input_confs,
+                input_hints=input_hints,
+                )
+
+    return opts
+
+
+def base_args(title, viz=None):
+    import datetime
+    args = Arguments()
+    ds = datetime.datetime.now().strftime(" %B-%d-%Y-%I:%M%p")
+    args.title = title + ds
+    args.log_every = 50
+    args.episodes = 100000
+    args.steps = 10
+    args.viz = viz
+
+    args.env = Arguments()
+    args.env.random_init = True
+    args.env.random_objective = False
+    args.env.incomplete_reward = -1
+
+    # args.env = env_args
+
+    args.loss = Arguments()
+    args.loss.gamma = 0.99
+    args.loss.entropy_coef = 0.01
+    args.loss.gae_lambda = 0.95
+    args.loss.value_loss_coef = 0.5
+    args.loss.max_grad_norm = 0.5
+
+    # nn_args = Arguments(out_dim=256)
+    args.nn = Arguments()
+    args.nn.out_dim = 256
+    return args
 
 
 class TestQ(TestCase):
@@ -248,7 +278,7 @@ class TestQ(TestCase):
         # viz.matplot(plt)
 
     def test_ep(self):
-        trainer = gr.FloatingTreeExp1(self.Env, size=(20, 20, 2))
+        trainer = gr.DQNTrainer(self.Env, size=(20, 20, 2))
         trainer.train(episodes=1000, steps=50)
 
     def test_epline(self):
@@ -259,7 +289,7 @@ class TestQ(TestCase):
         trainer.train(episodes=1000, steps=50)
 
     def test_reinforce(self):
-        title = 'reinforce_stop_soft_flag1'
+        title = 'reinfrc_stop_flag_noactpen_hard100step'
         Env = make_env()
         trainer = gr.Reinforced(Env,
                                 title=title,
@@ -267,12 +297,11 @@ class TestQ(TestCase):
                                 log_every=40,
                                 num_actions=3)
         trainer.train(episodes=100000,
-                      steps=1200,
+                      steps=100,
                       fig_size=(20, 20))
 
     def test_random(self):
-        Env = make_env()
-        trainer = gr.RandomWalk(Env,
+        trainer = gr.RandomWalk(self.Env,
                                 title='random200',
                                 log_every=40,
                                 num_actions=3)
@@ -322,6 +351,268 @@ class TestQ(TestCase):
         print('reward', ttl / avg )
         pprint.pprint(costs)
 
+
+class MiscGeom(TestCase):
+    def test1(self):
+        problem = prob.setup_2room_rect()
+        goal = [10, 10]
+        size = math.ceil(sum(goal) ** 0.5)
+        lyt = DiscreteCellComplexLayout(problem, size=(size, size))
+        obj = DiscreteSpaceObjective(goal)
+
+        # utils.layout_disc_to_viz(lyt)
+
+        env_action = UDLRStep()
+        lyt, success = env_action.forward(lyt, action=0)
+        lyt, success = env_action.forward(lyt, action=2)
+        print(obj.reward(lyt, True))
+        lyt, success = env_action.forward(lyt, action=0)
+        lyt, success = env_action.forward(lyt, action=0)
+        lyt, success = env_action.forward(lyt, action=0)
+        # img = lyt.to_image()
+        # viz.image(img)
+
+        utils.layout_disc_to_viz(lyt)
+        r, m = obj.reward(lyt, True)
+        print(r, m)
+
+    def test2(self):
+        problem = prob.setup_2room_rect()
+        goal = [10, 10]
+        size = math.ceil(sum(goal) ** 0.5)
+        lyt = CellComplexLayout(problem, size=(size, size))
+        obj = DiscreteSpaceObjective(goal)
+
+        env_action = UDLRStep(False)
+        # for i in range(2):
+        lyt, success = env_action.forward(lyt, action=2)
+        lyt, success = env_action.forward(lyt, action=6)
+        print(obj.reward(lyt, True))
+        for i in range(4):
+            lyt, success = env_action.forward(lyt, action=4)
+
+        # img = lyt.to_image()
+        # viz.image(img)
+
+        utils.layout_disc_to_viz(lyt)
+        r, m = obj.reward(lyt, True)
+        print(r, m)
+
+    def test3(self):
+        problem = prob.setup_2room_rect()
+        goal = [10, 10]
+        size = math.ceil(sum(goal) ** 0.5)
+        lyt = CellComplexLayout(problem, size=(size, size))
+        obj = DiscreteSpaceObjective(goal)
+
+        env_action = UDLRStep(False)
+        for i in range(3):
+            lyt, success = env_action.forward(lyt, action=6)
+        lyt, success = env_action.forward(lyt, action=4)
+        for i in range(3):
+            lyt, success = env_action.forward(lyt, action=7)
+        print(obj.reward(lyt, True))
+        #for i in range(4):
+        #     lyt, success = env_action.forward(lyt, action=4)
+
+        utils.layout_disc_to_viz(lyt)
+
+    def test_run1(self):
+        problem = prob.setup_2room_rect()
+        goal = [10, 10]
+        size = math.ceil(sum(goal) ** 0.5)
+        act = UDLRStep(False)
+        obj = DiscreteSpaceObjective(goal)
+        env = DiscreteEnv(problem, True, obj, size, act)
+
+        policy = nns.LSTMDQN(size, size, act.num_actions,
+                             in_size=2, feats_in=2, feats_size=10)
+        target = nns.LSTMDQN(size, size, act.num_actions,
+                             in_size=2, feats_in=2, feats_size=10)
+
+    def test_acc_seq(self):
+        res = [[2, [-1.41, -0.86, 1.38, 1.16]],
+               [1, [0.0, 0.0,  0.5, 0.5]],
+               [2, [-1.06, -0.8,  1.89, 0.92]]]
+
+        env = DiscreteEnv2(None, None, [10, 10],
+                           depth=6,
+                           state_cls=ColoredRooms,
+                           num_spaces=3,
+                           random_init=True)
+        print(env.objective.to_input())
+        for i,x in res:
+            print('-----')
+            print(np.where(np.asarray(x) < 0.0 ))
+            res = env.step([i, np.asarray(x)])
+            # print(res['prev_state'])
+            print(i, x)
+            print(res['legal'])
+
+    def test_disclyt(self):
+        problem = prob.setup_2room_rect()
+        state = StackedRooms(problem, size=(10, 10))
+
+        objective = DiscProbDim(None)
+        print(objective.keys)
+        # action = DrawBox()
+        state.add_step([0, 0, 0, 4, 4])
+        r1, m1 = objective.reward(state)
+        print(r1)
+        print(m1)
+        state.add_step([1, 5, 5, 8, 8])
+
+        # print(np.stack(state.rooms()))
+        r2, m2 = objective.reward(state)
+        print(r2)
+        print(m2)
+        print(state.state)
+
+    def test_ac2(self):
+        # problem = prob.setup_2room_rect()
+        title = 'ac-cont-mix'
+
+        args = Arguments()
+
+        # args.title = title
+        # args.log_every = 20
+        #
+        # env_args = Arguments()
+        # env_args.random_init = True
+        # env_args.random_objective = False
+        # env_args.incomplete_reward = -1
+        # env_args.lr = 0.0005
+        # args.env = env_args
+        #
+        # loss_args = Arguments()
+        # loss_args.gamma = 0.99
+        # loss_args.gae_lambda = 0.95
+        # loss_args.entropy_coef = 0.01
+        # loss_args.value_loss_coef = 0.5
+        # loss_args.max_grad_norm = 0.5
+        #
+        # nn_args = Arguments(out_dim=256)
+        # nn_args.out_dim = 256
+        num_spaces = 3
+        depth = 6
+        action_dim = 4
+        S = [num_spaces, 20, 20]
+
+        env = DiscreteEnv2(None, None, S[1:],
+                           depth=depth,
+                           num_spaces=num_spaces,
+                           random_init=True)
+
+        common = nns.CnvController2h([1, S[1] * depth, S[2]],
+                                     hints_shape=env.objective.area,
+                                     out_dim=args.nn.out_dim)
+
+        #  nns.ConvController(S, out_dim=nn_args.out_dim), ]
+        granular = [False, True]
+
+        model = nns.GaussianActorCriticNet(
+            S, action_dim,
+            phi_body=common,
+            actor_body=nn.Linear(nn_args.out_dim, nn_args.out_dim),
+            critic_body=nn.Linear(nn_args.out_dim, nn_args.out_dim),
+            granular=granular[0]
+        )
+        trainer = gr.ACTrainer2(env,
+                                title=args.title,
+                                model=model,
+                                lr=0.0005,
+                                log_every=args.log_every)
+        trainer.train(episodes=10000, steps=10, loss_args=loss_args)
+
+    def test_ac3(self):
+        # problem = prob.setup_2room_rect()
+        args = base_args('test-20step-stack-2h-tgtcode[0, 1]-noimp_0005')
+        args.episodes = int(1e6)
+        args.env.lr = 0.0005
+        args.inst = Arguments()
+        args.inst.depth = 6
+        args.inst.box_fmt = 'chw'
+        args.steps = 20
+        num_spaces = 3
+        action_dim = 4
+        S = [num_spaces, 20, 20]
+
+        env = DiscreteEnv2(None, None, S[1:],
+                           state_cls=RoomStack,
+                           inst_args=args.inst,
+                           num_spaces=num_spaces,
+                           terminal=NoImprovement(limit=4),
+                           random_init=True)
+
+        common = nns.CnvController2h(env.input_state_size,
+                                     hints_shape=env.objective.area,
+                                     out_dim=args.nn.out_dim)
+
+        # granular = [False, True]
+        model = nns.GaussianActorCriticNet(
+            S, action_dim,
+            actor_body=nn.Linear(args.nn.out_dim, args.nn.out_dim),
+            critic_body=nn.Linear(args.nn.out_dim, args.nn.out_dim),
+            granular=False,
+            phi_body=common,
+        )
+        trainer = gr.ACTrainer2(
+            env,
+            title=args.title,
+            lr=args.env.lr,
+            model=model,
+            log_every=args.log_every
+        )
+        trainer.train(episodes=args.episodes,
+                      steps=args.steps,
+                      loss_args=args.loss)
+
+
+    def test_ac1(self):
+        from src.model.arguments import Arguments
+        problem = prob.setup_2room_rect()
+        title = 'ac-10step_penalty100k'
+
+        args = Arguments()
+
+        args.title = title
+        args.log_every = 100
+
+        env_args = Arguments()
+        env_args.random_init = True
+        env_args.random_objective = False
+        env_args.incomplete_reward = -1
+        args.env = env_args
+
+        loss_args = Arguments()
+        loss_args.gamma = 0.99
+        loss_args.gae_lambda = 0.95
+        loss_args.entropy_coef = 0.01
+        loss_args.value_loss_coef = 0.5
+        loss_args.max_grad_norm = 0.5
+
+        # -----------------------------
+        viz = visdom.Visdom()
+        viz.text(args.print())
+        print(args)
+
+        base = 10
+        goal = [base, base]
+
+        size = math.ceil(sum(goal) ** 0.5)
+        act = UDLRStep(always_draw=False)
+        obj = DiscreteSpaceObjective(goal)
+        env = DiscreteEnv(problem, obj, size, act, random_init=True)
+        trainer = gr.ACTrainer(env, title=args.title, log_every=args.log_every)
+
+        trainer.train(episodes=100000, steps=base, lr=0.0005, loss_args=loss_args)
+        insts = trainer._instances
+        num_insts = len(insts)
+        print(num_insts)
+        gr.save_model(trainer.model, './data/{}.pkl'.format(title))
+        for i in range(5):
+            utils.layout_disc_to_viz(insts[-i][-1])
+        print('num_solutions', len(trainer._solutions))
 
 
 class TestFT(TestCase):
@@ -406,13 +697,7 @@ class TestL(TestCase):
 
         num_expirements = e
         n_row = int(math.ceil(num_expirements ** 0.5))
-
         utils.plot_figs(Gs, num_tests)
-        # from PIL import Image
-        # for k, v in plot.items():
-        #     for file in v:
-        #         np.asarray(Image.open(file).convert('RGB'))
-        return
 
     def plot_save(self, G):
         utils.simple_plot(G, kys=['ord'], save='./data/img/{}.png'.format(G.name))

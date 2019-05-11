@@ -14,8 +14,10 @@ import torchvision.transforms as T
 from shapely.geometry import LineString, MultiLineString, MultiPolygon
 import operator
 from lib.hessian.hessian import hessian, gradient
+from skimage.transform import resize
 
-from src.algo.nns import DQN, ReplayMemory, Transition
+from src.algo.nns import DQN
+from src.model.storage import *
 import src.algo.nns as nns
 from src.problem import Problem
 from src.structs.floating_tree import FloatingNode, PolyTree
@@ -30,7 +32,9 @@ import torchnet as tnt
 import src.utils as utils
 import src.actions.basic as A
 import src.geom.cg as gcg
-from src.metrics.meters import AllMeters
+from src.probablistic import funcs
+from src.metrics.meters import *
+from torchnet.meter import AverageValueMeter
 
 s = 10
 torch.manual_seed(s)
@@ -101,7 +105,7 @@ def prob1():
 def sol1():
     p1 = [0.5, 0.25, 0.5, 0.25]
     p2 = [0.5, 0.75, 0.5, 0.25]
-    return torch.tensor(p1 +p2, requires_grad=True)
+    return tensor(p1 +p2, requires_grad=True)
 
 
 def ehess(lossfn, prob=prob1):
@@ -421,6 +425,7 @@ def layout_to_tensor(layout, *dim):
         return torch.from_numpy(layout.to_tensor(*dim)).unsqueeze(0).float()
 
 
+# ----------------------------------------------------------------------------
 class NNEncoder:
     def __init__(self, problem, num_ents=2, size=(20, 20)):
         self._problem = problem
@@ -476,14 +481,14 @@ class NNEncoder:
             feat[i] = r.area / area
 
 
+class EncodeImgThenEnts(NNEncoder):
+    def __call__(self, layout, **kwargs):
+        rooms = self.rooms_mat(layout)
 
-class ConstraintEncoder:
-    def __init__(self, problem):
-        self.problem = problem
 
-    def eval(self, layout):
-        for room in layout.rooms():
-            pass
+class EncodeImg(NNEncoder):
+    def __call__(self, layout, **kwargs):
+        rooms = self.rooms_mat(layout)
 
 
 class JoyStick:
@@ -504,7 +509,49 @@ class JoyStick:
             return
 
 
-class FloatingTreeExp1:
+# TRAINING -----------------------------------------------------------------------
+from collections import namedtuple
+NNArgs = namedtuple('NNArgs', ('state_size', 'action_size', 'hidden_size', 'feats_size', 'memory_size'))
+
+
+class Trainer(object):
+    def __init__(self, env, state_size=(20, 20), title='',
+                 log_every=100,
+                 lr=0.0001,
+                 debug=False,
+                 action_size=8,
+                 viz=None,
+                 batch_size=64):
+        self.dim = state_size
+        self._dx = state_size[0]
+        self._dy = state_size[1]
+        self.env = env
+        self.problem = env.problem
+        self._title = title
+        self._debug = debug
+
+        self.lr = lr
+        self.BATCH_SIZE = batch_size
+
+        # self.max_episode_length =
+        self.action_size = action_size
+        self.num_ents = len(env.problem)
+
+        self.steps_done = 0
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.optimizer = None
+
+        self.save_every = 100000
+        self.log_every = log_every
+        self.M = AllMeters(env=viz, title=title)
+
+    def _to_tensor(self, state):
+        if isinstance(state, tuple):
+            return tuple([self._to_tensor(x) for x in state])
+        return torch.from_numpy(state).unsqueeze(0).float().to(self.device)
+
+
+class DQNTrainer:
     GAMMA = 0.999
     EPS_START = 0.9
     EPS_END = 0.05
@@ -630,7 +677,7 @@ class FloatingTreeExp1:
         # Transpose the batch (see https://stackoverflow.com/a/19343/3343043 for
         # detailed explanation). This converts batch-array of Transitions
         # to Transition of batch-arrays.
-        batch = Transition(*zip(*transitions))
+        batch = Sample(*zip(*transitions))
 
         # Compute a mask of non-final states and concatenate the batch elements
         # (a final state would've been the one after which simulation ended)
@@ -671,9 +718,9 @@ class FloatingTreeExp1:
         self.optimizer.step()
 
         # record loss an Q values -
-        self.loss_meter.add(loss.cpu().item())
+        self.M.loss_meter.add(loss.cpu().item())
         # self.qval_meter.add(torch.mean(next_state_values).cpu().item())
-        self.qval_meter.add(torch.mean(expected_state_action_values).cpu().item())
+        self.M.qval_meter.add(torch.mean(expected_state_action_values).cpu().item())
 
     def train(self, episodes=100, steps=10):
         episode_ends = []
@@ -729,10 +776,10 @@ class FloatingTreeExp1:
 
                 # if done is True:
                 #    break
-                self.reward_meter.add(reward)
+                self.M.reward_meter.add(reward)
 
-            self.duration_meter.add(nstep)
-            self.max_reward_meter.add(best_reward)
+            self.M.duration_meter.add(nstep)
+            self.M.max_reward_meter.add(best_reward)
             # self.improved_meter.add(reward - first_reward)
             # Update the target network, copying all weights and biases in DQN
 
@@ -740,28 +787,196 @@ class FloatingTreeExp1:
                 # logging reward,
                 print('ep', i_episode, nstep, best_reward, reward)
                 episode_ends.append(layout)
-                self.reward_logger.log(i_episode, (self.max_reward_meter.value()[0],
-                                                   self.reward_meter.value()[0],
-                                                   self.qval_meter.value()[0]
+                self.M.reward_logger.log(i_episode, (self.M.max_reward_meter.value()[0],
+                                                   self.M.reward_meter.value()[0],
+                                                   self.M.qval_meter.value()[0]
                                                    ))
-                self.duratn_logger.log(i_episode, [x / steps_total for x in actions])
-                self.losses_logger.log(i_episode, self.loss_meter.value())
+                self.M.duratn_logger.log(i_episode, [x / steps_total for x in actions])
+                self.M.losses_logger.log(i_episode, self.M.loss_meter.value())
                 steps_total = 0
                 actions = [0] * self.out_size
                 # self.explor_logger.log(i_episode, self.explore_exploit.value())
-                self.reset_meters()
+                self.M.reset()
 
             if i_episode % self.TARGET_UPDATE == 0:
                 self.target_net.load_state_dict(self.policy_net.state_dict())
 
         print('Complete')
         utils.plotpoly(episode_ends, show=False, figsize=(10, 10))
-        self.viz.matplot(plt)
+        # self.viz.matplot(plt)
 
 
-class RL2(FloatingTreeExp1):
+class DQNTrainer2:
+    GAMMA = 0.999
+    EPS_START = 0.9
+    EPS_END = 0.05
+    # EPS_DECAY = 200
+
+    def __init__(self, env, num_moves=10, out_size=7,
+                 grad_clip=(-1, 1),
+                 batch_size=64,
+                 target_update=10,
+                 size=(20, 20, 2),
+                 title='',
+                 debug=True,
+                 mem_size=5000,
+                 log_every=10,
+                 mode='vanilla'):
+        self.dim = size
+        self._dx = size[0]
+        self._dy = size[1]
+        self.env = env
+        self.mode = mode
+        self._title = title
+        self._debug = debug
+
+        self.TARGET_UPDATE = target_update
+        self.BATCH_SIZE = batch_size
+        self.EPS_DECAY = 1000
+
+        # [up, down, left, right] * num_room * [1, -1]
+        self.num_move = num_moves
+        self.num_ents = len(env.problem)
+        if mode == 'line':
+            self.out_size = out_size
+        elif mode == 'room':
+            self.out_size = num_moves * self.num_ents
+        else:
+            self.out_size = num_moves * self.num_ents
+
+        self.problem = env.problem
+        self.next_actns = 0
+        self.steps_done = 0
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.policy_net = DQN(size[0], size[1], self.out_size, in_size=size[2]).cuda()
+        self.target_net = DQN(size[0], size[1], self.out_size, in_size=size[2]).cuda()
+        self.optimizer = optim.RMSprop(self.policy_net.parameters())
+
+        self.memory = ReplayMemory(mem_size)
+        # self.n_actions = 1
+        self.log_every = log_every
+        self.M = AllMeters(title)
+
+    def select_action(self, state):
+        eps = self.EPS_START - self.EPS_END
+        eps_threshold = self.EPS_END + eps * np.exp(-1. * self.steps_done / self.EPS_DECAY)
+        self.steps_done += 1
+        if random.random() > eps_threshold:
+            with torch.no_grad():
+                logits, hidden = self.policy_net(state)
+                return logits.max(1)[1].view(1, 1), hidden
+        else:
+            return torch.tensor([[random.randrange(self.out_size)]], device=self.device, dtype=torch.long)
+
+    def optimize_model(self):
+        if len(self.memory) < self.BATCH_SIZE:
+            return
+        transitions = self.memory.sample(self.BATCH_SIZE)
+        batch = Sample(*zip(*transitions))
+        non_final_mask = torch.tensor(tuple(map(lambda s: s is not None,
+                                                batch.next_state)),
+                                      device=self.device,
+                                      dtype=torch.uint8)
+        non_final_next_states = torch.cat([s for s in batch.next_state if s is not None])
+        state_batch = torch.cat(batch.state)
+        action_batch = torch.cat(batch.action)
+        reward_batch = torch.cat(batch.reward)
+        # hidden states
+        hidden_batch = torch.cat(batch.hidden)
+
+        # Compute Q(s_t, a) - the model computes Q(s_t), then we select the columns of actions taken.
+        state_action_values = self.policy_net(state_batch, hidden_batch).gather(1, action_batch)
+        next_state_values = torch.zeros(self.BATCH_SIZE, device=self.device)
+        next_state_values[non_final_mask] = self.target_net(non_final_next_states)[0].max(1)[0].detach()
+
+        expected_state_action_values = (next_state_values * self.GAMMA) + reward_batch
+        # Compute Huber loss
+        loss = F.smooth_l1_loss(state_action_values, expected_state_action_values.unsqueeze(1))
+
+        # Optimize the model
+        self.optimizer.zero_grad()
+        loss.backward()
+        for param in self.policy_net.parameters():
+            if param.grad is not None:
+                param.grad.data.clamp_(-1, 1)
+        self.optimizer.step()
+
+        # record loss an Q values -
+        self.M.loss_meter.add(loss.cpu().item())
+        self.M.qval_meter.add(torch.mean(expected_state_action_values).cpu().item())
+
+    def _to_tensor(self, state):
+        return torch.from_numpy(state, device=self.device).unsqueeze(0).float()
+
+    def train(self, episodes=100, steps=10):
+        episode_ends = []
+        actions = [0] * self.out_size
+        steps_total = 0
+
+        for i_episode in range(1, episodes):
+            action_data = self.env.initialize()
+
+            layout = action_data['layout']
+            hx = torch.zeros(1, 256), torch.zeros(1, 256)
+            state = (self._to_tensor(action_data['state']), self._to_tensor(action_data['feats']), hx)
+            reward = action_data['reward']
+
+            ep_step, first_reward, best_reward = 0, reward, reward
+
+            for t in range(steps):
+                steps_total += 1
+                ep_step = t
+                # tensor.size([batch_size, 1])
+                action, hidden = self.select_action(state)
+                actions[action.item()] += 1
+
+                # apply action
+                action_data = self.env.step(layout, action.item())
+                next_state = (self._to_tensor(action_data['state']), self._to_tensor(action_data['feats']))
+                reward = torch.FloatTensor([action_data['reward']], device=self.device)
+
+                if action_data['fail'] is False:
+                    next_state = state
+                    self.M.fail_meter.add(0)
+                else:
+                    self.M.fail_meter.add(1)
+
+                self.memory.push(state, action, next_state, reward, hidden)
+                state = next_state
+                self.optimize_model()
+
+                #
+                self.M.reward_meter.add(action_data['reward'])
+                best_reward = max(action_data['reward'], best_reward)
+                if action_data['done'] is True:
+                    break
+
+            self.M.duration_meter.add(ep_step)
+            self.M.max_reward_meter.add(best_reward)
+            if i_episode % self.log_every == 0:
+                # logging reward,
+                print('ep', i_episode, ep_step, best_reward, reward)
+                episode_ends.append(layout)
+                self.M.reward_logger.log(i_episode, (self.M.max_reward_meter.value()[0],
+                                                     self.M.reward_meter.value()[0],
+                                                     self.M.qval_meter.value()[0]
+                                                     ))
+                self.M.duratn_logger.log(i_episode, self.M.fail_meter.value())
+                self.M.losses_logger.log(i_episode, self.M.loss_meter.value())
+                steps_total = 0
+                actions = [0] * self.out_size
+                self.M.reset()
+
+            if i_episode % self.TARGET_UPDATE == 0:
+                self.target_net.load_state_dict(self.policy_net.state_dict())
+
+        print('Complete')
+        utils.plotpoly(episode_ends, show=False, figsize=(10, 10))
+
+
+class RL2(DQNTrainer):
     def __init__(self, *args, **kwargs):
-        FloatingTreeExp1.__init__(self, *args, **kwargs)
+        DQNTrainer.__init__(self, *args, **kwargs)
 
     def step(self, layout, action, room_index=None, item_index=None):
         """ case 1 - output is right or left or Noop (0) HA !  [0, 1, 3]"""
@@ -798,7 +1013,7 @@ class Reinforced:
 
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.optimizer = optim.Adam(self.policy_net.parameters(), lr=0.000075)
-        self.M = AllMeters(title)
+        self.M = AllMeters(title=title)
         self.__save_log_probs = []
         self.__policy_rewards = []
         self._episode_ends = []
@@ -841,23 +1056,10 @@ class Reinforced:
         return action.cpu().item()
 
     def layout_to_tensor(self, layout, room, item):
-        return FloatingTreeExp1.enclayout(
+        return DQNTrainer.enclayout(
             layout, self.size[0], self.size[1], self.num_ents, room, item
         )
 
-    # def step(self, layout, action, room_index=None, item_index=None):
-    #     """ case 1 - output is right or left or Noop (0) HA !  [0, 1, 3]"""
-    #     size = self.num_actions // 2
-    #
-    #     sign = 1 if action == size else -1
-    #     mag = -1*action if action < size else action - size
-    #
-    #     room_name = layout[room_index].name
-    #     params = dict(room=room_name, item=item_index, mag=mag, sign=sign)
-    #     next_layout = self.env.step(layout, **params)
-    #     reward = self.env.reward2(next_layout)
-    #     fail = True if next_layout is None else False
-    #     return next_layout, reward, fail
     def wrap_feats(self, mat, imp=0):
         mat = torch.from_numpy(mat).float().view(-1)
         mat = torch.cat((mat, torch.tensor([imp / self._improve_thresh])))
@@ -895,9 +1097,9 @@ class Reinforced:
                 state_dict = self.env.step_enc(layout, action, room, item)
                 next_layout, next_reward = state_dict['layout'], state_dict['reward']
 
-                if next_reward > reward:
+                if next_reward > best_reward:
                     no_improvement = 0
-                elif reward >= next_reward:
+                elif best_reward >= next_reward:
                     no_improvement += 1
 
                 if no_improvement > self._improve_thresh:
@@ -908,8 +1110,6 @@ class Reinforced:
                     break
 
                 self.__policy_rewards.append(next_reward)
-                # room = t % self.num_ents
-                # item = np.random.randint(1, len(list(next_layout[room].exterior.coords)[0:-1]))
                 if state_dict['fail'] is False:
                     room = t % self.num_ents
                     item = np.random.randint(1, len(list(next_layout[room].exterior.coords)[0:-1]))
@@ -919,8 +1119,6 @@ class Reinforced:
                     self.M.fail_meter.add(0)
                 else:
                     self.M.fail_meter.add(1)
-                    # next_state = state
-                # next object
 
                 # meters
                 self.M.advantage_meter.add(reward)
@@ -935,8 +1133,9 @@ class Reinforced:
             # self.improved_meter.add(reward - first_reward)
             if i_episode % self.log_every == 0:
                 print('ep', i_episode, nstep, best_reward, reward)
-                self._episode_ends.append(layout)
-                episode_titles.append('ep:{}'.format(i_episode))
+                # if i_episode % 1000 == 0:
+                #    episode_titles.append('ep:{}'.format(i_episode))
+                #   self.+
                 self.M.reward_logger.log(i_episode, (self.M.max_reward_meter.value()[0],
                                                      self.M.reward_meter.value()[0],
                                                      self.M.fail_meter.value()[0]
@@ -952,14 +1151,14 @@ class Reinforced:
                 self.M.reset()
 
         print('Complete')
-        utils.plotpoly(self._episode_ends, show=False, figsize=fig_size, titles=episode_titles)
+        # utils.plotpoly(self._episode_ends, show=False, figsize=fig_size, titles=episode_titles)
         self.M.viz.matplot(plt)
         if not os.path.exists('./data/{}.pkl'.format(self._title)):
             torch.save(self.policy_net, './data/{}.pkl'.format(self._title))
 
     def log(self, i_episode, nstep, best_reward, reward, actions, steps_total, layout):
         print('ep', i_episode, nstep, best_reward, reward)
-        self.episode_ends.append(layout)
+        self.M.episode_ends.append(layout)
         self.M.reward_logger.log(i_episode, (self.M.max_reward_meter.value()[0],
                                              self.M.reward_meter.value()[0],
                                              # self.M.qval_meter.value()[0]
@@ -1003,7 +1202,754 @@ class Reinforced:
             title = 'a:{}'.format()
 
 
+class DrawLSTM:
+    """ from https://github.com/alexis-jacq/Pytorch-Sketch-RNN/blob/master/sketch_rnn.py
 
+    """
+    def __init__(self, hp):
+        self.hp = hp
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.use_cuda = hp.use_cuda
+        if hp.use_cuda:
+            self.encoder = nns.EncoderRNN(hp).cuda()
+            self.decoder = nns.DecoderRNN(hp).cuda()
+        else:
+            self.encoder = nns.EncoderRNN(hp)
+            self.decoder = nns.DecoderRNN(hp)
+        self.encoder_optimizer = optim.Adam(self.encoder.parameters(), hp.lr)
+        self.decoder_optimizer = optim.Adam(self.decoder.parameters(), hp.lr)
+        self.Nmax = hp.nmax
+        self.eta_step = hp.eta_min
+        self.M = AllMeters('drawlstm')
+
+        # step params
+        self.pi = None
+        self.mu_x = None
+        self.mu_y = None
+        self.sigma_x = None
+        self.sigma_y = None
+        self.rho_xy = None
+        self.q = None
+
+    def make_target(self, batch, lengths):
+        eos = torch.stack([torch.Tensor([0, 0, 0, 0, 1])] * batch.size()[1]).to(self.device).unsqueeze(0)
+        batch = torch.cat([batch, eos], 0)
+        mask = torch.zeros(Nmax + 1, batch.size()[1])
+        for indice, length in enumerate(lengths):
+            mask[:length, indice] = 1
+        mask = mask.to(self.device)
+        dx = torch.stack([batch.data[:, :, 0]] * self.hp.M, 2)
+        dy = torch.stack([batch.data[:, :, 1]] * self.hp.M, 2)
+        p1 = batch.data[:, :, 2]
+        p2 = batch.data[:, :, 3]
+        p3 = batch.data[:, :, 4]
+        p = torch.stack([p1, p2, p3], 2)
+        return mask, dx, dy, p
+
+    def train_step(self, epoch):
+        self.encoder.train()
+        self.decoder.train()
+        batch, lengths = make_batch(self.hp.batch_size)
+        # encode:
+        z, self.mu, self.sigma = self.encoder(batch, self.hp.batch_size)
+        # create start of sequence:
+        # if use_cuda:
+        sos = torch.stack([torch.Tensor([0, 0, 1, 0, 0])] * self.hp.batch_size).to(self.device).unsqueeze(0)
+
+        # had sos at the begining of the batch:
+        batch_init = torch.cat([sos, batch], 0)
+
+        # expand z to be ready to concatenate with inputs:
+        z_stack = torch.stack([z] * (self.Nmax + 1))
+        # inputs is concatenation of z and batch_inputs
+        inputs = torch.cat([batch_init, z_stack], 2)
+        # decode:
+        self.pi, self.mu_x, self.mu_y, self.sigma_x, self.sigma_y, \
+        self.rho_xy, self.q, _, _ = self.decoder(inputs, z)
+
+        # prepare targets:
+        mask, dx, dy, p = self.make_target(batch, lengths)
+
+        # prepare optimizers:
+        self.encoder_optimizer.zero_grad()
+        self.decoder_optimizer.zero_grad()
+
+        # update eta for LKL:
+        self.eta_step = 1 - (1 - self.hp.eta_min) * self.hp.R
+
+        # compute losses:
+        LKL = self.kullback_leibler_loss()
+        LR = self.reconstruction_loss(mask, dx, dy, p, epoch)
+        loss = LR + LKL
+
+        # gradient step
+        loss.backward()
+        # gradient cliping
+        nn.utils.clip_grad_norm(self.encoder.parameters(), self.hp.grad_clip)
+        nn.utils.clip_grad_norm(self.decoder.parameters(), self.hp.grad_clip)
+        # optim step
+        self.encoder_optimizer.step()
+        self.decoder_optimizer.step()
+        # some print and save:
+        if epoch % 1 == 0:
+            print('epoch', epoch, 'loss', loss.data[0], 'LR', LR.data[0], 'LKL', LKL.data[0])
+            self.encoder_optimizer = lr_decay(self.encoder_optimizer)
+            self.decoder_optimizer = lr_decay(self.decoder_optimizer)
+        if epoch % 100 == 0:
+            # self.save(epoch)
+            self.conditional_generation(epoch)
+
+
+    def bivariate_normal_pdf(self, dx, dy):
+        z_x = ((dx - self.mu_x) / self.sigma_x) ** 2
+        z_y = ((dy - self.mu_y) / self.sigma_y) ** 2
+        z_xy = (dx - self.mu_x) * (dy - self.mu_y) / (self.sigma_x * self.sigma_y)
+        z = z_x + z_y - 2 * self.rho_xy * z_xy
+        exp = torch.exp(-z / (2 * (1 - self.rho_xy ** 2)))
+        norm = 2 * np.pi * self.sigma_x * self.sigma_y * torch.sqrt(1 - self.rho_xy ** 2)
+        return exp / norm
+
+    def reconstruction_loss(self, mask, dx, dy, p, epoch):
+        pdf = self.bivariate_normal_pdf(dx, dy)
+        LS = -torch.sum(mask * torch.log(1e-5 + torch.sum(self.pi * pdf, 2))) \
+             / float(Nmax * hp.batch_size)
+        LP = -torch.sum(p * torch.log(self.q)) / float(Nmax * hp.batch_size)
+        return LS + LP
+
+    def kullback_leibler_loss(self):
+        LKL = -0.5 * torch.sum(1 + self.sigma - self.mu ** 2 - torch.exp(self.sigma)) \
+              / float(self.hp.Nz * self.hp.batch_size)
+
+        KL_min = torch.tensor([self.hp.KL_min], device=self.device, dtype=torch.float).detach()
+        return self.hp.wKL * self.eta_step * torch.max(LKL, KL_min)
+
+    def save(self, epoch):
+        sel = np.random.rand()
+        torch.save(self.encoder.state_dict(), \
+                   'encoderRNN_sel_%3f_epoch_%d.pth' % (sel, epoch))
+        torch.save(self.decoder.state_dict(), \
+                   'decoderRNN_sel_%3f_epoch_%d.pth' % (sel, epoch))
+
+    def load(self, encoder_name, decoder_name):
+        saved_encoder = torch.load(encoder_name)
+        saved_decoder = torch.load(decoder_name)
+        self.encoder.load_state_dict(saved_encoder)
+        self.decoder.load_state_dict(saved_decoder)
+
+    def conditional_generation(self, epoch):
+        batch, lengths = make_batch(1)
+        # should remove dropouts:
+        self.encoder.train(False)
+        self.decoder.train(False)
+        # encode:
+        z, _, _ = self.encoder(batch, 1)
+        sos = torch.tensor([0, 0, 1, 0, 0], device=self.device).view(1, 1, -1).cuda()
+
+        s = sos
+        seq_x = []
+        seq_y = []
+        seq_z = []
+        hidden_cell = None
+        for i in range(Nmax):
+            input = torch.cat([s, z.unsqueeze(0)], 2)
+            # decode:
+            self.pi, self.mu_x, self.mu_y, self.sigma_x, self.sigma_y, \
+            self.rho_xy, self.q, hidden, cell = self.decoder(input, z, hidden_cell)
+            hidden_cell = (hidden, cell)
+            # sample from parameters:
+            s, dx, dy, pen_down, eos = self.sample_next_state()
+            # ------
+            seq_x.append(dx)
+            seq_y.append(dy)
+            seq_z.append(pen_down)
+            if eos:
+                print(i)
+                break
+        # visualize result:
+        x_sample = np.cumsum(seq_x, 0)
+        y_sample = np.cumsum(seq_y, 0)
+        z_sample = np.array(seq_z)
+        sequence = np.stack([x_sample, y_sample, z_sample]).T
+        # make_image(sequence, epoch)
+
+    def sample_next_state(self):
+
+        def adjust_temp(pi_pdf):
+            pi_pdf = np.log(pi_pdf) / self.hp.temperature
+            pi_pdf -= pi_pdf.max()
+            pi_pdf = np.exp(pi_pdf)
+            pi_pdf /= pi_pdf.sum()
+            return pi_pdf
+
+        # get mixture indice:
+        pi = self.pi.data[0, 0, :].cpu().numpy()
+        pi = adjust_temp(pi)
+        pi_idx = np.random.choice(hp.M, p=pi)
+
+        # get pen state:
+        q = self.q.data[0, 0, :].cpu().numpy()
+        q = adjust_temp(q)
+        q_idx = np.random.choice(3, p=q)
+
+        # get mixture params:
+        mu_x = self.mu_x.data[0, 0, pi_idx]
+        mu_y = self.mu_y.data[0, 0, pi_idx]
+        sigma_x = self.sigma_x.data[0, 0, pi_idx]
+        sigma_y = self.sigma_y.data[0, 0, pi_idx]
+        rho_xy = self.rho_xy.data[0, 0, pi_idx]
+        x, y = funcs.sample_bivariate_normal(mu_x, mu_y, sigma_x, sigma_y, rho_xy,
+                                             greedy=False)
+        next_state = torch.zeros(5, device=self.device)
+        next_state[0] = x
+        next_state[1] = y
+        next_state[q_idx + 2] = 1
+        return next_state.view(1, 1, -1), x, y, q_idx == 1, q_idx == 2
+
+
+def save_model(model, pth):
+    torch.save(model.state_dict(), pth)
+
+
+class ACTrainer(Trainer):
+    def __init__(self, env, **kwargs):
+        Trainer.__init__(self, env, **kwargs)
+        h, w = self.env.state_shape
+
+        if kwargs.get('model', None) is None:
+            self.model = nns.LSTMDQN(h, w, self.env.action_size, in_size=2, feats_in=2, feats_size=10, value=True)\
+                .to(self.device)
+        else:
+            self.model = kwargs['model'].to(self.device)
+
+        self.__entropies = []
+        self.__log_probs = []
+        self.__rewards = []
+        self.__values = []
+
+        self._episode = 0
+        self._step = 1
+        self._best_reward = -1
+        self._actions = [0] * self.action_size
+        self._instances = []
+        self._solutions = []
+        if self.optimizer is None:
+            self.optimizer = optim.Adam(self.model.parameters(), lr=kwargs['lr'])
+        self.model.train()
+        self.make_meters()
+
+    def make_meters(self):
+        from torchnet.meter import AverageValueMeter
+        meters = ['policy_loss', 'loss', 'value_loss', 'fail', 'action',
+                  'duration', 'reward', 'best_avg', 'best', 'solved']
+        self.M.add_meters(*meters, cls=AverageValueMeter)
+
+    def optimize_model(self, R, args):
+        policy_loss = 0
+        value_loss = 0
+        gae = torch.zeros(1, 1, device=self.device)
+
+        for i in reversed(range(len(self.__rewards))):
+            R = gamma * R + self.__rewards[i]
+            advantage = R - self.__values[i]
+            value_loss = value_loss + 0.5 * advantage.pow(2)
+
+            # Generalized Advantage Estimation
+            delta_t = self.__rewards[i] + args['gamma'] * self.__values[i + 1] - self.__values[i]
+            gae = gae * args['gamma'] * args['gae_lambda '] + delta_t
+            policy_loss = policy_loss - self.__log_probs[i] * gae.detach() - args['entropy_coef '] * self.__entropies[i]
+
+        self.optimizer.zero_grad()
+
+        loss = policy_loss + args['value_loss_coef'] * value_loss
+        loss.backward()
+
+        nn.utils.clip_grad_norm_(self.model.parameters(), args['max_grad_norm'])
+        # ensure_shared_grads(model, shared_model)
+        self.optimizer.step()
+
+        # -------------------
+        self.M['loss'].add(loss.item())
+        self.M['policy_loss'].add(policy_loss.item())
+        self.M['value_loss'].add(value_loss.item())
+
+    def log_action(self, action_data):
+        self.M['fail'].add(1 if action_data['fail'] else 0)
+        self.M['reward'].add(action_data['reward'])
+        self._best_reward = max(action_data['reward'], self._best_reward)
+        if action_data['action']:
+            self._actions[action_data['action']] += 1
+
+    def log_episode(self, step):
+        self.M['duration'].add(step)
+        self.M['best_avg'].add(self._best_reward)
+
+        if self._episode % self.log_every == 0:
+            self.M['best'].add(self._best_reward)
+            self.M.losses_logger.log(self._episode, (self.M.values('loss', 'policy_loss', 'value_loss')))
+            self.M.reward_logger.log(self._episode, (self.M.values('best', 'best_avg', 'reward', 'fail')))
+            self.M.action_logger.log(self._episode, [x / self._step for x in self._actions])
+            self.M.duratn_logger.log(self._episode, self.M['duration'].value())
+            # reset
+            print('episode {}, best: {}'.format(self._episode, self._best_reward))
+            self._actions = [0] * self.action_size
+            self._step = 0
+            self.M.reset()
+        self._best_reward = -1
+
+    def train(self, episodes=100, steps=10, lr=0.0005, loss_args={}):
+
+        problem_instance, action_data = self.env.initialize()
+        state = self._to_tensor(action_data['state'], action_data['feats'])
+        done = True
+
+        for episode in range(episodes):
+            self._episode += 1
+            # Sync with the shared model todo -------------
+            # model.load_state_dict(shared_model.state_dict())
+            if done:
+                cx = torch.zeros(1, self.model.lstm_in).to(self.device)
+                hx = torch.zeros(1, self.model.lstm_in).to(self.device)
+            else:
+                cx, hx = cx.detach(), hx.detach()
+
+            self.__values = []
+            self.__log_probs = []
+            self.__rewards = []
+            self.__entropies = []
+
+            for step in range(steps):
+                self._step += 1
+
+                # model step
+                value, logit, (hx, cx) = self.model((state, (hx, cx)))
+                prob = F.softmax(logit, dim=-1)
+                log_prob = F.log_softmax(logit, dim=-1)
+                entropy = -(log_prob * prob).sum(1, keepdim=True)
+                action = prob.multinomial(num_samples=1).detach()
+                log_prob = log_prob.gather(1, action)
+
+                # env step
+                action_data = self.env.step(problem_instance, action.item())
+                self.log_action(action_data)
+                done = action_data['done']
+                reward = max(min(action_data['reward'], 1), -1)
+
+                if done:
+                    self.M['solved'].add(1 if action_data['solved'] else 0)
+                    if action_data['solved'] is True:
+                        self._solutions.append([episode, reward, problem_instance])
+                    elif self._episode % self.log_every == 0:
+                        self._instances.append([episode, reward, problem_instance])
+                    problem_instance, action_data = self.env.initialize()
+                # next states
+                state = self._to_tensor(action_data['state'])
+                feats = self._to_tensor(action_data['feats'])
+
+                # saved for optimizer
+                self.__entropies.append(entropy)
+                self.__log_probs.append(log_prob)
+                self.__rewards.append(reward)
+                self.__values.append(value)
+                if done:
+                    break
+
+            R = torch.zeros(1, 1, device=self.device)
+            if not done:
+                value, _, _ = self.model((state, (hx, cx)))
+                R = value.detach()
+
+            self.__values.append(R)
+            self.optimize_model(R, loss_args)
+
+            # log episode
+            self.log_episode(step)
+            if self._episode > episodes:
+                return
+
+
+class ACTrainer2(Trainer):
+    def __init__(self, env, optimizer=None, model=None, **kwargs):
+        Trainer.__init__(self, env, **kwargs)
+        self.model = model.to(self.device)
+        self._episode = 0
+        self._step = 1
+        self._actions = [0] * self.env.state.shape[0]
+        self._instances = []
+        self._solutions = []
+        self.make_meters()
+        if optimizer is None:
+            self.optimizer = optim.Adam(self.model.parameters(), lr=kwargs['lr'])
+        self.model.train()
+
+        import torch.backends.cudnn
+        torch.backends.cudnn.deterministic = True
+        self._img = None
+
+    def make_meters(self):
+        meters = ['policy_loss', 'loss', 'value_loss', 'fail', 'action', 'entropy', 'done',
+                  'duration', 'reward', 'legal', 'best_avg', 'solved', ] + \
+                 ['a_' + k for k in self.env._objective.keys] + \
+                 ['x1', 'y1', 'x2', 'y2']
+
+        self.M.add_meters(*meters, cls=AverageValueMeter)
+        self.M.add_meters(*['best'], cls=BestValueMeter)
+        self.M._mdict['actions'] = CounterMeter(num=3)
+
+    def log_action(self, state_data):
+        self.M['legal'].add(int(state_data['legal']))
+        self.M['reward'].add(state_data['reward'])
+        self.M['best'].add(state_data['reward'])
+        # print(state_data)
+        # for i, k in enumerate(['x1', 'y1', 'x2', 'y2']):
+        #     self.M[k].add(state_data['action'][1][i])
+
+        if state_data['action_index'] is not None:
+            self.M['actions'].add(state_data['action_index'])
+
+    def log_detailed_episode(self, storage, show=False):
+        for i in range(0, len(storage.state)):
+            action = storage.action_index[i]
+            acc = None if storage.action[i] is None else np.round(storage.action[i][1], 2)
+            feats = np.sum(storage.feats[i], -1)
+            print(action, acc, storage.legal[i], feats, storage.reward[i])
+
+        batch = np.stack([resize(self.env.to_image(x), (3, 100, 100), anti_aliasing=False)
+                          for x in storage.state])
+        self._img = self.M.viz.images(batch, win=self._img)
+
+    def log_episode(self, episode, step, state_data, storage):
+        # todo - action is 5 tuple here
+        self.M['duration'].add(step)
+        self.M['done'].add(int(state_data['done']))
+
+        # log codes - which constraints are being solved
+        # Final state objectives achieved
+        # for i, k in enumerate(self.env._objective.keys):
+        #    self.M['a_' + k ].add(np.mean(state_data['feats'][:, i] ))
+
+        if self._episode % self.log_every == 0:
+            self.log_detailed_episode(storage)
+            self.M.losses_logger.log(self._episode, self.M.values('loss', 'policy_loss', 'value_loss', 'entropy'))
+            self.M.reward_logger.log(self._episode, self.M.values('best', 'best_avg', 'reward', 'legal'))
+            self.M.action_logger.log(self._episode, self.M['actions'].value())
+
+            # self.M.duratn_logger.log(self._episode, self.M['duration'].value())
+            # reset
+            print('episode {}, best: {}, {}'.format(self._episode, self.M.values('best'), self.M['actions'].value()))
+            self._actions = [0] * self.action_size
+            self._step = 0
+            self.M.reset()
+
+    def optimize_model(self, R, storage, args):
+        policy_loss = 0
+        value_loss = 0
+        gae = torch.zeros(1, 1, device=self.device)
+        # print(storage.entropy)
+        for i in reversed(range(len(storage.reward))):
+            R = args['gamma'] * R + storage.reward[i]
+            advantage = R - storage.value[i]
+            value_loss = value_loss + 0.5 * advantage.pow(2)
+
+            # td loss
+
+            # aux_loss
+
+            # prediction loss
+
+            # Generalized Advantage Estimation
+            delta_t = storage.reward[i] + args['gamma'] * storage.value[i + 1] - storage.value[i]
+            gae = (gae * args['gamma'] * args['gae_lambda'] + delta_t).detach()
+            policy_loss = policy_loss - storage.log_prob[i] * gae - args['entropy_coef'] * storage.entropy[i]
+
+        self.optimizer.zero_grad()
+
+        loss = policy_loss + args['value_loss_coef'] * value_loss
+        loss.backward()
+        nn.utils.clip_grad_norm_(self.model.parameters(), args['max_grad_norm'])
+        self.optimizer.step()
+
+        # -------------------
+        self.M['loss'].add(loss.item())
+        self.M['entropy'].add(torch.stack(storage.entropy).mean().item())
+        self.M['policy_loss'].add(policy_loss.item())
+        self.M['value_loss'].add(value_loss.item())
+
+    def train(self, episodes=100, steps=10, loss_args={}):
+        for episode in range(episodes):
+            self._episode += 1
+            lstm_hidden_state = None
+            state_data = self.env.initialize()
+            storage = Storage(['reward', 'value', 'log_prob', 'entropy'])
+            state = self._to_tensor((state_data['state'],
+                                     # state_data['feats'],
+                                     state_data['target_code']))
+
+            for step in range(steps):
+                self._step += 1
+
+                # model step
+                prediction = self.model(state, lstm_hidden_state)
+                lstm_hidden_state = prediction['hidden']
+                prediction['action'] = prediction['action'].squeeze().detach()
+                prediction['action_index'] = prediction['action_index'].squeeze().detach().item()
+
+                # env step
+                state_data = self.env.step([prediction['action_index'],
+                                            prediction['action'].numpy()])
+                step_data = {**prediction, **state_data}
+                self.log_action(step_data)
+                done = state_data['done']
+                storage.add(step_data)
+                # next model_state
+                state = self._to_tensor((state_data['state'],
+                                         # state_data['feats'],
+                                         state_data['target_code']))
+                if done:
+                    break
+
+            prediction = self.model(state, lstm_hidden_state)
+            returns = prediction['value'].detach()
+            storage.add(prediction)
+
+            self.optimize_model(returns, storage, loss_args)
+            self.log_episode(episode, step, state_data, storage)
+
+
+class ACTrainer3(Trainer):
+    def __init__(self, env, optimizer=None, model=None, **kwargs):
+        Trainer.__init__(self, env, **kwargs)
+        self.model = model.to(self.device)
+        self._episode = 0
+        self._step = 1
+        self._actions = [0] * self.env.state.shape[0]
+        self._instances = []
+        self._solutions = []
+        self.make_meters()
+        if optimizer is None:
+            self.optimizer = optim.Adam(self.model.parameters(), lr=kwargs['lr'])
+        self.model.train()
+
+        import torch.backends.cudnn
+        torch.backends.cudnn.deterministic = True
+        self._img = None
+
+    def make_meters(self):
+        meters = ['policy_loss', 'loss', 'value_loss', 'fail', 'action', 'entropy', 'done',
+                  'duration', 'reward', 'legal', 'best_avg', 'solved', ] + \
+                 ['a_' + k for k in self.env._objective.keys] + \
+                 ['x1', 'y1', 'x2', 'y2']
+
+        self.M.add_meters(*meters, cls=AverageValueMeter)
+        self.M.add_meters(*['best'], cls=BestValueMeter)
+        self.M._mdict['actions'] = CounterMeter(num=3)
+
+    def log_episode(self, episode, step, state_data, storage):
+        self.M.log_episode(episode, step, state_data, storage, self.env)
+
+    def optimize_model(self, R, storage, args):
+        policy_loss = 0
+        value_loss = 0
+        gae = torch.zeros(1, 1, device=self.device)
+        # print(storage.entropy)
+        for i in reversed(range(len(storage.reward))):
+            R = args['gamma'] * R + storage.reward[i]
+            advantage = R - storage.value[i]
+            value_loss = value_loss + 0.5 * advantage.pow(2)
+
+            # td loss
+
+            # aux_loss - objective to predict
+
+            # prediction loss
+
+            # Generalized Advantage Estimation
+            delta_t = storage.reward[i] + args['gamma'] * storage.value[i + 1] - storage.value[i]
+            gae = (gae * args['gamma'] * args['gae_lambda'] + delta_t).detach()
+            policy_loss = policy_loss - storage.log_prob[i] * gae - args['entropy_coef'] * storage.entropy[i]
+
+        self.optimizer.zero_grad()
+
+        loss = policy_loss + args['value_loss_coef'] * value_loss
+        loss.backward()
+        nn.utils.clip_grad_norm_(self.model.parameters(), args['max_grad_norm'])
+        self.optimizer.step()
+
+        # -------------------
+        self.M['loss'].add(loss.item())
+        self.M['entropy'].add(torch.stack(storage.entropy).mean().item())
+        self.M['policy_loss'].add(policy_loss.item())
+        self.M['value_loss'].add(value_loss.item())
+
+    def observation_stream(self, state_data):
+        keys = ['state', 'target_code', 'feats']
+        return self._to_tensor(tuple([state_data[k] for k in keys]))
+
+    def action_stream(self, prediction):
+        return [prediction['action_index'], prediction['action'].numpy()]
+
+    def train(self, episodes=100, steps=10, loss_args={}):
+        for episode in range(episodes):
+            self._episode += 1
+            lstm_hidden_state = None
+            state_data = self.env.initialize()
+            storage = Storage(['reward', 'value', 'log_prob', 'entropy'])
+            state = self.observation_stream(state_data)
+
+            for step in range(steps):
+                # model step
+                prediction = self.model(state, lstm_hidden_state)
+                lstm_hidden_state = prediction['hidden']
+                prediction['action'] = prediction['action'].squeeze().detach()
+                prediction['action_index'] = prediction['action_index'].squeeze().detach().item()
+
+                # env step
+                state_data = self.env.step([prediction['action_index'], prediction['action'].numpy()])
+                step_data = {**prediction, **state_data}
+                done = state_data['done']
+                storage.add(step_data)
+                # next model_state
+                state = self.observation_stream(state_data)
+                if done:
+                    break
+
+            prediction = self.model(state, lstm_hidden_state)
+            returns = prediction['value'].detach()
+            storage.add(prediction)
+
+            self.optimize_model(returns, storage, loss_args)
+            self.log_episode(episode, step, state_data, storage)
+
+
+def compute_intrinsic_reward(rnd, device, next_obs):
+    next_obs = torch.FloatTensor(next_obs).to(device)
+    target_next_feature = rnd.target(next_obs)
+    predict_next_feature = rnd.predictor(next_obs)
+    intrinsic_reward = (target_next_feature - predict_next_feature).pow(2).sum(1) / 2
+    return intrinsic_reward.data.cpu().numpy()
+
+
+class RNDTrainer(Trainer):
+    """
+
+    Given 'drawing' with [rooms , lines,  footprint ] and requirements:
+
+    action1 : draw-line
+        1) pixel continuous (x, y, x, y) and one-hot  | state, requirements
+
+    action2 : assign.
+        policy_assign can must be either:
+        1) pixel continuous (x, y) and one-hot  | state, requirements
+        2) pixel discrete  (x, y) and one-hot   | state, requirements
+        2) external algorithm
+        3) one_hot of 'unassigned' regions.
+
+    assign policy trained seperately ! and reused in option-critic
+
+    PREDICT THE FUCKING FEATURE MATRIX FOR THE FUCCKING VALUE FUNCTION from a Z
+
+    """
+    def __init__(self, *args,
+                 rnd=None,
+                 assign=None,
+                 option=None,
+                 draw=None,
+                 **kwargs):
+        Trainer.__init__(self, *args, **kwargs)
+        self._step, self._episode = 0, 0
+        self.model = draw
+        self.rnd = rnd
+        self.assign = assign
+        self.option = option
+        self.policy_opt = Adam(self.model.parameters(), lr=self.lr)
+        self.pred_opt = Adam(self.rnd.parameters(), lr=self.lr)
+
+    def optimize_model(self, R, storage, args):
+
+        forward_mse = nn.MSELoss(reduction='none')
+        predict_next_state_feature, target_next_state_feature = self.rnd(torch.cat(storage.next_obs))
+
+        forward_loss = forward_mse(predict_next_state_feature, target_next_state_feature.detach()).mean(-1)
+        # Proportion of exp used for predictor update
+        mask = torch.rand(len(forward_loss)).to(self.device)
+
+        mask = (mask < args.update_proportion).type(torch.FloatTensor).to(self.device)
+        forward_loss = (forward_loss * mask).sum() / torch.max(mask.sum(), torch.Tensor([1]).to(self.device))
+
+        policy_loss = 0
+        value_loss = 0
+        gae = torch.zeros(1, 1, device=self.device)
+        # print(storage.entropy)
+        for i in reversed(range(len(storage.reward))):
+            R = args['gamma'] * R + storage.reward[i]
+            advantage = R - storage.value[i]
+            value_loss = value_loss + 0.5 * advantage.pow(2)
+
+            # td loss
+
+            # Generalized Advantage Estimation
+            delta_t = storage.reward[i] + args['gamma'] * storage.value[i + 1] - storage.value[i]
+            gae = (gae * args['gamma'] * args['gae_lambda'] + delta_t).detach()
+            policy_loss = policy_loss - storage.log_prob[i] * gae - args['entropy_coef'] * storage.entropy[i]
+
+        self.optimizer.zero_grad()
+
+        loss = policy_loss + args['value_loss_coef'] * value_loss + forward_loss
+        loss.backward()
+        nn.utils.clip_grad_norm_(self.model.parameters(), args['max_grad_norm'])
+        self.optimizer.step()
+
+        # -------------------
+        self.M['loss'].add(loss.item())
+        self.M['entropy'].add(torch.stack(storage.entropy).mean().item())
+        self.M['policy_loss'].add(policy_loss.item())
+        self.M['value_loss'].add(value_loss.item())
+
+    def train(self, episodes=10, steps=10, loss_args={}):
+        for episode in range(episodes):
+            self._episode += 1
+            lstm_hidden_state = None
+            state_data = self.env.initialize()
+            storage = Storage(['reward', 'value', 'log_prob', 'entropy'])
+            state = self._to_tensor((state_data['state'],
+                                     # state_data['feats'],
+                                     state_data['target_code']
+                                     ))
+
+            for step in range(steps):
+                self._step += 1
+
+                # model step
+                prediction = self.model(state, lstm_hidden_state)
+                lstm_hidden_state = prediction['hidden']
+                prediction['action'] = prediction['action'].squeeze().detach()
+                prediction['action_index'] = prediction['action_index'].squeeze().detach().item()
+
+                # env step
+                state_data = self.env.step([prediction['action_index'],
+                                            prediction['action'].numpy()])
+                step_data = {**prediction, **state_data}
+                self.log_action(step_data)
+                done = state_data['done']
+                storage.add(step_data)
+                # next model_state
+                state = self._to_tensor((state_data['state'],
+                                         # state_data['feats'],
+                                         state_data['target_code']
+                                         ))
+                if done:
+                    break
+
+            prediction = self.model(state, lstm_hidden_state)
+            returns = prediction['value'].detach()
+            storage.add(prediction)
+
+            self.optimize_model(returns, storage, loss_args)
+            self.log_episode(episode, step, state_data, storage)
+
+
+
+
+# ------------------------------------------------------------------
 class RandomWalk:
     """ random actions benchmark """
     def __init__(self, env, num_actions=3, log_every=10, title=''):
@@ -1069,9 +2015,10 @@ class RandomWalk:
         print('Complete')
         # utils.plotpoly(self.episode_ends, show=False, figsize=fig_size)
         # self.M.viz.matplot(plt)
+        return
 
 
-
+# --------------------------------------------------------------------------------
 def grass_drass():
     """ algorithm from GRASS / DRASS papers """
 
@@ -1082,7 +2029,6 @@ def spatial_planner():
     """
     from scipy.spatial import KDTree
     # KDTree
-
 
 
 def generalized_reduced_gradient():

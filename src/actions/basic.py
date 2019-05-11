@@ -7,6 +7,7 @@ from src.building import Room
 import random
 from copy import copy
 import numpy as np
+import torch
 
 s = 10
 random.seed(s)
@@ -118,6 +119,82 @@ class MoveWall(_RejectionSampledAction):
                     return None
             new_layout.update_room(new_room)
             return repair_overlaps(new_layout, new_room)
+
+
+class MoveWallUDLR(_RejectionSampledAction):
+    def params(self, layout):
+        return
+
+    def forward(self, layout, **kwargs):
+
+        return
+
+
+class DrawLineDiscrete(_RejectionSampledAction):
+    def __init__(self, always_draw=True, trace=None):
+        _RejectionSampledAction.__init__(self)
+        self._trace = trace
+        self._always_draw = always_draw
+        self._prev_step = torch.LongTensor([0, 0])
+
+    def params(self, layout):
+        return
+
+    def forward(self, layout, **kwargs):
+        if self._always_draw:
+            draw = 1
+            step = self._actions[action] + self._prev_step
+        else:
+            draw, action = divmod(action, self._actions.size(0))
+            step = self._actions[action] + self._prev_step
+
+
+class UDLRStep(_RejectionSampledAction):
+    """ Discrete steps in a 2d space """
+    def __init__(self, always_draw=True, trace=None):
+        _RejectionSampledAction.__init__(self)
+        self._trace = trace
+        self._always_draw = always_draw
+        self._prev_step = torch.LongTensor([0, 0])
+        self._actions = torch.LongTensor([[0, 1], [0, -1], [1, 0], [-1, 0]])
+
+    def params(self, state):
+        return dict(action=self._actions[torch.randint(0, self._actions.size(0))].detach())
+
+    def set_prev(self, coord):
+        self._prev_step = torch.LongTensor(list(coord))
+
+    @property
+    def num_actions(self):
+        return self._actions.size(0) * (1 if self._always_draw is True else 2)
+
+    def forward(self, state, action=0, **kwargs):
+        """ 0-3 UDLR x pencil_up_pencil_down (optional) """
+        if self._always_draw:
+            draw = 1
+            step = self._actions[action] + self._prev_step
+        else:
+            draw, action = divmod(action, self._actions.size(0))
+            step = self._actions[action] + self._prev_step
+            # print(step, draw, action)
+
+        if torch.lt(step, 0).sum() > 0 or step[0] >= state.size(-2) or step[1] >= state.size(-1):
+            return state, False
+
+        valid = state.add_step(step.tolist(), draw=draw)
+        self._prev_step = step
+        return state, valid
+
+
+class DrawBox:
+    def __init__(self, copy=False):
+        self._copy = copy
+
+    def forward(self, state, box_args):
+        i, xmin, ymin, xmax, ymax = box_args
+        state[i, xmin:xmax, ymin:ymax] = 1
+        return state
+
 
 
 class MoveWallSticky(_RejectionSampledAction):

@@ -5,6 +5,8 @@ import math
 import networkx as nx
 import pylab
 from matplotlib.collections import LineCollection
+import PIL
+import visdom
 
 
 def get_keys(data, keys):
@@ -50,8 +52,33 @@ def plotpoly(layouts, titles=None, show=True, figsize=(12, 12)):
         plt.show()
 
 
+def make_image(sequence, epoch, name='_output_'):
+    """plot drawing with separated strokes"""
+    strokes = np.split(sequence, np.where(sequence[:, 2] > 0)[0] + 1)
+    fig = plt.figure()
+    ax1 = fig.add_subplot(111)
+    for s in strokes:
+        plt.plot(s[:, 0], -s[:, 1])
+    canvas = plt.get_current_fig_manager().canvas
+    canvas.draw()
+    pil_image = PIL.Image.frombytes('RGB', canvas.get_width_height(),
+                                    canvas.tostring_rgb())
+    name = str(epoch) + name + '.jpg'
+    pil_image.save(name, "JPEG")
+    plt.close("all")
+
+
 def plot_constraints(problem):
     pass
+
+
+def layout_disc_to_viz(layout, viz=None):
+    if viz is None:
+        viz = visdom.Visdom()
+    nx.draw(layout._G, pos={x: x for x in layout._G.nodes()}, node_color='r', node_size=2)
+    nx.draw(layout._T, pos={x: x for x in layout._T.nodes()}, node_color='b', node_size=3)
+    viz.matplot(plt.gcf())
+    plt.clf()
 
 
 def plot_figs(Gs, num_trial, horiz=False):

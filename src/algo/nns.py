@@ -1,51 +1,37 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+import torch.distributions as D
 import random
 from collections import namedtuple
 import numpy as np
+from torch.nn.parameter import Parameter
+from torch import tensor
+from torch.nn import Module
+
+from src.algo.init_custom import *
+from src.probablistic.funcs import *
+from src.algo.layers import *
 
 
-def conv2d_size_out(size, k=5, s=2):
-    return (size - (k - 1) - 1) // s + 1
+def conv2d_size_out(in_size, mod, hw=0):
+    k = mod.kernel_size[hw]
+    s = mod.stride[hw]
+    d = mod.dilation[hw]
+    p = mod.padding[hw]
+    return (in_size + 2 * p - d * (k - 1) - 1) // s + 1
 
 
-def conv2d_size_outm(size, mod):
-    return (size - (mod.kernel_size[0] - 1) - 1) // mod.stride[0] + 1
-
-def convs2d_size_out(size, convs):
+def convs2d_size_out(size, convs, hw=0):
     res = size
     for conv in convs:
-        res = conv2d_size_outm(res, conv)
+        res = conv2d_size_out(res, conv, hw=hw)
     return res
+
 
 class RLdraw(nn.Module):
     def __init__(self):
         nn.Module.__init__(self)
-
-
-Transition = namedtuple('Transition',
-                        ('state', 'action', 'next_state', 'reward'))
-
-
-class ReplayMemory(object):
-    def __init__(self, capacity):
-        self.capacity = capacity
-        self.memory = []
-        self.position = 0
-
-    def push(self, *args):
-        """Saves a transition."""
-        if len(self.memory) < self.capacity:
-            self.memory.append(None)
-        self.memory[self.position] = Transition(*args)
-        self.position = (self.position + 1) % self.capacity
-
-    def sample(self, batch_size):
-        return random.sample(self.memory, batch_size)
-
-    def __len__(self):
-        return len(self.memory)
 
 
 _map = {2: [[2, 16, 3, 2], [16, 32, 3, 2], [32, 32, 3, 1]],
@@ -54,47 +40,11 @@ _map = {2: [[2, 16, 3, 2], [16, 32, 3, 2], [32, 32, 3, 1]],
         }
 
 
-class FeatureNet(nn.Module):
-    """ """
-    def __init__(self, in_size, output_size):
-        super(FeatureNet, self).__init__()
-        self.linear1 = nn.Linear(in_size, 2 * in_size)
-        self.linear2 = nn.Linear(2 * in_size, output_size)
-        # self.bn = nn.BatchNorm1d(output_size)
-
-    def forward(self, x):
-        # print(x.size())
-        x = F.relu(self.linear1(x))
-        x = F.relu(self.linear2(x))
-        return x
-
-
-class DQN(nn.Module):
+class DQN(Module):
     def __init__(self, h, w, outputs, in_size=2):
         super(DQN, self).__init__()
         print(in_size)
-        if in_size == 2:
-            self.conv1 = nn.Conv2d(in_size, 16, kernel_size=3, stride=2)
-            self.bn1 = nn.BatchNorm2d(16)
-            self.conv2 = nn.Conv2d(16, 32, kernel_size=3, stride=2)
-            self.bn2 = nn.BatchNorm2d(32)
-            self.conv3 = nn.Conv2d(32, 32, kernel_size=3, stride=1)
-            self.bn3 = nn.BatchNorm2d(32)
-            convw = conv2d_size_out(conv2d_size_out(conv2d_size_out(w, k=3, s=2), k=3, s=2), k=3, s=1)
-            convh = conv2d_size_out(conv2d_size_out(conv2d_size_out(h, k=3, s=2), k=3, s=2), k=3, s=1)
-        else:
-            self.conv1 = nn.Conv2d(in_size, 16, kernel_size=5, stride=2)
-            self.bn1 = nn.BatchNorm2d(16)
-            self.conv2 = nn.Conv2d(16, 32, kernel_size=3, stride=1)
-            self.bn2 = nn.BatchNorm2d(32)
-            self.conv3 = nn.Conv2d(32, 16, kernel_size=3, stride=1)
-            self.bn3 = nn.BatchNorm2d(16)
-            self.bnO = nn.LayerNorm(outputs , elementwise_affine=False)
-            convw = convs2d_size_out(w, [self.conv1, self.conv2, self.conv3])
-            convh = convs2d_size_out(h, [self.conv1, self.conv2, self.conv3])
-            # convw = conv2d_size_outm(conv2d_size_out(conv2d_size_outm(w), k=3, s=1), k=3, s=1)
-            # convh = conv2d_size_outm(conv2d_size_out(conv2d_size_outm(h), k=3, s=1), k=3, s=1)
-
+        self.stack = CnvStack(in_size)
         # Number of Linear input connections depends on output of conv2d layers
         # and therefore the input image size, so compute it.
 
@@ -114,66 +64,923 @@ class DQN(nn.Module):
         return self.bnO(x)
 
 
-class Controller:
-    def __init__(self):
-        pass
+# Components -------------------------------------------
+class FeatureNet(nn.Module):
+    """ """
+    def __init__(self, in_size, output_size):
+        super(FeatureNet, self).__init__()
+        self.linear1 = nn.Linear(in_size, 2 * in_size)
+        self.linear2 = nn.Linear(2 * in_size, output_size)
+
+    def forward(self, x):
+        x = F.relu(self.linear1(x))
+        x = F.relu(self.linear2(x))
+        return x
 
 
-class DQNC(nn.Module):
-    def __init__(self, h, w, outputs, in_size=2):
-        super(DQNC, self).__init__()
-        print(in_size)
-        if in_size == 2:
-            self.conv1 = nn.Conv2d(in_size, 16, kernel_size=3, stride=2)
-            self.bn1 = nn.BatchNorm2d(16)
-            self.conv2 = nn.Conv2d(16, 32, kernel_size=3, stride=2)
-            self.bn2 = nn.BatchNorm2d(32)
-            self.conv3 = nn.Conv2d(32, 32, kernel_size=3, stride=1)
-            self.bn3 = nn.BatchNorm2d(32)
-            convw = conv2d_size_out(conv2d_size_out(conv2d_size_out(w, k=3, s=2), k=3, s=2), k=3, s=1)
-            convh = conv2d_size_out(conv2d_size_out(conv2d_size_out(h, k=3, s=2), k=3, s=2), k=3, s=1)
+class CnvStack(Module):
+    def __init__(self, in_size=2, batch_norm=False):
+        Module.__init__(self)
+        self.batch_norm = batch_norm
+        self.in_channels = in_size
+        self.conv1 = nn.Conv2d(in_size, 64, kernel_size=5, stride=2, padding=2)
+        self.bn1 = nn.BatchNorm2d(64)
+
+        self.conv2 = nn.Conv2d(64, 32, kernel_size=4, stride=2, padding=1)
+        self.bn2 = nn.BatchNorm2d(32)
+
+        self.conv3 = nn.Conv2d(32, 16, kernel_size=3, stride=2, padding=1)
+        self.bn3 = nn.BatchNorm2d(16)
+
+    @property
+    def conv_mods(self):
+        return [self.conv1, self.conv2, self.conv3]
+
+    def out_size(self, w, h):
+        z = self(torch.zeros(1, self.in_channels, w, h))
+        return z.size(1) * z.size(2) * z.size(3)
+
+    def forward(self, x):
+        if self.batch_norm is True:
+            x = F.elu(self.bn1(self.conv1(x)))
+            x = F.elu(self.bn2(self.conv2(x)))
+            x = F.elu(self.bn3(self.conv3(x)))
         else:
-            self.conv1 = nn.Conv2d(in_size, 16, kernel_size=5, stride=2)
-            self.bn1 = nn.BatchNorm2d(16)
-            self.conv2 = nn.Conv2d(16, 32, kernel_size=3, stride=1)
-            self.bn2 = nn.BatchNorm2d(32)
-            self.conv3 = nn.Conv2d(32, 16, kernel_size=3, stride=1)
-            self.bn3 = nn.BatchNorm2d(16)
-            self.bnO = nn.LayerNorm(outputs , elementwise_affine=False)
-            convw = convs2d_size_out(w, [self.conv1, self.conv2, self.conv3])
-            convh = convs2d_size_out(h, [self.conv1, self.conv2, self.conv3])
-        # Number of Linear input connections depends on output of conv2d layers
-        # and therefore the input image size, so compute it.
-        features_out = 40
+            x = F.elu(self.conv1(x))
+            x = F.elu(self.conv2(x))
+            x = F.elu(self.conv3(x))
+        return x
 
-        linear_input_size = convw * convh * 16 + features_out
-        print('linear in size ', linear_input_size, outputs)
+
+
+
+
+class CnvController(Module):
+    def __init__(self,
+                 state_shape,
+                 out_dim=256,
+                 batch_norm=False):
+        Module.__init__(self)
+        self.conv_stack = CnvStack(state_shape[0], batch_norm=batch_norm)
+        cw, ch = self.conv_stack.out_size(state_shape[1], state_shape[2])
+        self.lstm = nn.LSTMCell(ch * cw, out_dim)
+        self.feature_dim = out_dim
+
+    def forward(self, x):
+        x = self.conv_stack(x)
+        x = x.view(x.size(0), -1)
+        return self.lstm(x)
+
+
+class CnvController2h(Module):
+    def __init__(self,
+                 state_shape,
+                 hints_shape=2,
+                 out_dim=256,
+                 batch_norm=False):
+        Module.__init__(self)
+        self.conv_stack = CnvStack(state_shape[0])
+        size_out = self.conv_stack.out_size(state_shape[1], state_shape[2])
+        print(state_shape, size_out)
+        self.features1 = nn.Linear(hints_shape, hints_shape * 2)
+        self.features2 = nn.Linear(hints_shape * 2, hints_shape)
+
+        self.lstm_in_size = size_out + hints_shape
+        self.lstm = nn.LSTMCell(self.lstm_in_size, out_dim)
+        self.feature_dim = out_dim
+        self.apply(weights_init)
+
+    def forward(self, x, hidden=None):
+        if hidden is None:
+            hidden = init_hidden_cell(self.feature_dim, next(self.parameters()).device)
+        s, hints = x
+        # print(s.size(), hints.size())
+        s = self.conv_stack(s)
+        s = s.view(s.size(0), -1)
+        h = F.tanh(self.features1(hints.view(hints.size(0), -1)))
+        h = F.tanh(self.features2(h))
+        v = torch.cat((h, s), -1)
+        # print(v.size())
+        return self.lstm(v, hidden)
+
+
+class CnvController3h(Module):
+    """ 3 headed input """
+    def __init__(self,
+                 state_shape,
+                 hints_shape=2,
+                 out_dim=256,
+                 batch_norm=False):
+        Module.__init__(self)
+        self.conv_stack = CnvStack(state_shape[0])
+        size_out = self.conv_stack.out_size(state_shape[1], state_shape[2])
+        print(state_shape, size_out)
+        self.features_cur = nn.Linear(hints_shape, hints_shape // 2)
+        self.features_tgt = nn.Linear(hints_shape, hints_shape // 2)
+
+        self.featuresf11 = nn.Linear(hints_shape, hints_shape // 2)
+        self.featuresf12 = nn.Linear(hints_shape // 2, state_shape[0])
+
+        self.lstm_in_size = size_out + state_shape[0]
+        self.lstm = nn.LSTMCell(self.lstm_in_size, out_dim)
+        self.feature_dim = out_dim
+        self.apply(weights_init)
+
+    def forward(self, x, hidden=None):
+        if hidden is None:
+            hidden = init_hidden_cell(self.feature_dim, next(self.parameters()).device)
+        s, hints, targets = x
+        # print(s.size(), hints.size())
+        s = self.conv_stack(s)
+        s = s.view(s.size(0), -1)
+        h1 = F.leaky_relu(self.features_cur(hints.view(hints.size(0), -1)))
+        h2 = F.leaky_relu(self.features_tgt(hints.view(targets.size(0), -1)))
+        h = F.leaky_relu(self.featuresf11(torch.cat((h1, h2), -1)))
+        h = F.leaky_relu(self.featuresf12(h))
+        v = torch.cat((h, s), -1)
+        # print(v.size())
+        return self.lstm(v, hidden)
+
+
+# MODELS -------------------------------------------------------
+class ActorCritic(nn.Module):
+    """ Original Actor Critic - github
+        DO NOT FUCK WITH
+    """
+    def __init__(self, num_inputs, action_space):
+        super(ActorCritic, self).__init__()
+        self.conv1 = nn.Conv2d(num_inputs, 32, 3, stride=2, padding=1)
+        self.conv2 = nn.Conv2d(32, 32, 3, stride=2, padding=1)
+        self.conv3 = nn.Conv2d(32, 32, 3, stride=2, padding=1)
+        self.conv4 = nn.Conv2d(32, 32, 3, stride=2, padding=1)
+
+        self.lstm = nn.LSTMCell(32 * 3 * 3, 256)
+
+        num_outputs = action_space.n
+        self.critic_linear = nn.Linear(256, 1)
+        self.actor_linear = nn.Linear(256, num_outputs)
+
+        self.apply(weights_init)
+        self.actor_linear.weight.data = normalized_columns_initializer(self.actor_linear.weight.data, 0.01)
+        self.critic_linear.weight.data = normalized_columns_initializer(self.critic_linear.weight.data, 1.0)
+        self.actor_linear.bias.data.fill_(0)
+        self.critic_linear.bias.data.fill_(0)
+
+        self.lstm.bias_ih.data.fill_(0)
+        self.lstm.bias_hh.data.fill_(0)
+
+        self.train()
+
+    def forward(self, inputs):
+        inputs, (hx, cx) = inputs
+        x = F.elu(self.conv1(inputs))
+        x = F.elu(self.conv2(x))
+        x = F.elu(self.conv3(x))
+        x = F.elu(self.conv4(x))
+
+        x = x.view(-1, 32 * 3 * 3)
+        hx, cx = self.lstm(x, (hx, cx))
+        x = hx
+        return self.critic_linear(x), self.actor_linear(x), (hx, cx)
+
+
+class DQNC(Module):
+    def __init__(self, h, w, outputs, in_size=2, feats_size=40):
+        Module.__init__(self)
+        # print(in_size)
+        self.conv_stack = CnvStack(in_size)
+        convw = convs2d_size_out(w, self.conv_stack.conv_mods, hw=0)
+        convh = convs2d_size_out(h, self.conv_stack.conv_mods, hw=1)
+
+        linear_input_size = convw * convh * 16 + feats_size
+        # print('linear in size ', linear_input_size, convw, outputs)
         self.head1 = nn.Linear(linear_input_size, linear_input_size // 2)
         self.head2 = nn.Linear(linear_input_size // 2, outputs)
-        # self.advantage = nn.Linear(linear_input_size, 1)
-        self.features = FeatureNet(11, features_out)
-        # self.head2 = nn.Linear(linear_input_size // 2, outputs)
-        # self.feats = FeatureNet(linear_input_size // 2, 64, in_size)
+        self.features = FeatureNet(11, feats_size)
 
     def forward(self, inputs):
         """Called with either one element to determine next action, or a batch
             during optimization. Returns tensor([[left0exp,right0exp]...])."""
-        # print(x.size())
         x, feats = inputs
-
-        x = F.relu(self.bn1(self.conv1(x)))
-        # print(x.size())
-        x = F.relu(self.bn2(self.conv2(x)))
-        # print(x.size())
-        x = F.relu(self.bn3(self.conv3(x)))
+        x = self.conv_stack(x)
 
         x = x.view(x.size(0), -1)
         y = self.features(feats.view(-1).unsqueeze(0))
-        # print(x.size(), y.size())
         xs = torch.cat((x, y), -1)
         xs = F.relu(self.head1(xs))
         xs = self.head2(xs)
         return F.softmax(xs, dim=1)
+
+
+class LSTMDQN(nn.Module):
+    def __init__(self, h, w, outputs, in_size=2, feats_in=11, feats_size=40, value=True):
+        super(LSTMDQN, self).__init__()
+        self.conv_stack = CnvStack(in_size)
+        convw = convs2d_size_out(w, self.conv_stack.conv_mods, hw=0)
+        convh = convs2d_size_out(h, self.conv_stack.conv_mods, hw=1)
+
+        lstm_in_size = convw * convh * 16 + feats_size
+        self.lstm_in = lstm_in_size
+        # print('linear in size ', lstm_in_size, convw, outputs)
+        self.features = FeatureNet(feats_in, feats_size)
+
+        self.lstm = nn.LSTMCell(lstm_in_size, lstm_in_size)
+        self.actor = nn.Linear(lstm_in_size, outputs)
+        self._value = value
+        if value is True:
+            self.critic = nn.Linear(lstm_in_size, 1)
+
+    def forward(self, inputs):
+        """ Mashup of Models """
+        x, feats, (hx, cx) = inputs
+        x = self.conv_stack(x)
+        x = x.view(x.size(0), -1)
+
+        y = self.features(feats.view(-1).unsqueeze(0))
+        x = torch.cat((x, y), -1)
+        hx, cx = self.lstm(x, (hx, cx))
+        x = hx
+        if self._value:
+            return self.critic(x), self.actor(x), (hx, cx)
+        return self.actor(x), (hx, cx)
+
+
+class SOM(nn.Module):
+    """
+    2-D Self-Organizing Map with Gaussian Neighbourhood function
+    and linearly decreasing learning rate.
+    """
+
+    def __init__(self, m, n, dim, niter, alpha=None, sigma=None):
+        super(SOM, self).__init__()
+        self.m = m
+        self.n = n
+        self.dim = dim
+        self.niter = niter
+        if alpha is None:
+            self.alpha = 0.3
+        else:
+            self.alpha = float(alpha)
+        if sigma is None:
+            self.sigma = max(m, n) / 2.0
+        else:
+            self.sigma = float(sigma)
+
+        self.weights = torch.randn(m * n, dim)
+        self.locations = torch.LongTensor(np.array(list(self.neuron_locations())))
+        self.pdist = nn.PairwiseDistance(p=2)
+
+    def get_weights(self):
+        return self.weights
+
+    def get_locations(self):
+        return self.locations
+
+    def neuron_locations(self):
+        for i in range(self.m):
+            for j in range(self.n):
+                yield np.array([i, j])
+
+    def map_vects(self, input_vects):
+        to_return = []
+        for vect in input_vects:
+            min_index = min([i for i in range(len(self.weights))],
+                            key=lambda x: np.linalg.norm(vect - self.weights[x]))
+            to_return.append(self.locations[min_index])
+
+        return to_return
+
+    def forward(self, x, it):
+
+        dists = self.pdist(torch.stack((x for i in range(self.m * self.n))), self.weights)
+
+        _, bmu_index = torch.min(dists, 0)
+        bmu_loc = self.locations[bmu_index, :]
+        bmu_loc = bmu_loc.squeeze()
+
+        learning_rate_op = 1.0 - it / self.niter
+        alpha_op = self.alpha * learning_rate_op
+        sigma_op = self.sigma * learning_rate_op
+
+        bmu_distance_squares = torch.sum(
+            torch.pow(self.locations.float() -
+                      torch.stack((bmu_loc for i in range(self.m * self.n))).float(), 2), 1)
+
+        neighbourhood_func = torch.exp(torch.neg(torch.div(bmu_distance_squares, sigma_op ** 2)))
+
+        learning_rate_op = alpha_op * neighbourhood_func
+
+        learning_rate_multiplier = torch.stack(
+            (learning_rate_op[i:i + 1].repeat(self.dim) for i in range(self.m * self.n))
+        )
+        delta = torch.mul(learning_rate_multiplier, (torch.stack((x for i in range(self.m * self.n))) - self.weights))
+        new_weights = torch.add(self.weights, delta)
+        self.weights = new_weights
+
+
+class DiscProbTransform(nn.Module):
+    def __init__(self):
+        super(DiscProbTransform, self).__init__()
+        self.xform = nn.Linear()
+
+    def forward(self, disc_probs):
+        """
+        given a tensor of size [(b), S, N, M] where sum([:, n, m]) = 1 aka a probablity dist.
+
+        learn a transformation which will move those about so that max(X) at each i,j resolves
+        constraints.
+
+        What are we really doing? perturbing a probablility field
+
+        the probabilities are all dependent
+
+        1) A map which operates on each point and adjusts the probability distribution
+        2) Something needs to tell the map roughly what to do.
+            - Attention module - parametrize by f(X) -> mu_x, sigma_x, mu_y, sigma_y
+
+        ------
+        1) a function which outputs [S, 4] representing mu_x, sigma_x, mu_y, sigma_y of each S
+        2) this is used to parametrize the final field on which agent shall act ????
+        3)
+
+        """
+        x = self.xform(disc_probs)
+        # is this a flow field ?? lets say S = 3
+        # eg: x[:, 0, 0] -> [0.1 , 0.2, 0.7]
+        # this is a unit vector. What does that mean?
+        # this means ..
+        return
+
+
+class FieldUpdate(nn.Module):
+    def __init__(self, s, w, h):
+        super(FieldUpdate, self).__init__()
+        self.xdim = w
+        self.ydim = h
+        self.s = s
+        self.conv_stack = CnvStack()
+
+        self.weight = Parameter(torch.FloatTensor(h, w, s))
+        self.xform = nn.Linear(s * h * w, s * h * w)
+
+    def forward(self, x):
+        """
+
+
+        """
+        # x2 = x.view(x.size(0), self.xdim * self.ydim * self.s)
+        #
+        self.xform(x)
+        new_field = F.softmax(x, dim=0)
+        return
+
+
+class ContProbTransform(nn.Module):
+    def __init__(self):
+        super(ContProbTransform, self).__init__()
+        self.conv_stack = CnvStack()
+
+    def forward(self, x):
+        """
+        input is a bunch of near-uniform distribution parameters (mu, sig) of size [N, 4]
+        """
+
+        return
+
+
+class OptionCriticNet(nn.Module):
+    def __init__(self, body, action_dim, num_options):
+        super(OptionCriticNet, self).__init__()
+        self.fc_q = layer_init(nn.Linear(body.feature_dim, num_options))
+        self.fc_pi = layer_init(nn.Linear(body.feature_dim, num_options * action_dim))
+        self.fc_beta = layer_init(nn.Linear(body.feature_dim, num_options))
+        self.num_options = num_options
+        self.action_dim = action_dim
+        self.body = body
+        # self.to(Config.DEVICE)
+
+    def forward(self, x):
+        phi = self.body(x)
+        q = self.fc_q(phi)
+        beta = F.sigmoid(self.fc_beta(phi))
+        pi = self.fc_pi(phi)
+        pi = pi.view(-1, self.num_options, self.action_dim)
+        log_pi = F.log_softmax(pi, dim=-1)
+        pi = F.softmax(pi, dim=-1)
+        return {'q': q,
+                'beta': beta,
+                'log_pi': log_pi,
+                'pi': pi}
+
+
+class Optimization(Module):
+    def __init__(self, action_dim):
+        Module.__init__(self)
+
+        self.X = nn.Parameter(torch.zeros(action_dim))
+        self.B = nn.Parameter(torch.zeros(action_dim))
+
+    def forward(self, Q):
+        f = torch.mm(self.X.t(), torch.matmul(Q, self.X)) + self.B
+
+
+class PredictionEncoded(Module):
+    """ if the encoder takes the lstm common layer as the inu"""
+    def __init__(self, input_shape, z_size):
+        Module.__init__(self)
+        self._state_action_encoder = nn.Linear(input_shape, z_size)
+        self._state_encoder = None
+
+    def forward(self, state, ):
+        """
+        Encoder(s, a)
+
+        Encoder(s)
+
+        """
+
+        return
+
+
+class GaussianActorCriticNet(Module):
+    def __init__(self,
+                 state_dim,
+                 action_dim,
+                 phi_body=None,
+                 actor_body=None,
+                 critic_body=None,
+                 granular=False):
+        Module.__init__(self)
+        self.state_dim = state_dim
+        self.action_dim = action_dim
+
+        self.phi_body = phi_body
+        feature_dim = self.phi_body.feature_dim
+
+        self.actor_body = actor_body
+        self.fc_action_cat = nn.Linear(feature_dim, state_dim[0])
+        self.fc_action_loc = nn.Linear(feature_dim, action_dim)
+
+        self.critic_body = critic_body
+        self.fc_critic = layer_init(nn.Linear(feature_dim, 1), 1e-3)
+
+        # auxilary value for predicting Himts
+        self.fc_auxilary = layer_init(nn.Linear(feature_dim, 1), 1e-3)
+
+        self.std = nn.Parameter(torch.zeros(action_dim))
+        # todo https://openai.com/blog/reinforcement-learning-with-prediction-based-rewards/
+        self.predictor_module = None
+        self.granular = granular
+        self.__init_weights()
+
+    def __init_weights(self):
+        self.critic_body.weight.data = normalized_columns_initializer(self.critic_body.weight.data, 1.0)
+        self.fc_critic.weight.data = normalized_columns_initializer(self.fc_critic.weight.data, 1.0)
+
+        self.actor_body.weight.data = normalized_columns_initializer(self.actor_body.weight.data,  0.01)
+        self.fc_action_cat.weight.data = normalized_columns_initializer(self.fc_action_cat.weight.data, 0.01)
+        self.fc_action_loc.weight.data = normalized_columns_initializer(self.fc_action_loc.weight.data, 0.01)
+
+        self.actor_body.bias.data.fill_(0)
+        self.critic_body.bias.data.fill_(0)
+        self.fc_action_cat.bias.data.fill_(0)
+        self.fc_action_loc.bias.data.fill_(0)
+        self.fc_critic.bias.data.fill_(0)
+
+    def forward(self, obs, hidden, action=None):
+        # Controller
+        hx, cx = self.phi_body(obs, hidden)     # conv+lstm
+        phi = hx
+
+        # bodies
+        phi_a = self.actor_body(phi)
+        value = self.critic_body(phi)
+
+        # heads -----------------------------
+        # value [n, 1]
+        value = self.fc_critic(value)
+
+        # discrete prediction [n, F ]
+        # act = self.fc_action_cat(phi_a)
+
+        # discrete prediction [n, S ]
+        act = self.fc_action_cat(phi_a)
+
+        # continuous prediction [n, 4 ]
+        loc = self.fc_action_loc(phi_a)
+
+        means = torch.tanh(loc)
+        # print(means, F.softplus(self.std))
+        pred_act = sample_normal(means, scale=F.softplus(self.std))
+        # print(act )
+        pred_opt = sample_categorical(F.softmax(act, dim=-1) )
+        # print('ac sizes', pred_act['log_prob'].size(), pred_opt['log_prob'].size() )
+        res = {'action_index': pred_opt['action'],
+               'action': pred_act['action'],
+               'hidden': (hx, cx),
+               'mean': means,
+               'value': value,
+               'logits': act}
+
+        if self.granular:
+            res['log_pi_a_cont'] = pred_act['log_prob']
+            res['log_pi_a_disc'] = pred_opt['log_prob']
+            res['log_pi_a_cont'] = pred_act['entropy']
+            res['log_pi_a_disc'] = pred_opt['entropy']
+        else:
+            # todo this is one way to hack the discrete problem
+            alp = pred_act['log_prob']
+            res['log_prob'] = torch.mean(torch.cat((alp.view(1, alp.size(1)), pred_opt['log_prob']), -1))
+            ep = pred_act['entropy']
+            res['entropy'] = torch.mean(torch.cat((ep.view(1, ep.size(1)), pred_opt['entropy']), -1))
+        return res
+
+
+class StreamNet(Module):
+    """
+    Attention + Auxilary Streams
+    """
+    def __init__(self,
+                 state_dim,
+                 action_dim,
+                 num_spaces=3,
+                 aux_code_size=4,
+                 critic_body=None,
+                 granular=False):
+        Module.__init__(self)
+        self.state_dim = state_dim
+        self.action_dim = action_dim
+
+        self.phi_body = CnvStack()
+        self.attention = ConvSelfAttention()
+
+        feature_dim = self.phi_body.feature_dim
+
+        self.extra_layers = nn.Sequential(
+            nn.Linear(feature_dim, 256),
+            nn.LeakyReLU(),
+            nn.Linear(feature_dim, 256),
+            nn.LeakyReLU()
+        )
+        # self.actor_body = actor_body
+        self.fc_action_cat = nn.Linear(feature_dim, state_dim[0])
+        self.fc_action_loc = nn.Linear(feature_dim, 2)
+
+        self.critic_body = critic_body
+        self.fc_critic = layer_init(nn.Linear(feature_dim, 1), 1e-3)
+
+        # auxilary value for predicting Hints
+        self.fc_auxilary = nn.Linear(feature_dim, 1)
+
+        self.sigmoid = nn.Sigmoid()
+        self.predictor_module = None
+        self.granular = granular
+        self.apply(weights_init)
+
+    def forward(self, obs, hidden, action=None):
+        """
+        obs 
+
+        :param obs:
+        :param hidden:
+        :param action:
+        :return:
+        """
+        # Controller
+        x = self.phi_body(obs)
+        phi = self.attention(x)
+
+        phi_a = self.actor_body(phi)
+
+        # heads -----------------------------
+        # value [n, 1]
+        value = self.fc_critic(phi_a)
+
+        # continuous prediction [n, 4 ]
+        cx, cy, dx, dy = self.fc_action_loc(phi_a).split(1, 1)
+
+        # mu = self.fc_mu(hidden_cat)
+        # sigma_hat = self.fc_sigma(hidden_cat)
+        # sigma = torch.exp(sigma_hat / 2.)
+        #
+        # # N ~ N(0,1)
+        # z_size = mu.size()
+        # N = torch.normal(torch.zeros(z_size), torch.ones(z_size)).to(self.device)
+        # z = mu + sigma * N
+
+        # means = torch.tanh(loc)
+        # pred_act = sample_normal(means, scale=F.softplus(self.std))
+        # print(act )
+        pred_opt = sample_categorical(F.softmax(act, dim=-1) )
+        # print('ac sizes', pred_act['log_prob'].size(), pred_opt['log_prob'].size() )
+        res = {'action_index': pred_opt['action'],
+               'action': pred_act['action'],
+               'hidden': (hx, cx),
+               'mean': means,
+               'value': value,
+               'logits': act}
+
+        if self.granular:
+            res['log_pi_a_cont'] = pred_act['log_prob']
+            res['log_pi_a_disc'] = pred_opt['log_prob']
+            res['log_pi_a_cont'] = pred_act['entropy']
+            res['log_pi_a_disc'] = pred_opt['entropy']
+        else:
+            # todo this is one way to hack the discrete problem
+            alp = pred_act['log_prob']
+            res['log_prob'] = torch.mean(torch.cat((alp.view(1, alp.size(1)), pred_opt['log_prob']), -1))
+            ep = pred_act['entropy']
+            res['entropy'] = torch.mean(torch.cat((ep.view(1, ep.size(1)), pred_opt['entropy']), -1))
+        return res
+
+
+
+class NextStatePred(Module):
+    def __init__(self, z_size, base=None, pred=None):
+        Module.__init__(self)
+        self.base_net = base
+        self.to_z = pred
+
+    def target(self, next_obs):
+        return
+
+    def predictor(self, next_obs):
+        return
+
+    def forward(self, state, action):
+        """
+        transition tuiple (s_t, s_t+1, a_t)
+        a) embed obseervations into representations φ(s_t )
+        b) forward dynamics network F ( φ(s_t+1 ) | a_t) -> s_t+1
+
+        r t = − log p(φ(x t+1 )|x t , a t ),
+        """
+        phi_s = self.base_net(state)
+        # predict action
+        # continuous prediction [n, 4 ]
+        action = self.fc_action_loc(phi_s)
+        pred_act = sample_normal(torch.tanh(action), scale=F.softplus(self.std))
+        this_z = self.to_z(phi_s, pred_act)
+        pred_z = self.to_z(phi_s, pred_act)
+
+        # --------------------------------
+        x = self.feature(state)
+        policy = self.actor(x)
+        value_ext = self.critic_ext(self.extra_layer(x) + x)
+        value_int = self.critic_int(self.extra_layer(x) + x)
+
+        return policy, value_ext, value_int
+
+    def impression(self, problem):
+        """ generate z of features """
+        # sample a point in the problem space
+
+
+class RNDModel(nn.Module):
+    def __init__(self, input_size, output_size):
+        super(RNDModel, self).__init__()
+
+        self.input_size = input_size
+        self.output_size = output_size
+
+        feature_output = 7 * 7 * 64
+        self.predictor = nn.Sequential(
+            nn.Conv2d(
+                in_channels=1,
+                out_channels=32,
+                kernel_size=8,
+                stride=4),
+            nn.LeakyReLU(),
+            nn.Conv2d(
+                in_channels=32,
+                out_channels=64,
+                kernel_size=4,
+                stride=2),
+            nn.LeakyReLU(),
+            nn.Conv2d(
+                in_channels=64,
+                out_channels=64,
+                kernel_size=3,
+                stride=1),
+            nn.LeakyReLU(),
+            Flatten(),
+            nn.Linear(feature_output, 512),
+            nn.ReLU(),
+            nn.Linear(512, 512),
+            nn.ReLU(),
+            nn.Linear(512, 512)
+        )
+
+        self.target = nn.Sequential(
+            nn.Conv2d(
+                in_channels=1,
+                out_channels=32,
+                kernel_size=8,
+                stride=4),
+            nn.LeakyReLU(),
+            nn.Conv2d(
+                in_channels=32,
+                out_channels=64,
+                kernel_size=4,
+                stride=2),
+            nn.LeakyReLU(),
+            nn.Conv2d(
+                in_channels=64,
+                out_channels=64,
+                kernel_size=3,
+                stride=1),
+            nn.LeakyReLU(),
+            Flatten(),
+            nn.Linear(feature_output, 512)
+        )
+        self.__init_weights()
+
+    def __init_weights(self):
+        for p in self.modules():
+            if isinstance(p, nn.Conv2d):
+                nn.init.orthogonal_(p.weight, np.sqrt(2))
+                p.bias.data.zero_()
+
+            if isinstance(p, nn.Linear):
+                nn.init.orthogonal_(p.weight, np.sqrt(2))
+                p.bias.data.zero_()
+
+        for param in self.target.parameters():
+            param.requires_grad = False
+
+    def forward(self, next_obs):
+        target_feature = self.target(next_obs)
+        predict_feature = self.predictor(next_obs)
+        return predict_feature, target_feature
+
+
+
+class GACLinearStds(GaussianActorCriticNet):
+    """ try with parametrizing all stds --- but why ??? """
+    def __init__(self, *args, **kwargs):
+        GaussianActorCriticNet.__init__(self , *args, **kwargs)
+        self.std = nn.Linear(self.feature_dim, self.action_dim)
+
+    def cov_mat(self, x=None):
+        return self.std(x)
+
+
+class GaussianActorCriticNet2(Module):
+    def __init__(self,
+                 state_dim,
+                 action_dim,
+                 phi_body=None,
+                 actor_body=None,
+                 critic_body=None):
+        Module.__init__(self)
+        # if phi_body is None: phi_body = DummyBody(state_dim)
+        # if actor_body is None: actor_body = DummyBody(phi_body.feature_dim)
+        # if critic_body is None: critic_body = DummyBody(phi_body.feature_dim)
+        self.phi_body = phi_body
+        self.actor_body = actor_body
+        self.critic_body = critic_body
+        self.fc_action_x = layer_init(nn.Linear(actor_body.feature_dim, action_dim), 1e-3)
+        self.fc_action_y = layer_init(nn.Linear(actor_body.feature_dim, action_dim), 1e-3)
+        self.fc_critic = layer_init(nn.Linear(critic_body.feature_dim, 1), 1e-3)
+
+        self.actor_params = list(self.actor_body.parameters()) + list(self.fc_action.parameters())
+        self.critic_params = list(self.critic_body.parameters()) + list(self.fc_critic.parameters())
+        self.phi_params = list(self.phi_body.parameters())
+
+        self.controller = nn.LSTMCell(ch * cw, lstm_out_size)
+
+        self.fc_sigma_x = nn.Linear()
+        self.fc_sigma_y = nn.Linear()
+
+        self.fc_mu_x = nn.Linear()
+        self.fc_mu_y = nn.Linear()
+
+        self.std_y = nn.Parameter(torch.zeros(action_dim))
+        self.std_x = nn.Parameter(torch.zeros(action_dim))
+
+    def forward(self, obs, hidden, action=None):
+        """ model an action as discrete, continuos """
+        phi = self.phi_body(obs)
+        hx, cx = self.controller(phi, hidden)
+        phi = hx
+
+        phi_a = self.actor_body(phi)
+        v = self.critic_body(phi)
+
+        # [n, S + 4]
+        mean = F.tanh(a)
+        dist = D.Normal(mean, F.softplus(self.std_x))
+        if action is None:
+            action = dist.sample()
+        log_prob = dist.log_prob(action).sum(-1).unsqueeze(-1)
+        entropy = dist.entropy().sum(-1).unsqueeze(-1)
+        # return action, log_prob, entropy, mean
+
+        # v = self.fc_critic(phi_v)
+        return {'a': action,
+                'log_pi_a': log_prob,
+                'hidden': (hx, cx),
+                'ent': entropy,
+                'mean': mean,
+                'v': v,
+                }
+
+
+# encoder and decoder modules
+class EncoderRNN(Module):
+    def __init__(self, enc_h_size, hp, device='cuda'):
+        Module.__init__(self)
+        self.hp = hp
+        self.device = device
+        self.enc_h_size = enc_h_size
+        # bidirectional lstm:
+        # self._is_cuda = hp.is_cuda
+        self.lstm = nn.LSTM(5, enc_h_size, dropout=hp.dropout, bidirectional=True)
+
+        # create mu and sigma from lstm's last output:
+        self.fc_mu = nn.Linear(2 * enc_h_size, hp.Nz)
+        self.fc_sigma = nn.Linear(2 * enc_h_size, hp.Nz)
+
+        # active dropout:
+        self.train()
+
+    def forward(self, inputs, batch_size, hidden_cell=None):
+        if hidden_cell is None:
+            # then must init with zeros
+            hidden = torch.zeros(2, batch_size, self.enc_h_size, device=self.device)
+            cell = torch.zeros(2, batch_size, self.enc_h_size, device=self.device)
+            hidden_cell = (hidden, cell)
+
+        _, (hidden, cell) = self.lstm(inputs.float(), hidden_cell)
+        # hidden is (2, batch_size, hidden_size), we want (batch_size, 2*hidden_size):
+        hidden_forward, hidden_backward = torch.split(hidden, 1, 0)
+        hidden_cat = torch.cat((hidden_forward.squeeze(0), hidden_backward.squeeze(0)), 1)
+        # mu and sigma:
+        mu = self.fc_mu(hidden_cat)
+        sigma_hat = self.fc_sigma(hidden_cat)
+        sigma = torch.exp(sigma_hat / 2.)
+
+        # N ~ N(0,1)
+        z_size = mu.size()
+        N = torch.normal(torch.zeros(z_size), torch.ones(z_size)).to(self.device)
+        z = mu + sigma * N
+        # mu and sigma_hat are needed for LKL loss
+        return z, mu, sigma_hat
+
+
+class DecoderRNN(Module):
+    def __init__(self, hp):
+        Module.__init__(self)
+        self.hp = hp
+        # to init hidden and cell from z:
+        self.fc_hc = nn.Linear(hp.Nz, 2 * hp.dec_hidden_size)
+        # unidirectional lstm:
+        self.lstm = nn.LSTM(hp.Nz + 5, hp.dec_hidden_size, dropout=hp.dropout)
+        # create proba distribution parameters from hiddens:
+        self.fc_params = nn.Linear(hp.dec_hidden_size, 6 * hp.M + 3)
+
+    def forward(self, inputs, z, hidden_cell=None):
+        """
+        in this case, inputs can be the image/field, z is previous actions
+
+        there is no reconsruction loss.
+
+        action is a continuous function paramaterized by mus and sigmas
+        """
+        if hidden_cell is None:
+            # then we must init from z
+            hidden, cell = torch.split(F.tanh(self.fc_hc(z)), self.hp.dec_hidden_size, 1)
+            hidden_cell = (hidden.unsqueeze(0).contiguous(), cell.unsqueeze(0).contiguous())
+        outputs, (hidden, cell) = self.lstm(inputs, hidden_cell)
+        # in training we feed the lstm with the whole input in one shot
+        # and use all outputs contained in 'outputs', while in generate
+        # mode we just feed with the last generated sample:
+        if self.training:
+            y = self.fc_params(outputs.view(-1, self.hp.dec_hidden_size))
+        else:
+            y = self.fc_params(hidden.view(-1, self.hp.dec_hidden_size))
+        # separate pen and mixture params:
+        params = torch.split(y, 6, 1)
+        params_mixture = torch.stack(params[:-1])  # trajectory
+        params_pen = params[-1]  # pen up/down
+        # identify mixture params:
+        pi, mu_x, mu_y, sigma_x, sigma_y, rho_xy = torch.split(params_mixture, 1, 2)
+
+        # preprocess params::
+        if self.training:
+            len_out = self.hp.Nmax + 1
+        else:
+            len_out = 1
+
+        pi = F.softmax(pi.transpose(0, 1).squeeze()).view(len_out, -1, self.hp.M)
+        sigma_x = torch.exp(sigma_x.transpose(0, 1).squeeze()).view(len_out, -1, self.hp.M)
+        sigma_y = torch.exp(sigma_y.transpose(0, 1).squeeze()).view(len_out, -1, self.hp.M)
+        rho_xy = torch.tanh(rho_xy.transpose(0, 1).squeeze()).view(len_out, -1, self.hp.M)
+        mu_x = mu_x.transpose(0, 1).squeeze().contiguous().view(len_out, -1, self.hp.M)
+        mu_y = mu_y.transpose(0, 1).squeeze().contiguous().view(len_out, -1, self.hp.M)
+        q = F.softmax(params_pen).view(len_out, -1, 3)
+        return pi, mu_x, mu_y, sigma_x, sigma_y, rho_xy, q, hidden, cell
+
 
 
 class STNNet(nn.Module):
@@ -189,16 +996,16 @@ class STNNet(nn.Module):
         self.localization = nn.Sequential(
             nn.Conv2d(1, 8, kernel_size=7),
             nn.MaxPool2d(2, stride=2),
-            nn.ReLU(True),
+            nn.ReLU(inplace=True),
             nn.Conv2d(8, 10, kernel_size=5),
             nn.MaxPool2d(2, stride=2),
-            nn.ReLU(True)
+            nn.ReLU(inplace=True)
         )
 
         # Regressor for the 3 * 2 affine matrix
         self.fc_loc = nn.Sequential(
             nn.Linear(10 * 3 * 3, 32),
-            nn.ReLU(True),
+            nn.ReLU(inplace=True),
             nn.Linear(32, 3 * 2)
         )
 
@@ -230,6 +1037,98 @@ class STNNet(nn.Module):
         x = F.dropout(x, training=self.training)
         x = self.fc2(x)
         return F.log_softmax(x, dim=1)
+
+
+# ----------------------------------------------------------------------------------
+# hyperparameters
+class HParams():
+    def __init__(self):
+        self.data_location = 'cat.npz'
+        self.enc_hidden_size = 256
+        self.dec_hidden_size = 512
+        self.Nz = 128
+        self.M = 20
+        self.dropout = 0.9
+        self.batch_size = 100
+        self.eta_min = 0.01
+        self.R = 0.99995
+        self.KL_min = 0.2
+        self.wKL = 0.5
+        self.lr = 0.001
+        self.lr_decay = 0.9999
+        self.min_lr = 0.00001
+        self.grad_clip = 1.
+        self.temperature = 0.4
+        self.max_seq_length = 200
+
+
+# load and prepare data
+def max_size(data):
+    """larger sequence length in the data set"""
+    return max([len(seq) for seq in data])
+
+
+def purify(strokes):
+    """removes to small or too long sequences + removes large gaps"""
+    data = []
+    for seq in strokes:
+        if seq.shape[0] <= hp.max_seq_length and seq.shape[0] > 10:
+            seq = np.minimum(seq, 1000)
+            seq = np.maximum(seq, -1000)
+            seq = np.array(seq, dtype=np.float32)
+            data.append(seq)
+    return data
+
+
+def calculate_normalizing_scale_factor(strokes):
+    """Calculate the normalizing factor explained in appendix of sketch-rnn."""
+    data = []
+    for i in range(len(strokes)):
+        for j in range(len(strokes[i])):
+            data.append(strokes[i][j, 0])
+            data.append(strokes[i][j, 1])
+    data = np.array(data)
+    return np.std(data)
+
+
+def normalize(strokes):
+    """Normalize entire dataset (delta_x, delta_y) by the scaling factor."""
+    data = []
+    scale_factor = calculate_normalizing_scale_factor(strokes)
+    for seq in strokes:
+        seq[:, 0:2] /= scale_factor
+        data.append(seq)
+    return data
+
+
+def make_batch(data, batch_size, Nmax, device='cuda'):
+    """# function to generate a batch:"""
+    batch_idx = np.random.choice(len(data), batch_size)
+    batch_sequences = [data[idx] for idx in batch_idx]
+    strokes = []
+    lengths = []
+    indice = 0
+    for seq in batch_sequences:
+        len_seq = len(seq[:, 0])
+        new_seq = np.zeros((Nmax, 5))
+        new_seq[:len_seq, :2] = seq[:, :2]
+        new_seq[:len_seq - 1, 2] = 1 - seq[:-1, 2]
+        new_seq[:len_seq, 3] = seq[:, 2]
+        new_seq[(len_seq - 1):, 4] = 1
+        new_seq[len_seq - 1, 2:4] = 0
+        lengths.append(len(seq[:, 0]))
+        strokes.append(new_seq)
+        indice += 1
+    batch = torch.from_numpy(np.stack(strokes, 1)).to(device).float()
+    return batch, lengths
+
+
+def lr_decay(optimizer, hp):
+    """ adaptive lr Decay learning rate by a factor of lr_decay"""
+    for param_group in optimizer.param_groups:
+        if param_group['lr'] > hp.min_lr:
+            param_group['lr'] *= hp.lr_decay
+    return optimizer
 
 
 class Canny(nn.Module):
@@ -368,47 +1267,4 @@ class Canny(nn.Module):
         assert grad_mag.size() == grad_orientation.size() == thin_edges.size() == thresholded.size() == early_threshold.size()
 
         return blurred_img, grad_mag, grad_orientation, thin_edges, thresholded, early_threshold
-
-
-class AC_Network():
-    def __init__(self, s_size, a_size, scope, trainer):
-        # with tf.variable_scope(scope):
-            # Input and visual encoding layers
-        self.inputs = tf.placeholder(shape=[None, s_size], dtype=tf.float32)
-        self.imageIn = tf.reshape(self.inputs, shape=[-1, 84, 84, 1])
-        self.conv1 = slim.conv2d(activation_fn=tf.nn.elu,
-                                     inputs=self.imageIn, num_outputs=16,
-                                     kernel_size=[8, 8], stride=[4, 4], padding='VALID')
-        self.conv2 = slim.conv2d(activation_fn=tf.nn.elu,
-                                     inputs=self.conv1, num_outputs=32,
-                                     kernel_size=[4, 4], stride=[2, 2], padding='VALID')
-        hidden = slim.fully_connected(slim.flatten(self.conv2), 256, activation_fn=tf.nn.elu)
-
-        # Recurrent network for temporal dependencies
-        self.lstm_cell = nn.LSTMCell(256, state_is_tuple=True)
-        c_init = np.zeros((1, lstm_cell.state_size.c), np.float32)
-        h_init = np.zeros((1, lstm_cell.state_size.h), np.float32)
-        self.state_init = [c_init, h_init]
-        c_in = tf.placeholder(tf.float32, [1, lstm_cell.state_size.c])
-        h_in = tf.placeholder(tf.float32, [1, lstm_cell.state_size.h])
-        self.state_in = (c_in, h_in)
-        rnn_in = tf.expand_dims(hidden, [0])
-        step_size = tf.shape(self.imageIn)[:1]
-        state_in = tf.nn.rnn_cell.LSTMStateTuple(c_in, h_in)
-        lstm_outputs, lstm_state = tf.nn.dynamic_rnn(
-                lstm_cell, rnn_in, initial_state=state_in, sequence_length=step_size,
-                time_major=False)
-        lstm_c, lstm_h = lstm_state
-        self.state_out = (lstm_c[:1, :], lstm_h[:1, :])
-        rnn_out = tf.reshape(lstm_outputs, [-1, 256])
-
-        # Output layers for policy and value estimations
-        self.policy = slim.fully_connected(rnn_out, a_size,
-                                               activation_fn=tf.nn.softmax,
-                                               weights_initializer=normalized_columns_initializer(0.01),
-                                               biases_initializer=None)
-        self.value = slim.fully_connected(rnn_out, 1,
-                                              activation_fn=None,
-                                              weights_initializer=normalized_columns_initializer(1.0),
-                                              biases_initializer=None)
 
