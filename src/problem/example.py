@@ -3,6 +3,8 @@ from src.building import Area
 from src.layout_ops import *
 from .base import Problem, ProgramEntity
 import math
+from src.problem.objective_utils import *
+
 
 # ---------------------------------------------------------------------
 def setup_2room():
@@ -49,8 +51,26 @@ _COSTS_WALL = {
 }
 
 
-def to_discrete():
-    pass
+
+def generate_statistics(size):
+    """ make a layout and get its statistics """
+    c = np.asarray([int(random.uniform(0.4, 0.6) * size) for _ in range(2)])
+    m = np.min(c)
+
+    for i in range(size):
+        # kd-split
+        x = random.choice([0, 1])
+        split_l = random.uniform(.1, .9),
+        pass
+
+    state = np.zeros(size, h, w)
+    bounds = max_boundnp(state)
+    for i in range(len(state)):
+        area = np.sum(state[i])
+        item = {'aspect': aspect(state[i]),
+                'area': area,
+                'convex': convexity(state[i], area=area),
+                'adj': []}
 
 
 def setup_problem(adj, footprint, **kwargs):
@@ -129,6 +149,61 @@ def setup_modular1():
     footprint = Area([(0, 0), (2, 0), (2, 10), (0, 10)], name='footprint')
     problem.add_constraint(FootPrintConstraint(footprint))
 
+
+# --------------------------------------------------
+def problem0(size):
+    """ 2 spaces trivial """
+
+    return [{'aspect': 0.5, 'area': 0.5, 'convex': 1, 'adj': [1 if i == 0 else 0]}
+            for i in range(2)]
+
+
+def problem1(num_spaces=3, x=20, y=20, return_state=False):
+    """ 3spaces """
+    s = np.zeros((num_spaces, x, y))
+    bbox = [[0, 0, x-1, y-1]]
+    seed = random.choice([0, 1])
+    for i in range(num_spaces - 1):
+        # kd-split
+        # print(seed)
+        split_l = random.uniform(.2, .8)
+        if seed == 0:  # X
+            # s[:, 0:int(split_l *x), :] = 0
+            s[i, 0:int(split_l *x), :] = 1
+        else:
+            # s[:, :, 0:int(split_l * x)] = 0
+            s[i, :, 0:int(split_l * x)] = 1
+
+        if i == 0:
+            s[1:] -= s[i]
+        else:
+            s[0:i] -= s[i]
+            s[i+1:] -= s[i]
+        s = np.clip(s, 0, 1)
+        seed ^= 1
+
+    s[num_spaces-1] = 1
+    for i in range(num_spaces - 1):
+        s[num_spaces - 1] -= s[i]
+
+    state = np.clip(np.abs(s), 0, 1).astype(int)
+    # print(state)
+    bounds = max_boundnp(state)
+    dilations = [skm.dilation(state[i]) for i in range(num_spaces)]
+    items = {}
+    for i in range(num_spaces):
+        area = np.sum(state[i])
+        adj = []
+        for j in range(num_spaces):
+            if i != j and len(np.where(state[i] + dilations[j] == 2)[0]) > 0:
+                adj.append(j)
+        items[i] = {'aspect': aspect(bounds[i][2:]),
+                    'area': area / (x * y),
+                    'convex': convexity(state[i], area=area),
+                    'adj': adj}
+    if return_state is True:
+        return items, state
+    return items
 
 
 

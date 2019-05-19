@@ -3,11 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/../DeepRL/.idea/DeepRL.iml" filepath="$PROJECT_DIR$/../DeepRL/.idea/DeepRL.iml" />
-      <module fileurl="file://$PROJECT_DIR$/../draw_pytorch/.idea/draw_pytorch.iml" filepath="$PROJECT_DIR$/../draw_pytorch/.idea/draw_pytorch.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/layout.iml" filepath="$PROJECT_DIR$/.idea/layout.iml" />
-      <module fileurl="file://$PROJECT_DIR$/../pytorch-a2c-ppo-acktr-gail/.idea/pytorch-a2c-ppo-acktr-gail.iml" filepath="$PROJECT_DIR$/../pytorch-a2c-ppo-acktr-gail/.idea/pytorch-a2c-ppo-acktr-gail.iml" />
-      <module fileurl="file://$PROJECT_DIR$/../pytorch-a3c/.idea/pytorch-a3c.iml" filepath="$PROJECT_DIR$/../pytorch-a3c/.idea/pytorch-a3c.iml" />
-      <module fileurl="file://$PROJECT_DIR$/../pytorch-dnc/.idea/pytorch-dnc.iml" filepath="$PROJECT_DIR$/../pytorch-dnc/.idea/pytorch-dnc.iml" />
     </modules>
   </component>
 </project>

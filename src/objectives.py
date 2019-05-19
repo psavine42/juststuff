@@ -3,8 +3,12 @@ import random
 import numpy as np
 from collections import defaultdict as ddict
 from collections import OrderedDict as odict
-import skimage.morphology as skm
+from src.problem.objective_utils import *
+from skimage import measure
+from skimage import filters
 
+# todo is needed here?
+# import torch
 
 s = 10
 random.seed(s)
@@ -222,48 +226,14 @@ class DiscreteSpaceObjective:
             return t, r
         return t
 
-
-import torch
-def max_bound(tensor):
-    """ return bounding boxes for each plane
-    Return
-    ----
-    size(6)
-    """
-    num = tensor.size(0)
-    amax = torch.argmax(tensor, 0)
-    stat = []
-    for i in range(num):
-        inds = (amax == i).nonzero()
-        center = inds.float().mean(dim=0)
-        xymin = inds.min(0)[0]
-        xymax = inds.max(0)[0]
-        stat.append(torch.cat((center, xymin, xymax)))
-    return torch.stack(stat)
+# ------------------------------------------------------------------------
+#
 
 
-def max_boundnp(tensor):
-    """ return bounding boxes for each plane
-    Return
-    ----
-    size(6)
-    """
-    stat = []
-    for i in range(tensor.shape[0]):
-        inds = np.stack(np.nonzero(tensor[i]), -1)
-        if inds.shape[0] == 0:
-            stat.append(None)
-            continue
-        center = inds.mean(axis=0)
-        xymin = np.min(inds, axis=0)
-        xymax = np.max(inds, axis=0)
-        stat.append(np.concatenate((center, xymin, xymax)))
-    return stat
 
 
 def binary_edge(mat):
     edges = mat - skm.erosion(mat)
-
 
 
 # todo - edge length
@@ -275,7 +245,7 @@ _cdict = {0: {'adj': {1}, 'aspect': 0.5, 'area': 0.5, 'convex': True, },
           }
 
 
-def generate_constraint_dict(num_spaces=10, area=1.):
+def generate_constraint_dict(num_spaces=10, x=20, y=20, return_state=False, area=1.):
     def item():
         nadj = random.randint(0, 3)
         return {'aspect': random.uniform(0.5, .99),
@@ -292,7 +262,7 @@ def generate_constraint_dict(num_spaces=10, area=1.):
     return items
 
 
-def generate_footprint_constr(size):
+def generate_footprint_constr(size, ones=True):
     """ create a footprint >= size"""
     from src.building import Area
     c = np.asarray([int(random.uniform(0.4, 0.6) * size) for _ in range(2)])
@@ -301,6 +271,58 @@ def generate_footprint_constr(size):
                       (c[0] + m, c[1] + m), (c[0] + m, c[1] - m)
                 ])
     return footprint
+
+
+# def problem0(size):
+#     return [{'aspect': 0.5, 'area': 0.5, 'convex': 1, 'adj': 1 if i == 0 else 0}
+#             for i in range(2)]
+
+
+# def problem1(num_spaces=3, x=20, y=20, return_state=False):
+#     s = np.zeros((num_spaces, x, y))
+#     bbox = [[0, 0, x-1, y-1]]
+#     seed = random.choice([0, 1])
+#     for i in range(num_spaces - 1):
+#         # kd-split
+#         # print(seed)
+#         split_l = random.uniform(.2, .8)
+#         if seed == 0:  # X
+#             # s[:, 0:int(split_l *x), :] = 0
+#             s[i, 0:int(split_l *x), :] = 1
+#         else:
+#             # s[:, :, 0:int(split_l * x)] = 0
+#             s[i, :, 0:int(split_l * x)] = 1
+#
+#         if i == 0:
+#             s[1:] -= s[i]
+#         else:
+#             s[0:i] -= s[i]
+#             s[i+1:] -= s[i]
+#         s = np.clip(s, 0, 1)
+#         seed ^= 1
+#
+#     s[num_spaces-1] = 1
+#     for i in range(num_spaces - 1):
+#         s[num_spaces - 1] -= s[i]
+#
+#     state = np.clip(np.abs(s), 0, 1).astype(int)
+#     # print(state)
+#     bounds = max_boundnp(state)
+#     dilations = [skm.dilation(state[i]) for i in range(num_spaces)]
+#     items = {}
+#     for i in range(num_spaces):
+#         area = np.sum(state[i])
+#         adj = []
+#         for j in range(num_spaces):
+#             if i != j and len(np.where(state[i] + dilations[j] == 2)[0]) > 0:
+#                 adj.append(j)
+#         items[i] = {'aspect': aspect(bounds[i][2:]),
+#                       'area': area / (x * y),
+#                       'convex': convexity(state[i], area=area),
+#                       'adj': adj}
+#     if return_state is True:
+#         return items, state
+#     return items
 
 
 class AdjConstraints:
@@ -338,7 +360,7 @@ class AdjConstraints:
 
 
 class DiscProbDim:
-    def __init__(self, problem, constraints, weights=None):
+    def __init__(self, problem, constraints, weights=None, use_comps=False):
         const = constraints if constraints else _cdict
 
         self.keys = sorted(list(set().union(*(d.keys() for d in const.values()))))
@@ -364,8 +386,11 @@ class DiscProbDim:
             for i, w in enumerate(weights):
                 self._wmat[:, i] = w
 
+        # optional Flags
+        self.use_comps = use_comps
+
         # self.area = self.size[0] * (self.size[1] - 1) + self.size[0] ** 2 if 'adj' in self.keys else
-        self.area =  self.size[0] * self.size[1]
+        self.area = self.size[0] * self.size[1]
         self._f = 1 - np.e
         self.__bounds, self.__rooms, self.__fp_area, self.__dilated = None, None, None, None
         self.reset()
@@ -390,13 +415,17 @@ class DiscProbDim:
         st += '\n'
         return st
 
+    @property
+    def fp_area(self):
+        return self.__fp_area
+
     def reward(self, layout, encode=True, avg=True, action=None):
         """ return a matrix of size [Problem.length, num_constraints]
             representing reward for mat[space_i, constraint_j]
         """
         if action is None:
             self.__fp_area = np.where(layout.footprint == 1)[0].shape[0]
-        rooms = np.stack(layout.rooms())    # these are binary images
+        rooms = layout.rooms(stack=True)    # these are binary images
         bounds = max_boundnp(rooms)
         areas = np.sum(rooms, axis=(1, 2))
         dilations = [skm.dilation(r) for r in rooms]
@@ -426,7 +455,7 @@ class DiscProbDim:
                     res[i, j] = 1 if aspect >= v else 0
 
                 elif k == 'area':
-                    res[i, j] = 1 - v - areas[i] / self.__fp_area
+                    res[i, j] = 1 - abs(v - areas[i] / self.__fp_area)
 
                 elif k == 'convex':
                     cvs = np.sum(skm.convex_hull_image(rooms[i]))
@@ -434,16 +463,25 @@ class DiscProbDim:
 
         # apply weights
         # todo add masking for missing constraints
+
+        if self.use_comps:
+            # penalty for disconnected components
+            for n in [num_components(rooms[i]) for i in range(len(rooms))]:
+                # print(n)
+                # if n == 0:
+                #    res[i] = 0.
+                if n != 0:
+                    res[i] /= n
+            # res = res / ncomps[: None]
+
         res = np.multiply(res, self._wmat)
         reward = np.sum(res)
+
         if avg:
             reward /= self.area
-
             # there is a bonus for having all
-
             # reward *= len(np.where(areas > 0.0)) / len(areas)
-            # NOTE - DO NOT ADJUST TO [-1, 1]
-            # adjust to [-1, 1]
+            # NOTE - DO NOT ADJUST TO [-1, 1] - this leeds to zero gradients at ~0
             # reward = np.exp(reward) + self._f
         if encode:
             return reward, res

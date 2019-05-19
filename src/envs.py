@@ -243,19 +243,28 @@ class DiscreteEnv2(DiscreteEnv):
                  inst_args=None,
                  terminal=TerminalCondition(),
                  state_cls=StackedRooms,
+                 problem_gen=generate_constraint_dict,
+                 unsolved_problem_reward=None,
+                 objective_args={},
                  **kwargs):
         DiscreteEnv.__init__(self, *args, **kwargs)
         self.num_spaces = num_spaces
         self._inst_args = inst_args
         self._state_cls = state_cls
+        self._objective_args = objective_args
+        self._problem_gen = problem_gen
 
         self._target_code = None
         self._instance = None
 
         # self._max_repeat = 4
+        self._unsolved_problem_reward = unsolved_problem_reward
         self._terminal_fn = terminal
         self._random_reset = random_reset
         self.__prev_data = self.initialize()
+
+    def dataset(self, batch_size=1):
+        pass
 
     def initialize(self):
         # if self._instance is not None
@@ -263,11 +272,16 @@ class DiscreteEnv2(DiscreteEnv):
         for i in range(self.num_spaces):
             self._problem.add_program(ProgramEntity(i, 'room'))
 
-        problem_dict = generate_constraint_dict(num_spaces=self.num_spaces)
+        problem_dict = self._problem_gen(num_spaces=self.num_spaces,
+                                         x=self._size[0],
+                                         y=self._size[1])
         self._problem.footprint = generate_footprint_constr(self._size[0])
-        self._objective = DiscProbDim(self._problem, problem_dict)
+        self._objective = DiscProbDim(self._problem, problem_dict, **self._objective_args)
 
-        self._instance = self._state_cls(self._problem, size=self._size, **self._inst_args)
+        self._instance = self._state_cls(self._problem,
+                                         size=self._size,
+                                         problem_dict=problem_dict,
+                                         **self._inst_args)
         self._target_code = self._objective.to_input()
         reward, code = self._objective.reward(self._instance, True)
 
@@ -287,7 +301,6 @@ class DiscreteEnv2(DiscreteEnv):
     def to_image(self, input_state):
         return self._instance.to_image(input_state)
 
-
     @property
     def input_state_size(self):
         return self._instance.input_state_size
@@ -298,10 +311,9 @@ class DiscreteEnv2(DiscreteEnv):
 
     def step(self, action, **kwargs):
         reward, moved = True, -1
-        legal = action[0] < len(self._problem)
+        # legal = action[0] < len(self._problem)
         prev_state = self._instance.to_input()
-        if legal is True:
-            moved, legal = self._instance.add_step(action)
+        moved, legal = self._instance.add_step(action)
 
         if moved is True:
             reward, code = self._objective.reward(self._instance,
@@ -322,7 +334,7 @@ class DiscreteEnv2(DiscreteEnv):
         # if not legal:
         #    reward = max(-1, reward - self._invalid_action_penalty)
         if done and not solved:
-            reward = -1
+            reward = self._unsolved_problem_reward # -1
 
         self.__prev_data = dict(prev_state=prev_state,
                                 action=action,
@@ -334,27 +346,6 @@ class DiscreteEnv2(DiscreteEnv):
                                 target_code=self._target_code,
                                 feats=code)
         return self.__prev_data
-
-
-class ArchiBuildEnv(EnvBase):
-    def __init__(self, problem):
-        self._problem = problem
-        self._initializer = None
-        self._solver = None
-
-    def expand(self):
-        pass
-
-    def transition_model(self, layout):
-        pass
-
-
-class GridBasedEnv(EnvBase):
-    def __init__(self, size=(200, 200)):
-        self._size = size
-
-    def encode(self, layout):
-        mat = np.zeros(self._size)
 
 
 class ModularLayoutEnv(EnvBase):

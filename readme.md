@@ -106,3 +106,5 @@ https://naeimdesigntechnologies.wordpress.com/2016/10/21/old-research-generative
 http://www.pyopt.org/reference/optimizers.fsqp.html
 
 
+TODO
+https://nbviewer.jupyter.org/github/MOSEK/Tutorials/blob/master/Optimizer/integer-exact-cover/exactcover.ipynb

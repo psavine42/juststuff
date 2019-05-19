@@ -28,6 +28,9 @@ class SameScore(TerminalCondition):
         self.steps = 0
         self.prev = -np.inf
 
+    def __str__(self):
+        return '<{}>:limit:{}'.format(self.__class__.__name__ , self._limit)
+
     def reset(self):
         self.steps = 0
         self.prev = -np.inf
@@ -37,15 +40,15 @@ class SameScore(TerminalCondition):
         if self._tol > abs(1 - reward):
             return True, True
 
-        elif self.prev == reward:
+        elif self.prev == round(reward, 5):
             if self.steps < self._limit:
                 self.steps += 1
-                self.prev = reward
+                self.prev = round(reward, 5)
                 return False, False
             return True, False
 
         self.steps = 0
-        self.prev = reward
+        self.prev = round(reward, 5)
         return False, False
 
 
@@ -57,6 +60,9 @@ class NoImprovement(TerminalCondition):
 
         self.steps = 0
         self.best = -np.inf
+
+    def __str__(self):
+        return '<{}>:limit:{}'.format(self.__class__.__name__, self._limit)
 
     def reset(self):
         self.steps = 0

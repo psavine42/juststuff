@@ -29,39 +29,26 @@ def convs2d_size_out(size, convs, hw=0):
     return res
 
 
-class RLdraw(nn.Module):
-    def __init__(self):
-        nn.Module.__init__(self)
+def out_size(modules, dims, all=False, d=False):
+    dy = [int(_) for _ in dims]
+    if d:
+        print(dy)
+    alls = [dy ]
+    for m in modules:
+        z = m(torch.zeros(1, *dy))
+        dy = list(z.size())[1:]
+        if d:
+            print(dy)
+        alls.append(dy)
+    if all is True:
+        return alls
+    return dy
 
 
 _map = {2: [[2, 16, 3, 2], [16, 32, 3, 2], [32, 32, 3, 1]],
         3: [[3, 16, 5, 2], [16, 32, 3, 1], [32, 32, 3, 1]],
         4: [[3, 16, 5, 2], [16, 32, 3, 1], [32, 32, 3, 1]]
         }
-
-
-class DQN(Module):
-    def __init__(self, h, w, outputs, in_size=2):
-        super(DQN, self).__init__()
-        print(in_size)
-        self.stack = CnvStack(in_size)
-        # Number of Linear input connections depends on output of conv2d layers
-        # and therefore the input image size, so compute it.
-
-        linear_input_size = convw * convh * 16
-        # print(linear_input_size, outputs)
-        self.head1 = nn.Linear(linear_input_size, outputs)
-        # self.head2 = nn.Linear(linear_input_size // 2, outputs)
-        # self.feats = FeatureNet(linear_input_size // 2, 64, in_size)
-
-    def forward(self, x, y=None):
-        """Called with either one element to determine next action, or a batch
-            during optimization. Returns tensor([[left0exp,right0exp]...])."""
-        x = F.relu(self.bn1(self.conv1(x)))
-        x = F.relu(self.bn2(self.conv2(x)))
-        x = F.relu(self.bn3(self.conv3(x)))
-        x = self.head1(x.view(x.size(0), -1))
-        return self.bnO(x)
 
 
 # Components -------------------------------------------
@@ -76,43 +63,6 @@ class FeatureNet(nn.Module):
         x = F.relu(self.linear1(x))
         x = F.relu(self.linear2(x))
         return x
-
-
-class CnvStack(Module):
-    def __init__(self, in_size=2, batch_norm=False):
-        Module.__init__(self)
-        self.batch_norm = batch_norm
-        self.in_channels = in_size
-        self.conv1 = nn.Conv2d(in_size, 64, kernel_size=5, stride=2, padding=2)
-        self.bn1 = nn.BatchNorm2d(64)
-
-        self.conv2 = nn.Conv2d(64, 32, kernel_size=4, stride=2, padding=1)
-        self.bn2 = nn.BatchNorm2d(32)
-
-        self.conv3 = nn.Conv2d(32, 16, kernel_size=3, stride=2, padding=1)
-        self.bn3 = nn.BatchNorm2d(16)
-
-    @property
-    def conv_mods(self):
-        return [self.conv1, self.conv2, self.conv3]
-
-    def out_size(self, w, h):
-        z = self(torch.zeros(1, self.in_channels, w, h))
-        return z.size(1) * z.size(2) * z.size(3)
-
-    def forward(self, x):
-        if self.batch_norm is True:
-            x = F.elu(self.bn1(self.conv1(x)))
-            x = F.elu(self.bn2(self.conv2(x)))
-            x = F.elu(self.bn3(self.conv3(x)))
-        else:
-            x = F.elu(self.conv1(x))
-            x = F.elu(self.conv2(x))
-            x = F.elu(self.conv3(x))
-        return x
-
-
-
 
 
 class CnvController(Module):
@@ -203,46 +153,6 @@ class CnvController3h(Module):
 
 
 # MODELS -------------------------------------------------------
-class ActorCritic(nn.Module):
-    """ Original Actor Critic - github
-        DO NOT FUCK WITH
-    """
-    def __init__(self, num_inputs, action_space):
-        super(ActorCritic, self).__init__()
-        self.conv1 = nn.Conv2d(num_inputs, 32, 3, stride=2, padding=1)
-        self.conv2 = nn.Conv2d(32, 32, 3, stride=2, padding=1)
-        self.conv3 = nn.Conv2d(32, 32, 3, stride=2, padding=1)
-        self.conv4 = nn.Conv2d(32, 32, 3, stride=2, padding=1)
-
-        self.lstm = nn.LSTMCell(32 * 3 * 3, 256)
-
-        num_outputs = action_space.n
-        self.critic_linear = nn.Linear(256, 1)
-        self.actor_linear = nn.Linear(256, num_outputs)
-
-        self.apply(weights_init)
-        self.actor_linear.weight.data = normalized_columns_initializer(self.actor_linear.weight.data, 0.01)
-        self.critic_linear.weight.data = normalized_columns_initializer(self.critic_linear.weight.data, 1.0)
-        self.actor_linear.bias.data.fill_(0)
-        self.critic_linear.bias.data.fill_(0)
-
-        self.lstm.bias_ih.data.fill_(0)
-        self.lstm.bias_hh.data.fill_(0)
-
-        self.train()
-
-    def forward(self, inputs):
-        inputs, (hx, cx) = inputs
-        x = F.elu(self.conv1(inputs))
-        x = F.elu(self.conv2(x))
-        x = F.elu(self.conv3(x))
-        x = F.elu(self.conv4(x))
-
-        x = x.view(-1, 32 * 3 * 3)
-        hx, cx = self.lstm(x, (hx, cx))
-        x = hx
-        return self.critic_linear(x), self.actor_linear(x), (hx, cx)
-
 
 class DQNC(Module):
     def __init__(self, h, w, outputs, in_size=2, feats_size=40):
@@ -305,79 +215,6 @@ class LSTMDQN(nn.Module):
         return self.actor(x), (hx, cx)
 
 
-class SOM(nn.Module):
-    """
-    2-D Self-Organizing Map with Gaussian Neighbourhood function
-    and linearly decreasing learning rate.
-    """
-
-    def __init__(self, m, n, dim, niter, alpha=None, sigma=None):
-        super(SOM, self).__init__()
-        self.m = m
-        self.n = n
-        self.dim = dim
-        self.niter = niter
-        if alpha is None:
-            self.alpha = 0.3
-        else:
-            self.alpha = float(alpha)
-        if sigma is None:
-            self.sigma = max(m, n) / 2.0
-        else:
-            self.sigma = float(sigma)
-
-        self.weights = torch.randn(m * n, dim)
-        self.locations = torch.LongTensor(np.array(list(self.neuron_locations())))
-        self.pdist = nn.PairwiseDistance(p=2)
-
-    def get_weights(self):
-        return self.weights
-
-    def get_locations(self):
-        return self.locations
-
-    def neuron_locations(self):
-        for i in range(self.m):
-            for j in range(self.n):
-                yield np.array([i, j])
-
-    def map_vects(self, input_vects):
-        to_return = []
-        for vect in input_vects:
-            min_index = min([i for i in range(len(self.weights))],
-                            key=lambda x: np.linalg.norm(vect - self.weights[x]))
-            to_return.append(self.locations[min_index])
-
-        return to_return
-
-    def forward(self, x, it):
-
-        dists = self.pdist(torch.stack((x for i in range(self.m * self.n))), self.weights)
-
-        _, bmu_index = torch.min(dists, 0)
-        bmu_loc = self.locations[bmu_index, :]
-        bmu_loc = bmu_loc.squeeze()
-
-        learning_rate_op = 1.0 - it / self.niter
-        alpha_op = self.alpha * learning_rate_op
-        sigma_op = self.sigma * learning_rate_op
-
-        bmu_distance_squares = torch.sum(
-            torch.pow(self.locations.float() -
-                      torch.stack((bmu_loc for i in range(self.m * self.n))).float(), 2), 1)
-
-        neighbourhood_func = torch.exp(torch.neg(torch.div(bmu_distance_squares, sigma_op ** 2)))
-
-        learning_rate_op = alpha_op * neighbourhood_func
-
-        learning_rate_multiplier = torch.stack(
-            (learning_rate_op[i:i + 1].repeat(self.dim) for i in range(self.m * self.n))
-        )
-        delta = torch.mul(learning_rate_multiplier, (torch.stack((x for i in range(self.m * self.n))) - self.weights))
-        new_weights = torch.add(self.weights, delta)
-        self.weights = new_weights
-
-
 class DiscProbTransform(nn.Module):
     def __init__(self):
         super(DiscProbTransform, self).__init__()
@@ -411,41 +248,6 @@ class DiscProbTransform(nn.Module):
         # this means ..
         return
 
-
-class FieldUpdate(nn.Module):
-    def __init__(self, s, w, h):
-        super(FieldUpdate, self).__init__()
-        self.xdim = w
-        self.ydim = h
-        self.s = s
-        self.conv_stack = CnvStack()
-
-        self.weight = Parameter(torch.FloatTensor(h, w, s))
-        self.xform = nn.Linear(s * h * w, s * h * w)
-
-    def forward(self, x):
-        """
-
-
-        """
-        # x2 = x.view(x.size(0), self.xdim * self.ydim * self.s)
-        #
-        self.xform(x)
-        new_field = F.softmax(x, dim=0)
-        return
-
-
-class ContProbTransform(nn.Module):
-    def __init__(self):
-        super(ContProbTransform, self).__init__()
-        self.conv_stack = CnvStack()
-
-    def forward(self, x):
-        """
-        input is a bunch of near-uniform distribution parameters (mu, sig) of size [N, 4]
-        """
-
-        return
 
 
 class OptionCriticNet(nn.Module):
@@ -596,6 +398,80 @@ class GaussianActorCriticNet(Module):
         return res
 
 
+class StagedActorCriticNet(Module):
+    def __init__(self,
+                 state_dim,
+                 action_dim,
+                 phi_body=None,
+                 actor_body=None,
+                 critic_body=None,
+                 granular=False):
+        Module.__init__(self)
+        self.state_dim = state_dim
+        self.action_dim = action_dim
+
+        self.phi_body = phi_body
+        feature_dim = self.phi_body.feature_dim
+
+        self.actor_body = actor_body
+        self.fc_action_cat = nn.Linear(feature_dim, state_dim[0])
+        self.fc_action_loc = nn.Linear(feature_dim, action_dim)
+
+        self.critic_body = critic_body
+        self.fc_critic = layer_init(nn.Linear(feature_dim, 1), 1e-3)
+
+        # auxilary value for predicting Himts
+        self.fc_auxilary = layer_init(nn.Linear(feature_dim, 1), 1e-3)
+
+        self.std = nn.Parameter(torch.zeros(action_dim))
+        self.predictor_module = None
+        self.granular = granular
+        self.apply(weights_init)
+
+    def forward(self, obs, hidden, action=None):
+        """
+        1) encode state
+        - predict parameters writing DRAW grid
+        2) predict boxes [N, M, N, M] ~ 4N
+        3) assign (boxes, z)
+        """
+        # Controller
+        hx, cx = self.phi_body(obs, hidden)     # conv+lstm
+        phi = hx
+
+        # bodies
+        phi_a = self.actor_body(phi)
+        value = self.critic_body(phi)
+
+        # heads -----------------------------
+        # value [n, 1]
+        value = self.fc_critic(value)
+
+        # discrete prediction [n, F ]
+        # act = self.fc_action_cat(phi_a)
+
+        # continuous prediction [n, 4, M]
+        loc = self.fc_action_loc(phi_a)
+
+        # means = torch.tanh(loc)
+        # print(means, F.softplus(self.std))
+        # pred_act = sample_normal(means, scale=F.softplus(self.std))
+        # print(act )
+        pred_geom = sample_categorical(F.softmax(loc, dim=-1) )
+
+        # predict next_state
+
+        # print('ac sizes', pred_act['log_prob'].size(), pred_opt['log_prob'].size() )
+        res = {'action_index': pred_opt['action'],
+               'action': pred_geom['action'],
+               'hidden': (hx, cx),
+
+               'value': value,
+               'logits': act}
+
+        return res
+
+
 class StreamNet(Module):
     """
     Attention + Auxilary Streams
@@ -603,6 +479,7 @@ class StreamNet(Module):
     def __init__(self,
                  state_dim,
                  action_dim,
+                 img_size=[20, 20],
                  num_spaces=3,
                  aux_code_size=4,
                  critic_body=None,
@@ -611,90 +488,305 @@ class StreamNet(Module):
         self.state_dim = state_dim
         self.action_dim = action_dim
 
-        self.phi_body = CnvStack()
+        self.phi_body = CnvStack(img_size)
         self.attention = ConvSelfAttention()
 
         feature_dim = self.phi_body.feature_dim
 
         self.extra_layers = nn.Sequential(
+            Flatten(),
             nn.Linear(feature_dim, 256),
             nn.LeakyReLU(),
             nn.Linear(feature_dim, 256),
             nn.LeakyReLU()
         )
         # self.actor_body = actor_body
-        self.fc_action_cat = nn.Linear(feature_dim, state_dim[0])
-        self.fc_action_loc = nn.Linear(feature_dim, 2)
+        # self.fc_action_cat = nn.Linear(feature_dim, state_dim[0])
+        # self.fc_action_loc = nn.Linear(feature_dim, 2)
 
         self.critic_body = critic_body
         self.fc_critic = layer_init(nn.Linear(feature_dim, 1), 1e-3)
 
         # auxilary value for predicting Hints
-        self.fc_auxilary = nn.Linear(feature_dim, 1)
+        self.fc_auxilary = nn.ModuleList([nn.Linear(feature_dim, num_spaces)
+                                          for x in range(aux_code_size)])
+        self.fc_auxilary_attn = nn.Linear(feature_dim, num_spaces * aux_code_size)
 
         self.sigmoid = nn.Sigmoid()
         self.predictor_module = None
         self.granular = granular
         self.apply(weights_init)
 
-    def forward(self, obs, hidden, action=None):
+    def forward(self, obs, hidden=None):
         """
-        obs 
+        Auxilary task streams
 
-        :param obs:
-        :param hidden:
-        :param action:
+            Predict adj_matrix
+            Predict constraint-values
+            Value (standard)
+
         :return:
         """
+        img, target_code = obs
         # Controller
-        x = self.phi_body(obs)
-        phi = self.attention(x)
-
-        phi_a = self.actor_body(phi)
+        x = self.phi_body(img)
+        attn = self.attention(x)
+        phi_att = 0.5 * attn + x
+        phi = self.extra_layers(phi_att)
 
         # heads -----------------------------
         # value [n, 1]
-        value = self.fc_critic(phi_a)
+        value = self.fc_critic(phi)
 
-        # continuous prediction [n, 4 ]
-        cx, cy, dx, dy = self.fc_action_loc(phi_a).split(1, 1)
+        # aux [n, F, S]
+        aux_value = torch.stack(tuple([l(phi) for l in self.fc_auxilary]))
+        aux_attn = self.fc_auxilary_attn(aux_value)
 
-        # mu = self.fc_mu(hidden_cat)
-        # sigma_hat = self.fc_sigma(hidden_cat)
-        # sigma = torch.exp(sigma_hat / 2.)
-        #
-        # # N ~ N(0,1)
-        # z_size = mu.size()
-        # N = torch.normal(torch.zeros(z_size), torch.ones(z_size)).to(self.device)
-        # z = mu + sigma * N
+        # global attention - look at aux_values and
+        phi_feats = torch.cat((aux_attn, phi))
+        xf = self.global_attn(phi_feats)
 
-        # means = torch.tanh(loc)
-        # pred_act = sample_normal(means, scale=F.softplus(self.std))
-        # print(act )
-        pred_opt = sample_categorical(F.softmax(act, dim=-1) )
-        # print('ac sizes', pred_act['log_prob'].size(), pred_opt['log_prob'].size() )
-        res = {'action_index': pred_opt['action'],
-               'action': pred_act['action'],
-               'hidden': (hx, cx),
-               'mean': means,
-               'value': value,
-               'logits': act}
+        # these describe a window of the input
+        sigmas = self.fc_sigma(xf)
+        action = self.fc_action(xf)
 
-        if self.granular:
-            res['log_pi_a_cont'] = pred_act['log_prob']
-            res['log_pi_a_disc'] = pred_opt['log_prob']
-            res['log_pi_a_cont'] = pred_act['entropy']
-            res['log_pi_a_disc'] = pred_opt['entropy']
-        else:
-            # todo this is one way to hack the discrete problem
-            alp = pred_act['log_prob']
-            res['log_prob'] = torch.mean(torch.cat((alp.view(1, alp.size(1)), pred_opt['log_prob']), -1))
-            ep = pred_act['entropy']
-            res['entropy'] = torch.mean(torch.cat((ep.view(1, ep.size(1)), pred_opt['entropy']), -1))
-        return res
+        logits = self.fc_choice(xf)
+        pred_act = sample_categorical(F.softmax(logits, dim=-1))
+        return {'action_index': pred_act['action'],
+                'action': action,
+                'sigmas': sigmas,
+                'log_prob': pred_act['log_prob'],
+                'entropy': pred_act['entropy'],
+                'aux': aux_value,
+                'value': value,
+                'logits': logits
+                }
 
 
+class StreamNetFull(Module):
+    """
+    Attention + Auxilary Streams
+    """
+    def __init__(self,
+                 state_dim=[4, 20, 20],
+                 zdim=100,
+                 num_spaces=3,
+                 aux_code_size=4,
+                 debug=False):
+        Module.__init__(self)
+        self.state_dim = state_dim
+        self.zdim = zdim
+        _ly = [dict(k=6, s=1),
+               dict(k=6, s=1),
+               dict(k=4, s=2),
+               dict(k=4, s=1)]
 
+        self.conv1 = ConvNormRelu(state_dim[0], 8, **_ly[0])
+        self.conv2 = ConvNormRelu(8, 16,    **_ly[1])
+        self.conv3 = ConvNormRelu(16, 32,   **_ly[2])
+        self.conv4 = ConvNormRelu(32, zdim, **_ly[3])
+
+        dims1 = out_size([self.conv1, self.conv2, self.conv3, self.conv4],
+                         state_dim, all=True, d=debug)
+        self._inner_dim = dims1[-1]
+
+        self.encode = nn.Sequential(
+            Flatten(),
+            nn.Linear(dims1[-1][0] * dims1[-1][1] * dims1[-1][2], zdim * 2),
+            nn.LeakyReLU(),
+            nn.Linear(zdim * 2, zdim),
+            nn.LeakyReLU()
+        )
+
+        self.encode_targets = nn.Sequential(
+            Flatten(),
+            nn.Linear(aux_code_size * num_spaces,
+                      min(zdim, aux_code_size * num_spaces) * 2),
+            nn.LeakyReLU(),
+            nn.Linear(min(zdim, aux_code_size * num_spaces) * 2, zdim),
+            nn.LeakyReLU()
+        )
+        self.merge = nn.Bilinear(zdim, zdim, zdim)
+
+        self.dec1 = DeConvNormRelu(zdim *2, 32, **_ly[3])
+        self.dec2 = DeConvNormRelu(32*2, 16,   **_ly[2])
+        self.dec3 = DeConvNormRelu(16*2, 8,    **_ly[1])
+        self.dec4 = DeConvNormRelu(8*2, num_spaces, **_ly[0])
+
+        self.fc_critic = nn.Linear(zdim, 1)
+        self.fc_auxilary = nn.ModuleList([nn.Linear(zdim, num_spaces)
+                                          for _ in range(aux_code_size)])
+        self.softmax2 = nn.Softmax2d()
+        self.sigmoid = nn.Sigmoid()
+        self.predictor_module = None
+        self.apply(weights_init)
+
+    def forward(self, obs, hidden=None):
+        """
+        todo - make this real
+        img: size [batch_size, c, h, w]
+        """
+        img, target_code = obs
+        res = []
+
+        # Stack of convs with features cache
+        x = self.conv1(img)
+        res.append(x)
+        x = self.conv2(x)
+        res.append(x)
+        x = self.conv3(x)
+        res.append(x)
+        x = self.conv4(x)
+        res.append(x)
+
+        # encode for target and z
+        tgt = self.encode_targets(target_code)
+
+        z = self.merge(flatten(x), tgt)
+        # z = z.view(z.size(0), )
+        # --or-- Bilinear layyer ???
+        # z = self.encode(x, tgt)
+
+        # value for prediciont module
+        value = self.fc_critic(z)
+        auxs = torch.sigmoid(torch.stack([m(z) for m in self.fc_auxilary]).permute(1, 2, 0))
+
+        # decode into an image of [b, c, h, w]
+        # at each step there is a skip connection to diluted input
+        x = self.dec1(torch.cat((z.unsqueeze(-1).unsqueeze(-1), res[-1]), 1))
+        x = self.dec2(torch.cat((x, res[-2]), 1))
+        x = self.dec3(torch.cat((x, res[-3]), 1))
+        x = self.dec4(torch.cat((x, res[-4]), 1))
+        # x = self.dec5(torch.cat((tgt, x, res[2])))
+
+        # ?? final_state = softmax(probs + x)
+        # ?? or --       = softmax(self.softmax2(x) + x)
+        # so that i am just doing a giant residual step ????
+        probs = self.softmax2(x)
+
+        maxs = probs.max(dim=1)[0]
+        kl_divergence = (probs * torch.log(probs / maxs)).sum(-1).mean(dim=(1, 2), keepdim=True).squeeze(-1)
+        entropy = -(probs * torch.log(probs)).sum(-1).mean(dim=(1, 2), keepdim=True).squeeze(-1)
+
+        return {'log_prob': kl_divergence,  # to maximize
+                'entropy': entropy,         # to minimize
+                'action': probs,
+                'hidden': None,
+                'value': value,
+                'aux': auxs,
+                'z': z,
+                }
+
+
+class StreamNet2(Module):
+    """
+    Attention + Auxilary Streams
+    """
+
+    def __init__(self,
+                 state_dim=[4, 20, 20],
+                 zdim=100,
+                 num_spaces=3,
+                 aux_code_size=4,
+                 debug=False):
+        Module.__init__(self)
+        self.state_dim = state_dim
+        self.zdim = zdim
+        _ly = [dict(k=6, s=1),
+               dict(k=6, s=1),
+               dict(k=4, s=2),
+               dict(k=4, s=1)]
+
+        self.conv1 = ConvNormRelu(state_dim[0], 8, **_ly[0])
+        self.conv2 = ConvNormRelu(8, 16, **_ly[1])
+        self.conv3 = ConvNormRelu(16, 32, **_ly[2])
+        self.conv4 = ConvNormRelu(32, zdim, **_ly[3], batch_norm=False)
+
+        dims1 = out_size([self.conv1, self.conv2, self.conv3, self.conv4],
+                         state_dim, all=True, d=debug)
+        self._inner_dim = dims1[-1]
+
+        self.encode = nn.Sequential(
+            Flatten(),
+            nn.Linear(dims1[-1][0] * dims1[-1][1] * dims1[-1][2], zdim * 2),
+            nn.LeakyReLU(),
+            nn.Linear(zdim * 2, zdim),
+            nn.LeakyReLU()
+        )
+
+        self.encode_targets = nn.Sequential(
+            Flatten(),
+            nn.Linear(aux_code_size * num_spaces,
+                      min(zdim, aux_code_size * num_spaces) * 2),
+            nn.LeakyReLU(),
+            nn.Linear(min(zdim, aux_code_size * num_spaces) * 2, zdim),
+            nn.LeakyReLU()
+        )
+        self.merge = nn.Bilinear(zdim, zdim, zdim)
+
+        self.dec1 = DeConvNormRelu(zdim * 2, 32, **_ly[3], batch_norm=False)
+        self.dec2 = DeConvNormRelu(32 * 2, 16, **_ly[2])
+        self.dec3 = DeConvNormRelu(16 * 2, 8, **_ly[1])
+        self.dec4 = DeConvNormRelu(8 * 2, num_spaces, **_ly[0], activation=lambda x: x)
+
+        self.fc_critic = nn.Linear(zdim, 1)
+        self.fc_auxilary = nn.ModuleList([nn.Linear(zdim, num_spaces)
+                                          for _ in range(aux_code_size)])
+        self.softmax2 = nn.Softmax2d()
+        self.sigmoid = nn.Sigmoid()
+        self.predictor_module = None
+        self.apply(weights_init)
+
+    def forward(self, obs, hidden=None):
+        """
+        todo - make this real
+        img: size [batch_size, c, h, w]
+        """
+        img, target_code = obs
+
+        # Stack of convs with features cache
+        x1 = self.conv1(img)
+        x2 = self.conv2(x1)
+        x3 = self.conv3(x2)
+        x4 = self.conv4(x3)
+
+        # encode for target and z
+        tgt = self.encode_targets(target_code)
+
+        # todo attention layer
+        z = self.merge(flatten(x4), tgt)
+
+        # value for predicion module
+        value = self.fc_critic(z)
+        auxs = torch.sigmoid(torch.stack([m(z) for m in self.fc_auxilary]).permute(1, 2, 0))
+
+        # decode into an image of [b, c, h, w]
+        # at each step there is a skip connection to diluted input
+        x = self.dec1(torch.cat((z.unsqueeze(-1).unsqueeze(-1), x4), 1))
+        x = self.dec2(torch.cat((x, x3), 1))
+        x = self.dec3(torch.cat((x, x2), 1))
+        x = self.dec4(torch.cat((x, x1), 1))
+
+        probs = self.softmax2(img[:, 0:x.size(1), :, :] + x) # self.softmax2(x))
+
+        log_prob = log_prob_from_logits(x).mean()
+        sf = self.softmax2(x)
+        entropy = -(sf * torch.log(sf)).sum(-1).mean(dim=(1, 2), keepdim=True).squeeze(-1)
+        return {'log_prob': log_prob,  # to maximize
+                'entropy': entropy,  # to minimize
+                'action': probs,
+                'hidden': None,
+                'value': value,
+                'aux': auxs,
+                'x': x.detach().squeeze().cpu(),
+                'z': z,
+                }
+
+
+
+
+
+# ----------------------------------------------------------------------------------
 class NextStatePred(Module):
     def __init__(self, z_size, base=None, pred=None):
         Module.__init__(self)
@@ -736,7 +828,7 @@ class NextStatePred(Module):
         # sample a point in the problem space
 
 
-class RNDModel(nn.Module):
+class RNDModel(Module):
     def __init__(self, input_size, output_size):
         super(RNDModel, self).__init__()
 
@@ -812,7 +904,6 @@ class RNDModel(nn.Module):
         target_feature = self.target(next_obs)
         predict_feature = self.predictor(next_obs)
         return predict_feature, target_feature
-
 
 
 class GACLinearStds(GaussianActorCriticNet):
@@ -982,8 +1073,7 @@ class DecoderRNN(Module):
         return pi, mu_x, mu_y, sigma_x, sigma_y, rho_xy, q, hidden, cell
 
 
-
-class STNNet(nn.Module):
+class STNNet(Module):
     def __init__(self):
         super(STNNet, self).__init__()
         self.conv1 = nn.Conv2d(1, 10, kernel_size=5)

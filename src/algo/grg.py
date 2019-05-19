@@ -16,7 +16,6 @@ import operator
 from lib.hessian.hessian import hessian, gradient
 from skimage.transform import resize
 
-from src.algo.nns import DQN
 from src.model.storage import *
 import src.algo.nns as nns
 from src.problem import Problem
@@ -543,7 +542,7 @@ class Trainer(object):
 
         self.save_every = 100000
         self.log_every = log_every
-        self.M = AllMeters(env=viz, title=title)
+        self.M = None
 
     def _to_tensor(self, state):
         if isinstance(state, tuple):
@@ -1716,7 +1715,7 @@ class ACTrainer2(Trainer):
 
 
 class ACTrainer3(Trainer):
-    def __init__(self, env, optimizer=None, model=None, **kwargs):
+    def __init__(self, env, optimizer=None, model=None, argobj=None, **kwargs):
         Trainer.__init__(self, env, **kwargs)
         self.model = model.to(self.device)
         self._episode = 0
@@ -1724,6 +1723,7 @@ class ACTrainer3(Trainer):
         self._actions = [0] * self.env.state.shape[0]
         self._instances = []
         self._solutions = []
+        self.arg_obj = argobj
         self.make_meters()
         if optimizer is None:
             self.optimizer = optim.Adam(self.model.parameters(), lr=kwargs['lr'])
@@ -1734,14 +1734,16 @@ class ACTrainer3(Trainer):
         self._img = None
 
     def make_meters(self):
+        self.M = Meters2(env=None, title=self._title,
+                         detail_every= self.arg_obj.train.detail_every,
+                         log_every=self.arg_obj.train.log_every,
+                         arg_obj=self.arg_obj )
         meters = ['policy_loss', 'loss', 'value_loss', 'fail', 'action', 'entropy', 'done',
-                  'duration', 'reward', 'legal', 'best_avg', 'solved', ] + \
-                 ['a_' + k for k in self.env._objective.keys] + \
-                 ['x1', 'y1', 'x2', 'y2']
-
+                  'duration', 'reward', 'legal', 'best_avg', 'aux_loss', 'solved',
+                  'log_prob', 'gae', 'advantage']
         self.M.add_meters(*meters, cls=AverageValueMeter)
         self.M.add_meters(*['best'], cls=BestValueMeter)
-        self.M._mdict['actions'] = CounterMeter(num=3)
+        # self.M._mdict['actions'] = CounterMeter(num=3)
 
     def log_episode(self, episode, step, state_data, storage):
         self.M.log_episode(episode, step, state_data, storage, self.env)
@@ -1749,8 +1751,9 @@ class ACTrainer3(Trainer):
     def optimize_model(self, R, storage, args):
         policy_loss = 0
         value_loss = 0
+        # advantage = 0
         gae = torch.zeros(1, 1, device=self.device)
-        # print(storage.entropy)
+
         for i in reversed(range(len(storage.reward))):
             R = args['gamma'] * R + storage.reward[i]
             advantage = R - storage.value[i]
@@ -1758,18 +1761,24 @@ class ACTrainer3(Trainer):
 
             # td loss
 
-            # aux_loss - objective to predict
-
             # prediction loss
 
             # Generalized Advantage Estimation
             delta_t = storage.reward[i] + args['gamma'] * storage.value[i + 1] - storage.value[i]
             gae = (gae * args['gamma'] * args['gae_lambda'] + delta_t).detach()
+
+            # todo STORAGE.LOG_PROB IS TOO DAMN HIGh!!
+            # todo SHOULD BE BETWEEN 0-1 AND LOW
             policy_loss = policy_loss - storage.log_prob[i] * gae - args['entropy_coef'] * storage.entropy[i]
 
-        self.optimizer.zero_grad()
+        # additional losses
+        feats_tgt = torch.from_numpy(np.stack(storage.feats)).to(self.device).float()
+        # print(feats_tgt.size(), torch.cat(storage.aux).size())
+        auxilary_loss = F.mse_loss(feats_tgt, torch.cat(storage.aux)[:-1])
 
-        loss = policy_loss + args['value_loss_coef'] * value_loss
+        self.optimizer.zero_grad()
+        loss = policy_loss + args['value_loss_coef'] * value_loss + args['aux_loss_coef'] * auxilary_loss
+        # print(loss)
         loss.backward()
         nn.utils.clip_grad_norm_(self.model.parameters(), args['max_grad_norm'])
         self.optimizer.step()
@@ -1777,15 +1786,36 @@ class ACTrainer3(Trainer):
         # -------------------
         self.M['loss'].add(loss.item())
         self.M['entropy'].add(torch.stack(storage.entropy).mean().item())
+        self.M['aux_loss'].add(auxilary_loss.item())
+        self.M['advantage'].add(advantage.item())
+        self.M['log_prob'].add(torch.stack(storage.log_prob).mean().item())
+        self.M['gae'].add(gae.item())
         self.M['policy_loss'].add(policy_loss.item())
         self.M['value_loss'].add(value_loss.item())
 
-    def observation_stream(self, state_data):
-        keys = ['state', 'target_code', 'feats']
+    def state_to_observation(self, state_data):
+        keys = ['state', 'target_code'] # , 'feats'
         return self._to_tensor(tuple([state_data[k] for k in keys]))
 
-    def action_stream(self, prediction):
-        return [prediction['action_index'], prediction['action'].numpy()]
+    def prediction_to_action(self, prediction):
+        # prediction['action_index'],
+        return prediction['action'].squeeze(0).cpu().numpy()
+
+    def train_prediction(self, episodes=100, batch_size=32, steps=100):
+        """
+        train to predict just the value
+        """
+        hidden_state = None
+        for episode in range(episodes):
+            state_data = self.env.dataset(batch_size=batch_size)
+            state = self.state_to_observation(state_data)
+
+            prediction = self.model(state, hidden_state)
+            loss = F.mse_loss(prediction['value'], state_data['reward'])
+
+            self.optimizer.zero_grad()
+            loss.backward()
+            self.optimizer.step()
 
     def train(self, episodes=100, steps=10, loss_args={}):
         for episode in range(episodes):
@@ -1793,31 +1823,34 @@ class ACTrainer3(Trainer):
             lstm_hidden_state = None
             state_data = self.env.initialize()
             storage = Storage(['reward', 'value', 'log_prob', 'entropy'])
-            state = self.observation_stream(state_data)
+            state = self.state_to_observation(state_data)
 
             for step in range(steps):
                 # model step
                 prediction = self.model(state, lstm_hidden_state)
                 lstm_hidden_state = prediction['hidden']
                 prediction['action'] = prediction['action'].squeeze().detach()
-                prediction['action_index'] = prediction['action_index'].squeeze().detach().item()
+                # prediction['action_index'] = prediction['action_index'].squeeze().detach().item()
 
                 # env step
-                state_data = self.env.step([prediction['action_index'], prediction['action'].numpy()])
+                state_data = self.env.step(self.prediction_to_action(prediction))
                 step_data = {**prediction, **state_data}
                 done = state_data['done']
                 storage.add(step_data)
+                
                 # next model_state
-                state = self.observation_stream(state_data)
+                state = self.state_to_observation(state_data)
                 if done:
                     break
 
             prediction = self.model(state, lstm_hidden_state)
             returns = prediction['value'].detach()
+            prediction['action'] = prediction['action'].squeeze().detach().cpu().numpy()
             storage.add(prediction)
 
             self.optimize_model(returns, storage, loss_args)
             self.log_episode(episode, step, state_data, storage)
+        save_model(self.model, './data/trained/{}.pkl'.format(self._title))
 
 
 def compute_intrinsic_reward(rnd, device, next_obs):

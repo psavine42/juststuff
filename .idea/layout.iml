@@ -4,11 +4,7 @@
     <content url="file://$MODULE_DIR$" />
     <orderEntry type="jdk" jdkName="Python 3.6 (layout)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="module" module-name="pytorch-dnc" />
-    <orderEntry type="module" module-name="pytorch-a3c" />
-    <orderEntry type="module" module-name="pytorch-a2c-ppo-acktr-gail" />
     <orderEntry type="module" module-name="DeepRL" />
-    <orderEntry type="module" module-name="draw_pytorch" />
   </component>
   <component name="TestRunnerService">
     <option name="projectConfiguration" value="pytest" />

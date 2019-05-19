@@ -314,7 +314,7 @@ class DiscreteLayout(_LayoutBase):
     dim1 = lines
     dim2 = footprint (optional)
     """
-    def __init__(self, problem, rooms=None, depth=2, adj=None, size=(30, 30)):
+    def __init__(self, problem, rooms=None, depth=2, adj=None, size=(30, 30), **kwargs):
         _LayoutBase.__init__(self, problem)
         self._problem = problem
         self._rooms = odict()
@@ -547,12 +547,22 @@ def hatch(state, num_spaces):
 # ----------------------------------------------------------------
 def _preproc_center_hw(box):
     """
-    input [ xcent, ycent, s_x, s_y]
+    input [ xcent, ycent, size_y, size_y]
     center = (0, 0)
     return [ xmin, ymin, xmax, ymax]
     """
     clip = (1 + np.clip(box[0:2], -1, 1)) / 2
     hw = np.abs(box[2:])
+    return np.concatenate([clip - hw, clip + hw])
+
+
+def _preproc_norm_box(box):
+    """
+    input [ xmin, ymin, xmax, ymax ] e (-2, 2)
+    return [ xmin, ymin, xmax, ymax] center = (0.5, 0.5), d=(0, 1)
+    """
+    clip = box[0:2] / 2
+
     return np.concatenate([clip - hw, clip + hw])
 
 
@@ -569,13 +579,16 @@ class StackedRooms(DiscreteLayout):
     dim-1 -> footprint : 1 if not allowed, 0 if available
     """
 
-    def __init__(self, problem, depth=None, box_fmt='', **kwargs):
+    def __init__(self, problem, depth=None, box_fmt='', problem_dict={}, **kwargs):
         DiscreteLayout.__init__(self, problem, **kwargs)
         self._footprint_dim = -1
         self._depth = depth if depth else 1 + len(self.problem)
-        self._prev = None # last action - for state updates
+        self._prev = None
         self._num_spaces = len(self._problem)
+        self._problem_dict = problem_dict
         self.__init_state()
+
+        #
         self._coord = np.asarray([self.N, self.M, self.N, self.M])
         self._edges = np.zeros_like(self.active_state)
         self._create_box_min_max = lambda x: x
@@ -590,20 +603,28 @@ class StackedRooms(DiscreteLayout):
 
     @property
     def input_state_size(self):
-        return [1, self._size[0] * self._depth, self._size[1]]
+        return list(self._state.shape)
 
     @property
     def active_state(self):
         return self._state[:self._num_spaces]
 
+    @active_state.setter
+    def active_state(self, state):
+        assert state.shape == self.active_state.shape
+        self._state[:self._num_spaces] = state
+
     @property
     def footprint(self):
         return self._state[self._footprint_dim]
 
-    def rooms(self, names=None):
+    def rooms(self, names=None, stack=True):
+        """ """
         if names is not None:
             return []
-        return [self._state[i] for i in range(len(self._problem))]
+        if stack is True:
+            return self.active_state
+        return np.stack([self._state[i] for i in range(self._num_spaces)])
 
     def __init_state(self):
         self._state = np.zeros((self._depth, self._size[0], self._size[1])).astype(int)
@@ -638,6 +659,84 @@ class StackedRooms(DiscreteLayout):
         return True, legal
 
 
+class ProbStack(StackedRooms):
+    def __init__(self, *args, init_dist=None, eps=0.1, **kwargs):
+        """
+
+        init_dist: options 'None' - default is uniform
+
+        Properties:
+            N:  x-dimension of state
+            M:  y-dimension of state
+            depth:  channels of state
+
+            footprint:  NxM Tensor
+            active_state:
+            state:
+
+        """
+        StackedRooms.__init__(self, *args, **kwargs)
+        self._init_dist = init_dist
+        self._eps = eps
+        self.__init_state()
+
+    def __init_state(self):
+        self._state = np.zeros((self._depth, self.N, self.M)).astype(float)
+        # todo add this back in latter
+        # fp = write_mat([self._problem.footprint], self._problem.footprint, self.N, self.M)
+        self._state[self._footprint_dim] = 1.
+
+        state = self.active_state
+        # set the likelyhood of that pixel being space_i
+        for k, v in self._problem_dict.items():
+            state[k, :, :] = v['area']
+
+        # add some noise
+        if self._init_dist is None:
+            noise = np.random.uniform(size=(self._num_spaces, self.N, self.M)) * self._eps
+            state = softmax(state + (noise - np.max(noise) / 2), axis=0)
+
+        elif self._init_dist == 'scaled':
+            state *= self._eps
+
+        elif self._init_dist == 'scaled-un':
+            noise = np.random.uniform(size=(self._num_spaces, self.N, self.M)) * self._eps
+            state = np.multiply(state, noise)
+
+        elif self._init_dist == 'zeros':
+            state = np.zeros_like(state)
+
+        self._state[:self._num_spaces] = state
+
+    def rooms(self, names=None, stack=True, state=None):
+        """ return a binary plane for each space """
+        if state is None:
+            state = self._state[:self._num_spaces]
+        res = np.zeros_like(self.active_state)
+        maxs = np.argmax(state, axis=0)
+        for i in range(self._num_spaces):
+            ix = np.where(maxs == i)
+            res[i, ix[0], ix[1]] = 1
+        return res
+
+    def to_input(self):
+        """ """
+        return self._state.copy()
+
+    def add_step(self, inputs, draw=1, erase=0):
+        """ the agent directly modifies state - so this is a no-op"""
+        self._state[:self._num_spaces] = inputs.copy()
+        return True, True
+
+    @property
+    def input_state_size(self):
+        return list(self._state.shape)
+
+    def to_image(self, input_state=None):
+        return self.rooms(stack=True, state=input_state)
+
+
+
 class KDRooms(StackedRooms):
     def add_step(self, box_args, draw=1, erase=0):
         """
@@ -648,9 +747,6 @@ class KDRooms(StackedRooms):
             SPLIT       1   -
 
         """
-
-
-
 
 
 class RoomStack(StackedRooms):
@@ -690,12 +786,6 @@ class ColoredRooms(StackedRooms):
         used = self._state[:self._num_spaces]
         spaces = np.einsum('jik,j->ik', used, np.linspace(0.4, 0.9, self._num_spaces))
         return np.clip(np.stack([spaces, self.footprint]), 0, 1)
-        # lines = np.zeros((self.N, self.M))
-        # # print(self._prev)
-        # if self._prev is not None:
-        #     c = self._prev
-        #     lines[c[0]:c[2], c[1]:c[3]] = 1
-        # return np.clip(np.stack([spaces, lines * self.footprint, self.footprint]), 0, 1)
 
     @property
     def input_state_size(self):
@@ -723,5 +813,46 @@ class ColoredRoomsCenter(StackedRooms):
 
 
 
+def softmax(X, theta = 1.0, axis = None):
+    """
+    Compute the softmax of each element along an axis of X.
 
+    Parameters
+    ----------
+    X: ND-Array. Probably should be floats.
+    theta (optional): float parameter, used as a multiplier
+        prior to exponentiation. Default = 1.0
+    axis (optional): axis to compute values along. Default is the
+        first non-singleton axis.
+
+    Returns an array the same size as X. The result will sum to 1
+    along the specified axis.
+    """
+
+    # make X at least 2d
+    y = np.atleast_2d(X)
+
+    # find axis
+    if axis is None:
+        axis = next(j[0] for j in enumerate(y.shape) if j[1] > 1)
+
+    # multiply y against the theta parameter,
+    y = y * float(theta)
+
+    # subtract the max for numerical stability
+    y = y - np.expand_dims(np.max(y, axis = axis), axis)
+
+    # exponentiate y
+    y = np.exp(y)
+
+    # take the sum along the specified axis
+    ax_sum = np.expand_dims(np.sum(y, axis = axis), axis)
+
+    # finally: divide elementwise
+    p = y / ax_sum
+
+    if len(X.shape) == 1:
+        p = p.flatten()
+
+    return p
 

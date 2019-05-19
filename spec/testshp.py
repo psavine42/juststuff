@@ -34,7 +34,7 @@ from src.utils import plotpoly
 import matplotlib.pyplot as plt
 import visdom
 import torchnet as tnt
-
+from arg_config import base_args
 
 s = 10
 random.seed(s)
@@ -216,36 +216,6 @@ def test_run(self):
     return opts
 
 
-def base_args(title, viz=None):
-    import datetime
-    args = Arguments()
-    ds = datetime.datetime.now().strftime(" %B-%d-%Y-%I:%M%p")
-    args.title = title + ds
-    args.log_every = 50
-    args.episodes = 100000
-    args.steps = 10
-    args.viz = viz
-
-    args.env = Arguments()
-    args.env.random_init = True
-    args.env.random_objective = False
-    args.env.incomplete_reward = -1
-
-    # args.env = env_args
-
-    args.loss = Arguments()
-    args.loss.gamma = 0.99
-    args.loss.entropy_coef = 0.01
-    args.loss.gae_lambda = 0.95
-    args.loss.value_loss_coef = 0.5
-    args.loss.max_grad_norm = 0.5
-
-    # nn_args = Arguments(out_dim=256)
-    args.nn = Arguments()
-    args.nn.out_dim = 256
-    return args
-
-
 class TestQ(TestCase):
     def setUp(self):
         self.Env = make_env()
@@ -357,7 +327,7 @@ class MiscGeom(TestCase):
         problem = prob.setup_2room_rect()
         goal = [10, 10]
         size = math.ceil(sum(goal) ** 0.5)
-        lyt = DiscreteCellComplexLayout(problem, size=(size, size))
+        lyt = CellComplexLayout(problem, size=(size, size))
         obj = DiscreteSpaceObjective(goal)
 
         # utils.layout_disc_to_viz(lyt)
@@ -471,28 +441,7 @@ class MiscGeom(TestCase):
     def test_ac2(self):
         # problem = prob.setup_2room_rect()
         title = 'ac-cont-mix'
-
         args = Arguments()
-
-        # args.title = title
-        # args.log_every = 20
-        #
-        # env_args = Arguments()
-        # env_args.random_init = True
-        # env_args.random_objective = False
-        # env_args.incomplete_reward = -1
-        # env_args.lr = 0.0005
-        # args.env = env_args
-        #
-        # loss_args = Arguments()
-        # loss_args.gamma = 0.99
-        # loss_args.gae_lambda = 0.95
-        # loss_args.entropy_coef = 0.01
-        # loss_args.value_loss_coef = 0.5
-        # loss_args.max_grad_norm = 0.5
-        #
-        # nn_args = Arguments(out_dim=256)
-        # nn_args.out_dim = 256
         num_spaces = 3
         depth = 6
         action_dim = 4
@@ -513,7 +462,7 @@ class MiscGeom(TestCase):
         model = nns.GaussianActorCriticNet(
             S, action_dim,
             phi_body=common,
-            actor_body=nn.Linear(nn_args.out_dim, nn_args.out_dim),
+            actor_body=nn.Linear(args.nn.out_dim, nn_args.out_dim),
             critic_body=nn.Linear(nn_args.out_dim, nn_args.out_dim),
             granular=granular[0]
         )
@@ -567,30 +516,170 @@ class MiscGeom(TestCase):
                       steps=args.steps,
                       loss_args=args.loss)
 
+    def test_stream(self):
+        state_dim = [4, 20, 20]
+        model = nns.StreamNetFull(
+            state_dim=state_dim,
+            zdim=64,
+            debug=True
+        )
+        x = torch.randn(1, *state_dim)
+        y = torch.randn(1, 12)
+        out = model((x, y), None)
+
+        args = base_args('spec')
+        args.inst = Arguments()
+        args.objective = Arguments()
+        args.objective.use_comps = True
+        args.episodes = 1000
+        args.steps = 5
+        args.inst.depth = 4
+        env = DiscreteEnv2(None, None, [20, 20],
+                           state_cls=ProbStack,
+                           inst_args=args.inst,
+                           num_spaces=3,
+                           problem_gen=problem1,
+                           objective_args=args.objective,
+                           random_init=True)
+
+        obs_data = env.initialize()
+        # debug
+        for k, v in out.items():
+            if k in ['entropy', 'log_prob']:
+                print(k, v.item())
+            elif v is None:
+                pass
+            else:
+                print(k, v.size())
+        assert 'entropy' in out
+        area = state_dim[1] * state_dim[2]
+
+        # im just gonna redo the reward calcs cuz this sucks
+        rooms = env._instance.rooms(stack=True)
+        areas = np.sum(rooms, axis=(1, 2))
+        cvx_areas = [np.sum(skm.convex_hull_image(rooms[i])) for i in range(3)]
+
+        # tests for good numerical properties
+        # todo:
+        # check that rewards make sense
+        print('\nreward', obs_data['reward'], '\ntargets\n', env.objective.keys)
+        [print(x) for x in env._objective._constraints]
+
+        print('targets\n', obs_data['feats'])
+        print('--')
+        print('areas', areas)
+        print('convex areas', cvx_areas)
+        print([(cvx_areas[i] - areas[i]) / cvx_areas[i]  for i in range(3)])
+        assert env._objective.fp_area == area, \
+            'footprint area {} {}'.format(env._objective.fp_area, area)
+        assert env._objective.fp_area > 0, 'footprint cannot be 0'
+        assert area == env._objective.fp_area
+
+    def test_p1(self):
+        args = base_args('res-action8,lr:1e-4,m15_BN')
+        args.objective = Arguments()
+        args.objective.use_comps = True
+
+        # """
+        args.train.episodes = int(1e6)
+        args.train.detail_every = 200
+        args.train.log_every = 50
+        """
+        args.train.episodes = 5  # int(1e6)
+        args.train.detail_every = 1
+        args.train.log_every = 1
+        """
+
+        args.train.steps = 15
+        # Layout Instance ARguments
+        args.inst.depth = 4
+        args.inst.init_dist = 'scaled-un'  # 'scaled-un'
+        args.inst.cls = ProbStack
+
+        args.env.incomplete_reward = 0.0001
+        args.env.terminal = NoImprovement(limit=4)
+
+        #
+        args.nn.zdim = 64
+        args.train.lr = 0.0001
+
+        env = DiscreteEnv2(None, None, [20, 20],
+                           state_cls=ProbStack,
+                           inst_args=args.inst,
+                           num_spaces=3,
+                           problem_gen=problem1,
+                           objective_args=args.objective,
+                           terminal=args.env.terminal,
+                           unsolved_problem_reward=args.env.incomplete_reward,
+                           random_init=args.env.random_init)
+
+        # print(env._state_cls)
+        # print(env.input_state_size)
+        model = nns.StreamNet2(
+            state_dim=env.input_state_size,
+            zdim=args.nn.zdim,
+            debug=True,
+        )
+        trainer = gr.ACTrainer3(
+            env,
+            title=args.title,
+            lr=args.train.lr,
+            model=model,
+            argobj=args,
+
+        )
+        trainer.train(episodes=args.train.episodes,
+                      steps=args.train.steps,
+                      loss_args=args.loss)
+
+    def test_supervised(self):
+
+
+
+    def test_lpent(self):
+        import src.probablistic.funcs as fp
+        import torch.distributions as dist
+        softmax = nn.Softmax2d()
+        size = (1, 3, 5, 5)
+        # baseline is random uniform
+        x1 = torch.FloatTensor(*size).uniform_(0.2, 0.4)
+
+        x2 = torch.zeros(*size)
+        x2[:, 0, 0:2, :] = 1.
+        x2[:, 1, 2:, :2] = 1.
+        x2[:, 2, 2:, 2:] = 1.
+
+        x3 = (x1 + x2) / 2
+
+        tests= [x1, x3, x2]
+
+        print(x3)
+        # kl_hard = [fp.kl_divirgence2d(x).mean() for x in tests]
+        kl_soft = [fp.kl_divirgence2d(softmax(x)).mean() for x in tests]
+
+        # ent_hard = [fp.entropy2d(x).mean() for x in tests]
+        ent_soft = [fp.entropy2d(softmax(x)).mean() for x in tests]
+        print('ents', ent_soft)
+        print('probs', kl_soft)
+
+        print([dist.Categorical(x.squeeze()).entropy().mean() for x in tests])
+        print([dist.Categorical(logits=x.squeeze()).entropy().mean() for x in tests])
+        print([dist.Categorical(softmax(x).squeeze()).entropy().mean() for x in tests])
+        print([dist.Categorical(softmax(x).squeeze()).entropy().size() for x in tests])
+
+        for x in tests:
+            dc = dist.Categorical(logits=x.permute(0, 2, 3, 1))
+            # print(dc.logits.size())
+            maxs = x.max(dim=1)[0].squeeze()
+            sample = dc.sample()
+            # print(sample.size(), maxs.size())
+            # print(maxs.size())
+            print(dc.entropy().sum(), dc.log_prob(sample).mean(), dc.log_prob(maxs).mean())
 
     def test_ac1(self):
-        from src.model.arguments import Arguments
         problem = prob.setup_2room_rect()
         title = 'ac-10step_penalty100k'
-
-        args = Arguments()
-
-        args.title = title
-        args.log_every = 100
-
-        env_args = Arguments()
-        env_args.random_init = True
-        env_args.random_objective = False
-        env_args.incomplete_reward = -1
-        args.env = env_args
-
-        loss_args = Arguments()
-        loss_args.gamma = 0.99
-        loss_args.gae_lambda = 0.95
-        loss_args.entropy_coef = 0.01
-        loss_args.value_loss_coef = 0.5
-        loss_args.max_grad_norm = 0.5
-
+        args = base_args('-')
         # -----------------------------
         viz = visdom.Visdom()
         viz.text(args.print())

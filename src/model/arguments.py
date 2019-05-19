@@ -20,6 +20,8 @@ class Arguments(object):
         for k, v in self.__dict__.items():
             if isinstance(v, self.__class__):
                 st += '\n<br>{} {} = {}'.format('-' * offs, k, v.print(offs=offs + 3))
+            elif isinstance(v, type):
+                st += '\n<br>{} {} = {}'.format('-' * offs, k, str(v.__class__))
             else:
                 st += '\n<br>{} {} = {}'.format('-' * offs, k, str(v))
         return st

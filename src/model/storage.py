@@ -138,6 +138,13 @@ class Storage:
     def __getitem__(self, item):
         return getattr(self, item)
 
+    def sample(self):
+        ix = random.randint(0, len(self))
+        sample = {}
+        for k in self.keys:
+            sample[k] = getattr(self, k)[ix]
+        return sample
+
     def add(self, data):
         for k, v in data.items():
             if k not in self.keys:

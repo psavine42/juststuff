@@ -7,11 +7,9 @@ import scipy.ndimage as nd
 def sample_(dist, action=None):
     if action is None:
         action = dist.sample()
-    log_prob = dist.log_prob(action).unsqueeze(-1)
-    entropy = dist.entropy().unsqueeze(-1)
     return {'action': action,
-            'log_prob': log_prob,
-            'entropy': entropy}
+            'log_prob': dist.log_prob(action).unsqueeze(-1),
+            'entropy': dist.entropy().unsqueeze(-1)}
 
 
 def sample_categorical(logits, **kwargs):
@@ -37,6 +35,26 @@ def sample_bivariate_normal(mu_x, mu_y, sigma_x, sigma_y, rho_xy, temp=1, greedy
            [rho_xy * sigma_x * sigma_y, sigma_y * sigma_y]]
     x = np.random.multivariate_normal(mean, cov, 1)
     return x[0][0], x[0][1]
+
+
+def log_prob_from_logits(x):
+    """ numerically stable log_softmax implementation that prevents overflow
+     https://github.com/pclucas14/pixel-cnn-pp/blob/master/utils.py
+    """
+    axis = len(x.size()) - 1
+    m, _ = torch.max(x, dim=axis, keepdim=True)
+    return x - m - torch.log(torch.sum(torch.exp(x - m), dim=axis, keepdim=True))
+
+
+def kl_divirgence2d(probs):
+    maxs = probs.max(dim=1)[0]
+    kl_divergence = (probs * torch.log(probs / maxs)).sum(-1).mean(dim=(1, 2), keepdim=True)
+    return kl_divergence.squeeze(-1)
+
+
+def entropy2d(probs):
+    entropy = -(probs * torch.log(probs)).sum(-1).mean(dim=(1, 2), keepdim=True)
+    return entropy.squeeze(-1)
 
 
 def get_action_log_prob(batch_mu, batch_log_sigma, min_val):
@@ -67,6 +85,9 @@ def update(model, optimizer, replay_buffer, batch_size):
     optimizer.step()
 
 
+# ---------------------------------------------------------------------------
+# LOSSES
+# ---------------------------------------------------------------------------
 def gae(storage, R, args):
     policy_loss = 0
     value_loss = 0
@@ -86,6 +107,42 @@ def gae(storage, R, args):
     return policy_loss + args['value_loss_coef'] * value_loss
 
 
+def base_reinforce(storage, R, args):
+    R = 0
+    policy_loss = []
+    returns = []
+    for r in storage.policy_rewards[::-1]:
+        R = r + args.gamma * R
+        returns.insert(0, R)
+
+    returns = torch.tensor(returns)
+    returns = (returns - returns.mean()) / (returns.std() + args.eps)
+    for log_prob, R in zip(storage.log_probs, returns):
+        policy_loss.append(-log_prob * R)
+
+    # optimizer.zero_grad()
+    loss = torch.cat(policy_loss).sum()
+    loss.backward()
+    # for param in self.policy_net.parameters():
+    #    if param.grad is not None:
+    #        param.grad.data.clamp_(-1, 1)
+    # self.optimizer.step()
+    return loss
+
+
+def gaussed_loss(storage, args):
+    """ Model-Based Planning with Discrete and Continuous Actions """
+    # eps = args['eps']
+    sigma = args['sigma'] ** 2
+
+    for i in reversed(range(len(storage))):
+        eps_noise = torch.normal(0, sigma)
+        storage.action[i] + eps_noise
+
+
+
+
+
 class LKLLoss:
     def __init__(self, args):
         self.wKL = args.wkl
@@ -100,6 +157,9 @@ class LKLLoss:
         return self.wKL * eta * torch.max(LKL, KL_min)
 
 
+# ---------------------------------------------------------------------------
+# MISC
+# ---------------------------------------------------------------------------
 def deepdream(net, base_img, iter_n=10, octave_n=4, octave_scale=1.4,
               end='inception_4c/output', clip=True, **step_params):
     """https://github.com/google/deepdream/blob/master/dream.ipynb """

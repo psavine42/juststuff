@@ -101,3 +101,22 @@ class ProgramEntity(object):
             self.__class__.__name__, self.name, self.prog_type
         )
 
+
+class DictProblem(Problem):
+    def __init__(self, program={}, target_state=None, footprint=None):
+        """
+
+        :param program:     dictionary with constraints by type
+        :param target_state: tensor of size [C, N, M]
+        :param footprint:
+        """
+        Problem.__init__(self)
+        self._program = program
+        self._footprint = footprint
+        self._target_state = target_state
+
+    @property
+    def program(self):
+        return self._program
+
+

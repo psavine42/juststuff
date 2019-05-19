@@ -1,3 +1,4 @@
+import math
 import torch
 import torch.nn as nn
 from torch.nn import Module, Parameter
@@ -5,14 +6,181 @@ from torch import tensor
 import torch.nn.functional as F
 
 
+
+
+class CnvStack(Module):
+    def __init__(self, in_size=2, batch_norm=False):
+        Module.__init__(self)
+        self.batch_norm = batch_norm
+        self.in_channels = in_size
+        self.conv1 = nn.Conv2d(in_size, 64, kernel_size=5, stride=2, padding=2)
+        self.bn1 = nn.BatchNorm2d(64)
+
+        self.conv2 = nn.Conv2d(64, 32, kernel_size=4, stride=2, padding=1)
+        self.bn2 = nn.BatchNorm2d(32)
+
+        self.conv3 = nn.Conv2d(32, 16, kernel_size=3, stride=2, padding=1)
+        self.bn3 = nn.BatchNorm2d(16)
+
+    @property
+    def conv_mods(self):
+        return [self.conv1, self.conv2, self.conv3]
+
+    def out_size(self, w, h):
+        z = self(torch.zeros(1, self.in_channels, w, h))
+        return z.size(1) * z.size(2) * z.size(3)
+
+    def forward(self, x):
+        if self.batch_norm is True:
+            x = F.leaky_relu(self.bn1(self.conv1(x)))
+            x = F.leaky_relu(self.bn2(self.conv2(x)))
+            x = F.leaky_relu(self.bn3(self.conv3(x)))
+        else:
+            x = F.leaky_relu(self.conv1(x))
+            x = F.leaky_relu(self.conv2(x))
+            x = F.leaky_relu(self.conv3(x))
+        return x
+
+
+class ConvNormRelu(Module):
+    def __init__(self, in_channels=2, out_channels=16, k=5, s=1,
+                 p=0, batch_norm=True):
+        Module.__init__(self)
+        self.batch_norm = batch_norm
+        self.in_channels = in_channels
+        self.conv1 = nn.Conv2d(in_channels, out_channels,
+                               kernel_size=k, stride=s, padding=p)
+        self.bn1 = nn.BatchNorm2d(out_channels)
+        self.pool = nn.MaxPool2d(kernel_size=5, stride=1, padding=2)
+
+    def out_size(self, w, h, ndim=1):
+        z = self(torch.zeros(1, self.in_channels, w, h))
+        if ndim == 1:
+            return z.size(1) * z.size(2) * z.size(3)
+        else:
+            return [z.size(2), z.size(3)]
+
+    def forward(self, x):
+        if self.batch_norm is True:
+            x = F.leaky_relu(self.bn1(self.conv1(x)))
+        else:
+            x = F.leaky_relu(self.conv1(x))
+        return x
+
+
+class MLP2(Module):
+    def __init__(self, in_size, out_size, activation=nn.ReLU):
+        Module.__init__(self)
+        self.l = nn.Sequential([nn.Linear(in_size, (in_size + out_size) // 2),
+                               activation(),
+                                nn.Linear((in_size + out_size) // 2, out_size),
+                                # activation()
+                               ])
+
+    def forward(self, *input):
+        return self.l(input)
+
+
+class DeConvNormRelu(Module):
+    def __init__(self, in_channels=2, out_channels=16, k=5, s=1,
+                 p=0, u=1, d=False, batch_norm=True,
+                 activation=None):
+        Module.__init__(self)
+        self.batch_norm = batch_norm
+        self.in_channels = in_channels
+        self.conv1 = nn.ConvTranspose2d(in_channels, out_channels, k, stride=s,
+                                        padding=p)
+        self.bn1 = nn.BatchNorm2d(out_channels)
+        self.activation = activation if activation else F.leaky_relu
+        self.u = True if u > 1 else False
+        if u > 1:
+            self.up_sample = nn.Upsample(scale_factor=u, mode='bilinear')
+
+    def out_size(self, w, h, ndim=1):
+        z = self(torch.zeros(1, self.in_channels, w, h))
+        if ndim == 1:
+            return z.size(1) * z.size(2) * z.size(3)
+        else:
+            return [z.size(2), z.size(3)]
+
+    def forward(self, x):
+        if self.batch_norm is True:
+            x = self.bn1(self.conv1(x))
+        else:
+            x = self.conv1(x)
+        # if self.activation is not None:
+        x = self.activation(x)
+        if self.u:
+            return self.up_sample(x)
+        return x
+
+
+class EncodeState4(Module):
+    def __init__(self, in_channels, zdim, residual=False):
+        Module.__init__(self)
+        _ly = [dict(k=6, s=1),
+               dict(k=6, s=1),
+               dict(k=4, s=2),
+               dict(k=4, s=1)]
+        self.residual = residual
+        self.conv1 = ConvNormRelu(in_channels, 8, **_ly[0])
+        self.conv2 = ConvNormRelu(8, 16, **_ly[1])
+        self.conv3 = ConvNormRelu(16, 32, **_ly[2])
+        self.conv4 = ConvNormRelu(32, zdim, **_ly[3])
+        # self.encode_targets = MLP2(feats, zdim)
+        # self.merge = MLP2(zdim*2, zdim)
+
+    def forward(self, input):
+        img, target_code = input
+        # res = []
+        # Stack of convs with features cache
+        x1 = self.conv1(img)
+        # res.append(x)
+        x2 = self.conv2(x1)
+        # res.append(x)
+        x3 = self.conv3(x2)
+        # res.append(x)
+        x4 = self.conv4(x3)
+        # tgt = self.encode_targets(flatten(target_code))
+        zs = self.merge(flatten(x4))
+        return zs
+
+
+class DecodeState4(Module):
+    def __init__(self, in_channels, zdim, residual=False):
+        Module.__init__(self)
+        _ly = [dict(k=6, s=1),
+               dict(k=6, s=1),
+               dict(k=4, s=2),
+               dict(k=4, s=1)]
+        self.dec1 = DeConvNormRelu(zdim, 32, **_ly[3])
+        self.dec2 = DeConvNormRelu(32, 16,   **_ly[2])
+        self.dec3 = DeConvNormRelu(16, 8,    **_ly[1])
+        self.dec4 = DeConvNormRelu(8, in_channels, **_ly[0])
+
+    def forward(self, z, hidden=None):
+        """
+        todo - make this real
+        img: size [batch_size, c, h, w]
+        """
+        x = self.dec1(z.unsqueeze(-1).unsqueeze(-1))
+        x = self.dec2(x)
+        x = self.dec3(x)
+        x = self.dec4(x)
+        return x
+
+
+
+
 class MultiBoxLayer(Module):
     """https://github.com/kuangliu/pytorch-ssd/blob/master/multibox_layer.py """
-    num_classes = 21
+    # num_classes = 21
     num_anchors = [4, 6, 6, 6, 4, 4]
     in_planes = [512, 1024, 512, 256, 256, 256]
 
-    def __init__(self):
+    def __init__(self, num_class):
         super(MultiBoxLayer, self).__init__()
+        self.num_classes = num_class
 
         self.loc_layers = nn.ModuleList()
         self.conf_layers = nn.ModuleList()
@@ -52,6 +220,16 @@ class Flatten(Module):
         return input.view(input.size(0), -1)
 
 
+def flatten(input):
+    return input.view(input.size(0), -1)
+
+
+def squash(input, dims):
+    for d in dims:
+        input.squeeze_(d)
+    return input
+
+
 class DotAttention(Module):
     def __init__(self, in_features=512, sigma0=0.5):
         Module.__init__(self)
@@ -70,18 +248,18 @@ class DotAttention(Module):
 
 class ConvSelfAttention(Module):
     """ https://lilianweng.github.io/lil-log/2018/06/24/attention-attention.html """
-    def __init__(self):
+    def __init__(self, in_channels):
         Module.__init__(self)
-        self.key = nn.Conv2d()
-        self.value = nn.Conv2d()
-        self.query = nn.Conv2d()
+        self.key = nn.Conv2d(in_channels, in_channels, stride=1, kernel_size=1)
+        self.value = nn.Conv2d(in_channels, in_channels, stride=1, kernel_size=1)
+        self.query = nn.Conv2d(in_channels, in_channels, stride=1, kernel_size=1)
         self.softmx = nn.Softmax()
 
     def forward(self, x):
         """
-        α_i,j = softmax(f(xi).t(), g(xj))
+        α_(i,j) = softmax(f(xi).t(), g(xj))
 
-        o_j= ∑ αi,jh(xi)
+        o_j= ∑ α_(i,j) * h(xi)
 
         """
         kx = self.key(x)
@@ -147,3 +325,139 @@ class NoisyLinear(Module):
     def __repr__(self):
         return self.__class__.__name__ + '(' \
             + 'in_features=' + str(self.in_features) + ', out_features=' + str(self.out_features) + ')'
+
+
+def batchnorm(in_planes):
+    "batch norm 2d"
+    return nn.BatchNorm2d(in_planes, affine=True, eps=1e-5, momentum=0.1)
+
+
+def conv3x3(in_planes, out_planes, stride=1, bias=False):
+    "3x3 convolution with padding"
+    return nn.Conv2d(in_planes, out_planes, kernel_size=3, stride=stride,
+                     padding=1, bias=bias)
+
+
+def conv1x1(in_planes, out_planes, stride=1, bias=False):
+    "1x1 convolution"
+    return nn.Conv2d(in_planes, out_planes, kernel_size=1, stride=stride,
+                     padding=0, bias=bias)
+
+
+def convbnrelu(in_planes, out_planes, kernel_size, stride=1, groups=1, act=True):
+    "conv-batchnorm-relu"
+    if act:
+        return nn.Sequential(
+            nn.Conv2d(in_planes, out_planes, kernel_size, stride=stride, padding=int(kernel_size / 2.), groups=groups,
+                      bias=False),
+            batchnorm(out_planes),
+            nn.ReLU6(inplace=True))
+    else:
+        return nn.Sequential(
+            nn.Conv2d(in_planes, out_planes, kernel_size, stride=stride, padding=int(kernel_size / 2.), groups=groups,
+                      bias=False),
+            batchnorm(out_planes))
+
+
+class ResidualEncBlock(Module):
+    expansion = 1
+
+    def __init__(self, inplanes, planes, stride=1, downsample=None):
+        Module.__init__(self)
+        self.conv1 = conv3x3(inplanes, planes, stride)
+        self.bn1 = nn.BatchNorm2d(planes)
+        self.relu = nn.ReLU(inplace=True)
+        self.conv2 = conv3x3(planes, planes)
+        self.bn2 = nn.BatchNorm2d(planes)
+        self.downsample = downsample
+        self.stride = stride
+
+    def forward(self, x):
+        residual = x
+
+        out = self.conv1(x)
+        out = self.bn1(out)
+        out = self.relu(out)
+
+        out = self.conv2(out)
+        out = self.bn2(out)
+
+        if self.downsample is not None:
+            residual = self.downsample(x)
+
+        y = out + residual
+        return self.relu(y)
+
+
+class ResidualDecBlock(Module):
+    def __init__(self, inplanes, planes, stride=1, downsample=None):
+        Module.__init__(self)
+        self.downsample = downsample
+        self.stride = stride
+
+        self.conv1 = conv3x3(inplanes, planes, stride)
+        self.bn1 = nn.BatchNorm2d(planes)
+        self.relu = nn.ReLU(inplace=True)
+        self.conv2 = conv3x3(planes, planes)
+        self.bn2 = nn.BatchNorm2d(planes)
+
+    def forward(self, x):
+
+        return
+
+
+class CRPBlock(nn.Module):
+
+    def __init__(self, in_planes, out_planes, n_stages):
+        super(CRPBlock, self).__init__()
+        for i in range(n_stages):
+            setattr(self, '{}_{}'.format(i + 1, 'outvar_dimred'),
+                    conv3x3(in_planes if (i == 0) else out_planes,
+                            out_planes, stride=1,
+                            bias=False))
+        self.stride = 1
+        self.n_stages = n_stages
+        self.maxpool = nn.MaxPool2d(kernel_size=5, stride=1, padding=2)
+
+    def forward(self, x):
+        top = x
+        for i in range(self.n_stages):
+            top = self.maxpool(top)
+            top = getattr(self, '{}_{}'.format(i + 1, 'outvar_dimred'))(top)
+            x = top + x
+        return x
+
+
+stages_suffixes = {0: '_conv',
+                   1: '_conv_relu_varout_dimred'}
+
+
+class RCUBlock(Module):
+    def __init__(self, in_planes, out_planes, n_blocks, n_stages):
+        super(RCUBlock, self).__init__()
+        for i in range(n_blocks):
+            for j in range(n_stages):
+                setattr(self, '{}{}'.format(i + 1, stages_suffixes[j]),
+                        conv3x3(in_planes if (i == 0) and (j == 0) else out_planes,
+                                out_planes, stride=1,
+                                bias=(j == 0)))
+        self.stride = 1
+        self.n_blocks = n_blocks
+        self.n_stages = n_stages
+
+    def forward(self, x):
+        for i in range(self.n_blocks):
+            residual = x
+            for j in range(self.n_stages):
+                x = F.relu(x)
+                x = getattr(self, '{}{}'.format(i + 1, stages_suffixes[j]))(x)
+            x += residual
+        return x
+
+
+
+
+
+
+
+
