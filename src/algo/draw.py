@@ -25,7 +25,7 @@ def align(x, y, start_dim=0):
             ys[td] = xs[td]
         elif xs[td] == 1:
             xs[td] = ys[td]
-    return x.expand(*xs), y.expand(*ys)
+    return x.expand(*xs).float(), y.expand(*ys).float()
 
 
 def matmul(X, Y):
@@ -37,7 +37,7 @@ def matmul(X, Y):
 
 
 class DrawModel(nn.Module):
-    def __init__(self, T, A, B, z_size, N, dec_size, enc_size):
+    def __init__(self, T, A, B, z_size, N, dec_size, enc_size, C=1):
         """
 
         :param T: time steps
@@ -53,6 +53,7 @@ class DrawModel(nn.Module):
         # self.batch_size = batch_size
         self.A = A
         self.B = B
+        self.C = C
         self.z_size = z_size
         self.N = N
         self.dec_size = dec_size
@@ -197,26 +198,30 @@ class DrawModel(nn.Module):
         w = self.dec_w_linear(h_dec)
         w = w.view(self.batch_size, self.N, self.N)
 
+        # gamma - scalar
         (Fx, Fy), gamma = self.attn_window(h_dec)
-        Fyt = Fy.transpose(2, 1)
 
-        wr = Fyt.bmm(w.bmm(Fx))
+        wr = Fy.transpose(2, 1).bmm(w.bmm(Fx))
         wr = wr.view(self.batch_size, self.A*self.B)
         return wr / gamma.view(-1, 1).expand_as(wr)
 
     def generate(self, batch_size=64):
-        h_dec_prev = Variable(torch.zeros(batch_size, self.dec_size), volatile=True)
-        dec_state = Variable(torch.zeros(batch_size, self.dec_size), volatile=True)
+        self.batch_size = batch_size
+        h_dec_prev = torch.zeros(batch_size, self.dec_size)
+        dec_state = torch.zeros(batch_size, self.dec_size)
 
         for t in range(self.T):
-            c_prev = Variable(torch.zeros(batch_size, self.A * self.B)) if t == 0 else self.cs[t - 1]
-            z = self.normalSample()
+            c_prev = torch.zeros(batch_size, self.A * self.B) if t == 0 else self.cs[t - 1]
+            z = torch.randn(self.batch_size, self.z_size)
             h_dec, dec_state = self.decoder(z, (h_dec_prev, dec_state))
             self.cs[t] = c_prev + self.write(h_dec)
             h_dec_prev = h_dec
         imgs = []
         for img in self.cs:
-            imgs.append(self.sigmoid(img).cpu().data.numpy())
+            # imgs.append(self.sigmoid(img))
+            i = img / img.norm(2)
+
+            imgs.append(i - i.min())
         return imgs
 
 

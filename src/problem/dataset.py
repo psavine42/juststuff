@@ -1,10 +1,23 @@
 import itertools
-import torch
+from scipy.spatial import KDTree
 
 from src.problem.example import *
 from src.objectives import DiscProbDim
 from src.model.storage import Storage
 from src.problem.objective_utils import max_boundnp
+
+
+def ix_to_one_hot(indices, size):
+    x = np.zeros(size)
+    # print(indices, x.shape)
+    if len(x.shape) == 1:
+        x[indices] = 1
+    elif len(x.shape) == 2:
+        for i in range(x.shape[0]):
+            x[i, indices[i]] = 1
+    else:
+        raise Exception
+    return x
 
 
 def reverse_box_action(state, next_state, inst=None):
@@ -16,13 +29,46 @@ def reverse_box_action(state, next_state, inst=None):
         - next_state tensor of size [ C, N, M ]
     """
     delta = next_state - state
-    # get the layer index
-    index = np.sum(delta, axis=(1, 2)).argmax()
+    index = np.sum(delta, axis=(1, 2)).argmax()     # get the updated layer index
     # get upper and lower bounds to compute box-action
-    inds = np.nonzero(delta[index])
+    inds = np.stack(np.nonzero(delta[index]), -1)
     xymin = np.min(inds, axis=0)
     xymax = np.max(inds, axis=0)
-    return np.concatenate((xymin, xymax))
+    cat = np.concatenate((xymin, xymax))
+    return index, cat
+
+
+def to_disc_disc(state, xs):
+    a, y = xs
+    # print(a, y, state.shape)
+    a = ix_to_one_hot(a, (state.shape[0]))
+    y = ix_to_one_hot(y, (4, state.shape[-1]))
+    return a, y
+
+
+def to_disc_cont(state, xs):
+    a, cat = xs
+    a = ix_to_one_hot(a, (state.shape[0]))
+    cat = cat / state.shape[1]
+    return a, cat
+
+
+def to_cont_cont(state, xs):
+    a, cat = xs
+    # print(cat, state.shape)
+    a /= state.shape[0]
+    cat = cat / state.shape[1]
+    return a, cat
+
+
+def to_vec(state, xs):
+    a, cat = to_cont_cont(state, xs)
+    return np.concatenate([np.asarray([a]), cat])
+
+
+def generate_dataset_kd(dataset_args, state_cls, inst_args, objective_args):
+    pass
+
 
 
 def generate_dataset(dataset_args, state_cls, inst_args, objective_args):
@@ -44,29 +90,40 @@ def generate_dataset(dataset_args, state_cls, inst_args, objective_args):
     while count < size and not done:
         # count = 0
         problem_dict, term_state = problem1(return_state=True)
-        instance = state_cls(problem_dict=problem_dict, **inst_args)
+        problem = DictProblem(problem_dict)
+
+        instance = state_cls(problem, problem_dict=problem_dict, **inst_args)
         instance.active_state = term_state
 
-        objective = DiscProbDim(None, problem_dict, **objective_args)
+        objective = DiscProbDim(problem, problem_dict, **objective_args)
         target_code = objective.to_input()
 
+        # these steps are optimal backtracks
         perfect_perm = list(range(term_state.shape[0]))
         for seq in itertools.permutations(perfect_perm):
             # variations of state | problem
-            # zero out one level
+            # zero out one level at each step and save
             state = term_state.copy()
             for i in seq:
                 prev_state = state.copy()
                 prev_state[i] = 0
-                r, feats = objective.reward(prev_state)
+                instance.active_state = prev_state
+                r, feats = objective.reward(instance)
                 action = reverse_box_action(prev_state, state)
+                if dataset_args['post_process']:
+                    action = dataset_args['post_process'](state, action)
+                else:
+                    action = to_disc_cont(state, action)
+
                 datum = {
-                    'state': torch.from_numpy(prev_state).float(),
-                    'action': torch.from_numpy(action).float(),
-                    'code': torch.from_numpy(target_code).float(),
-                    'reward': torch.tensor([r]).float(),
-                    'next_state': torch.from_numpy(state).float(),
-                    'real': 1
+                    'state': prev_state,    # state_t
+                    'action': action,       # action_t
+                    'code': target_code.astype(float),      # constant | problem
+                    'reward': r.astype(float),              # reward_t+1
+                    'next_state': state,                    # state_t+1
+                    'real': 1,
+                    'optimal': 1,
+                    'index': i
                 }
                 state = prev_state
                 yield datum
@@ -77,10 +134,13 @@ def generate_dataset(dataset_args, state_cls, inst_args, objective_args):
                     break
 
 
-def build_dataset(dataset_args, state_cls, inst_args, objective_args):
+def build_dataset(dataset_args, state_cls, inst_args, objective_args, store=False):
     size = dataset_args.num_problems * dataset_args.num_options
-    storage = Storage(size)
-    for datum in generate_dataset(dataset_args, state_cls, inst_args, objective_args):
-        storage.add(datum)
-    return storage
+    if store is True:
+        storage = Storage(size)
+        for datum in generate_dataset(dataset_args, state_cls, inst_args, objective_args):
+            storage.add(datum)
+        return storage
+    else:
+        return list(generate_dataset(dataset_args, state_cls, inst_args, objective_args))
 

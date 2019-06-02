@@ -26,6 +26,9 @@ class Arguments(object):
                 st += '\n<br>{} {} = {}'.format('-' * offs, k, str(v))
         return st
 
+    def __contains__(self, item):
+        return getattr(self, item, None) is not None
+
     def __str__(self):
         return self.print()
 
@@ -34,7 +37,6 @@ class Arguments(object):
 
     def save(self):
         js = {}
-
 
     def load(self):
         pass

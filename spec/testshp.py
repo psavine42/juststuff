@@ -35,6 +35,8 @@ import matplotlib.pyplot as plt
 import visdom
 import torchnet as tnt
 from arg_config import base_args
+from src.problem.example import *
+
 
 s = 10
 random.seed(s)

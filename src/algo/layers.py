@@ -4,8 +4,16 @@ import torch.nn as nn
 from torch.nn import Module, Parameter
 from torch import tensor
 import torch.nn.functional as F
+from src.actions.action_models import *
+from src.probablistic.utils import flatten
 
 
+class Noop(Module):
+    def __init__(self):
+        Module.__init__(self)
+
+    def forward(self, input):
+        return input
 
 
 class CnvStack(Module):
@@ -71,14 +79,14 @@ class ConvNormRelu(Module):
 class MLP2(Module):
     def __init__(self, in_size, out_size, activation=nn.ReLU):
         Module.__init__(self)
-        self.l = nn.Sequential([nn.Linear(in_size, (in_size + out_size) // 2),
+        self.l = nn.Sequential(nn.Linear(in_size, (in_size + out_size) // 2),
                                activation(),
                                 nn.Linear((in_size + out_size) // 2, out_size),
                                 # activation()
-                               ])
+                               )
 
-    def forward(self, *input):
-        return self.l(input)
+    def forward(self, x):
+        return self.l(x)
 
 
 class DeConvNormRelu(Module):
@@ -126,24 +134,14 @@ class EncodeState4(Module):
         self.conv1 = ConvNormRelu(in_channels, 8, **_ly[0])
         self.conv2 = ConvNormRelu(8, 16, **_ly[1])
         self.conv3 = ConvNormRelu(16, 32, **_ly[2])
-        self.conv4 = ConvNormRelu(32, zdim, **_ly[3])
-        # self.encode_targets = MLP2(feats, zdim)
-        # self.merge = MLP2(zdim*2, zdim)
+        self.conv4 = ConvNormRelu(32, zdim, **_ly[3], batch_norm=False)
 
-    def forward(self, input):
-        img, target_code = input
-        # res = []
-        # Stack of convs with features cache
-        x1 = self.conv1(img)
-        # res.append(x)
+    def forward(self, x):
+        x1 = self.conv1(x)
         x2 = self.conv2(x1)
-        # res.append(x)
         x3 = self.conv3(x2)
-        # res.append(x)
         x4 = self.conv4(x3)
-        # tgt = self.encode_targets(flatten(target_code))
-        zs = self.merge(flatten(x4))
-        return zs
+        return x4
 
 
 class DecodeState4(Module):
@@ -170,8 +168,259 @@ class DecodeState4(Module):
         return x
 
 
+# ----------------------------------------------------------
+class _PolicyDecoderBase(Module):
+    def __init__(self, zdim,
+                 shape=[3, 20, 20],
+                 action_fn=None,
+                 geomtry_fn=None):
+        Module.__init__(self)
+        self._zdim = zdim
+        self._state_shape = shape
+        self.sigmoid = geomtry_fn if geomtry_fn else nn.Sigmoid()
+        self.softmax = action_fn if action_fn else nn.Softmax(dim=-1)
+
+    def loss(self, *args):
+        raise NotImplemented('not implemented in base class ')
+
+    def predict_box(self, *args):
+        """ return [b , 5 ] in (0, 1) """
+        raise NotImplemented('not implemented in base class ')
 
 
+class PolicySimple(_PolicyDecoderBase):
+    """
+    DONE
+
+    """
+    def __init__(self, zdim, **kwargs):
+        _PolicyDecoderBase.__init__(self, zdim, **kwargs)
+        self.action = MLP2(zdim, 5)
+
+    def predict_box(self, x):
+        return x
+
+    def loss(self, predicted, targets):
+        return F.mse_loss(predicted, targets)
+
+    def forward(self, x):
+        return self.sigmoid(self.action(x))
+
+
+# ----------------------------------------------------------
+# LOGITS :[N, S] , GEOM: [ N, 4 ] - testing fully continuous policies
+class PolicyDiscContIndependant(_PolicyDecoderBase):
+    """
+    todo DONE
+    Assumes Independence
+    ----
+    action -> size(shape[0]) logits-num_spaces
+    action -> size(4)        continuous
+    """
+    def __init__(self, zdim, **kwargs):
+        _PolicyDecoderBase.__init__(self, zdim, **kwargs)
+        self.action = MLP2(zdim, kwargs['shape'][0])
+        self.geom = MLP2(zdim, 4)
+
+    def predict_box(self, x):
+        return composite_action_to_cont_box(x)
+
+    def loss(self, predicted, targets):
+        return disc_cont_loss(predicted, targets)
+
+    def forward(self, z):
+
+        logits = self.softmax(self.action(z))
+        geom = self.sigmoid(self.geom(z))
+        return logits, geom
+
+
+class PolicyDiscContGA(_PolicyDecoderBase):
+    """
+    todo DONE
+    Assumes 'ActionIndex' Depends on 'Geometry'
+
+    """
+    def __init__(self, zdim, **kwargs):
+        _PolicyDecoderBase.__init__(self, zdim, **kwargs)
+        self.action = MLP2(zdim + 4, kwargs['shape'][0])
+        self.geom = MLP2(zdim, 4)
+
+    def predict_box(self, x):
+        return composite_action_to_cont_box(x)
+
+    def loss(self, predicted, targets):
+        return disc_cont_loss(predicted, targets)
+
+    def forward(self, z):
+        geom = self.geom(z)
+        logits = self.action(torch.cat((z, geom), -1))
+        return self.softmax(logits), self.sigmoid(geom)
+
+
+class PolicyDiscContAG(_PolicyDecoderBase):
+    """
+    todo DONE
+    Assumes 'ActionIndex' Depends on 'Geometry'
+    ----
+    action -> size(shape[0]) logits-num_spaces
+    action -> size(4)        continuous
+
+    """
+    def __init__(self, zdim, **kwargs):
+        _PolicyDecoderBase.__init__(self, zdim, **kwargs)
+        self.action = MLP2(zdim, kwargs['shape'][0])
+        self.geom = MLP2(zdim + kwargs['shape'][0], 4)
+
+    def predict_box(self, x):
+        return composite_action_to_cont_box(x)
+
+    def loss(self, predicted, targets):
+        return disc_cont_loss(predicted, targets)
+
+    @property
+    def out_size(self):
+        return [self._state_shape[0], 4]
+
+    def forward(self, z):
+        logits = self.action(z)
+        geom = self.geom(torch.cat((z, logits), -1))
+        return self.softmax(logits), self.sigmoid(geom)
+
+
+# ----------------------------------------------------------
+#
+class PolicyLogits4CoordIndep(_PolicyDecoderBase):
+    """
+    TODO THIS SHOULD BE THE CONF PRED MODELLLLL
+        location_predictions   [N, 4]
+    confidence_predictions [N, num_]
+
+    """
+    def __init__(self, zdim, **kwargs):
+        _PolicyDecoderBase.__init__(self, zdim, **kwargs)
+        self.action = MLP2(zdim, kwargs['shape'][0])
+        self.geom = MLP2(zdim, 4)
+
+    def loss(self, predicted, targets):
+        return disc_cont_loss(predicted, targets)
+
+    def forward(self, z):
+        """
+        Returns
+            [b, S, 1], [b, N, 4 ]
+        """
+        y = self.softmax(self.action(z))
+        action_box = self.sigmoid(self.action(z))
+        return y, action_box
+
+
+class PolicyAllLogitsIndependent(_PolicyDecoderBase):
+    """
+
+    TODO - losses
+
+    action -> logits-num_spaces
+    action -> logits-xdim
+    action -> logits-ydim
+    action -> logits-xdim
+    action -> logits-ydim
+    """
+
+    def __init__(self, zdim, shape=[3, 20, 20], **kwargs):
+        _PolicyDecoderBase.__init__(self, zdim, shape=shape, **kwargs)
+        self.action = MLP2(zdim, shape[0])
+        self.x0 = MLP2(zdim, shape[1])
+        self.y0 = MLP2(zdim, shape[2])
+        self.x1 = MLP2(zdim, shape[1])
+        self.y1 = MLP2(zdim, shape[2])
+
+    def loss(self, pred, targets):
+        return disc_disc_loss(pred, targets)
+
+    def predict_box(self, x):
+        return disc_disc_action_to_cont_box(x)
+
+    def forward(self, z):
+        """ tuple of [N, actions ] ,
+            [ b, 1, S ], [ b, 4, N ]
+        """
+        ac = self.softmax(self.action(z))
+        x0 = self.softmax(self.x0(z))
+        y0 = self.softmax(self.y0(z))
+        x1 = self.softmax(self.x1(z))
+        y1 = self.softmax(self.y1(z))
+        return ac, torch.stack((x0, y0, x1, y1), 1)
+
+
+class PolicyAllLogitsAG(_PolicyDecoderBase):
+    """
+
+    TODO - losses
+
+    action -> logits-num_spaces
+    action -> logits-xdim
+    action -> logits-ydim
+    action -> logits-xdim
+    action -> logits-ydim
+    """
+
+    def __init__(self, zdim, shape=[3, 20, 20], **kwargs):
+        _PolicyDecoderBase.__init__(self, zdim, shape=shape, **kwargs)
+        self.action = MLP2(zdim, shape[0])
+        self.x0 = MLP2(zdim + shape[0], shape[1])
+        self.y0 = MLP2(zdim + shape[0], shape[1])
+        self.x1 = MLP2(zdim + shape[0], shape[1])
+        self.y1 = MLP2(zdim + shape[0], shape[1])
+
+    def loss(self, pred, targets):
+        return disc_disc_loss(pred, targets)
+
+    def predict_box(self, x):
+        return disc_disc_action_to_cont_box(x)
+
+    @property
+    def out_size(self):
+        return [self._state_shape[0], [self._state_shape[1], 4]]
+
+    def forward(self, z):
+        """ tuple of [N, actions ] ,
+            [ b, 1, S ], [ b, 4, N ]
+        """
+        ac = self.action(z)
+        x0 = self.x0(torch.cat((z, ac), -1))
+        y0 = self.y0(torch.cat((z, ac), -1))
+        x1 = self.x1(torch.cat((z, ac), -1))
+        y1 = self.y1(torch.cat((z, ac), -1))
+        return self.softmax(ac), torch.stack((x0, y0, x1, y1), 1)
+
+
+class PolicyAllLogitsRNN(_PolicyDecoderBase):
+    """
+
+    """
+    def __init__(self, zdim, num_layer=1, **kwargs):
+        _PolicyDecoderBase.__init__(self, zdim, **kwargs)
+        shape = kwargs['shape']
+        self.hs = shape[1]
+        self.num_layer = num_layer
+        self.action = MLP2(zdim, shape[0])
+        self.geom = nn.RNN(zdim, shape[1], num_layer)
+
+    def forward(self, z):
+
+        nz = z.expand(4, z.size(0), z.size(-1))
+        hx = torch.zeros(self.num_layer, z.size(0), self.hs)
+
+        coord, hs = self.geom(nz, hx)
+
+        ac = self.action(z )
+        return
+
+
+# ---------------------------------------------------------------------------------------
+# OTHER LAYERS - EXTERNALS
+# ---------------------------------------------------------------------------------------
 class MultiBoxLayer(Module):
     """https://github.com/kuangliu/pytorch-ssd/blob/master/multibox_layer.py """
     # num_classes = 21
@@ -216,12 +465,8 @@ class MultiBoxLayer(Module):
 
 
 class Flatten(Module):
-    def forward(self, input):
-        return input.view(input.size(0), -1)
-
-
-def flatten(input):
-    return input.view(input.size(0), -1)
+    def forward(self, x):
+        return flatten(x)
 
 
 def squash(input, dims):

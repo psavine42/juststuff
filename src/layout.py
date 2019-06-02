@@ -30,8 +30,11 @@ def fillable(G):
 
 
 def get_scale_for_size(footprint, nx, ny):
-    xmn, ymn, xmx, ymx = footprint.bounds
-    return min([nx / (xmx - xmn), ny / (ymx - ymn)])
+    if footprint is not None:
+        xmn, ymn, xmx, ymx = footprint.bounds
+        return min([nx / (xmx - xmn), ny / (ymx - ymn)])
+    else:
+        return nx, ny
 
 
 def write_mat(geoms, footprint, nx, ny):
@@ -611,7 +614,8 @@ class StackedRooms(DiscreteLayout):
 
     @active_state.setter
     def active_state(self, state):
-        assert state.shape == self.active_state.shape
+        assert state.shape == self.active_state.shape, \
+            'state in {}, active {}'.format(state.shape, self.active_state.shape)
         self._state[:self._num_spaces] = state
 
     @property
@@ -628,7 +632,10 @@ class StackedRooms(DiscreteLayout):
 
     def __init_state(self):
         self._state = np.zeros((self._depth, self._size[0], self._size[1])).astype(int)
-        fp = write_mat([self._problem.footprint], self._problem.footprint, self.N, self.M)
+        if self._problem.footprint is not None:
+            fp = write_mat([self._problem.footprint], self._problem.footprint, self.N, self.M)
+        else:
+            fp = np.ones((self._size[0], self._size[1]))
         self._state[self._footprint_dim] = fp
 
     def add_step(self, box_args, draw=1, erase=0):

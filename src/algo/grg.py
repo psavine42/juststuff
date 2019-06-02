@@ -525,7 +525,7 @@ class Trainer(object):
         self._dx = state_size[0]
         self._dy = state_size[1]
         self.env = env
-        self.problem = env.problem
+        self.problem = env.problem if env is not None else None
         self._title = title
         self._debug = debug
 
@@ -534,20 +534,26 @@ class Trainer(object):
 
         # self.max_episode_length =
         self.action_size = action_size
-        self.num_ents = len(env.problem)
+        self.num_ents = len(env.problem) if env is not None else None
 
         self.steps_done = 0
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.optimizer = None
-
+        self.model = None
         self.save_every = 100000
         self.log_every = log_every
         self.M = None
 
-    def _to_tensor(self, state):
-        if isinstance(state, tuple):
-            return tuple([self._to_tensor(x) for x in state])
-        return torch.from_numpy(state).unsqueeze(0).float().to(self.device)
+    def save_model(self):
+        if self.model is not None:
+            save_model(self.model, './data/trained/{}.pkl'.format(self._title))
+
+    def _to_tensor(self, x):
+        if isinstance(x, tuple):
+            return tuple([self._to_tensor(x) for x in x])
+        elif isinstance(x, (int, float)):
+            return torch.tensor([x]).float().to(self.device)
+        return torch.from_numpy(x).unsqueeze(0).float().to(self.device)
 
 
 class DQNTrainer:

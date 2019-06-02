@@ -1,7 +1,7 @@
 import networkx as nx
 from src.building import Area
 from src.layout_ops import *
-from .base import Problem, ProgramEntity
+from .base import *
 import math
 from src.problem.objective_utils import *
 
@@ -205,6 +205,13 @@ def problem1(num_spaces=3, x=20, y=20, return_state=False):
         return items, state
     return items
 
+
+def problem12(num_spaces=3,  x=20, y=20, return_state=False):
+    """ generate spaces by growing tiles .... """
+    s = np.zeros((num_spaces, x, y))
+    seeds = np.random.random_integers(0, max(x, y), 2 * num_spaces)
+
+    return
 
 
 

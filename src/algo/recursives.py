@@ -4,6 +4,8 @@ from torch.nn import Module, Parameter
 from src.probablistic.funcs import *
 from src.model.storage import Storage
 from src.algo.layers import *
+from src.probablistic.utils import *
+
 
 class SMC(Module):
     """
@@ -71,8 +73,22 @@ class SMC(Module):
 
 
 class GBP(Module):
-    def __init__(self, enc, dec, action_size, z_size, target_size,
-                 shared_size=None):
+    """
+    Lacunn Et al.
+    Adapted to this problem
+
+        - enc: Encoder Module
+        - dec: Decoder Module
+        - action_size : tuple
+        - z_size: size of laatent representation vector
+    """
+    def __init__(self, enc, dec,
+                 action_size,
+                 z_size,
+                 target_size,
+                 shared_size=None,
+                 subgoal_size=None,
+                 policy=None):
         Module.__init__(self)
         shared_size = shared_size if shared_size else 2 * action_size
 
@@ -81,57 +97,84 @@ class GBP(Module):
 
         self.encode_target = MLP2(target_size, shared_size)
         self.encode_action = MLP2(action_size, shared_size)
-        self.decode_action = MLP2(shared_size, action_size)
+
+        #self.generate_subgoal = MLP2(z_size, subgoal_size)
+        # not needed
+        # self.decode_action = MLP2(shared_size, action_size)
 
         #
-        self.merge_saz = MLP2(2 * shared_size + z_size, z_size)
-        self.pred_reward = MLP2(2 * shared_size + z_size, 1)
+        self.merge_sfz = MLP2(shared_size + z_size, z_size)
+        self.merge_saz = MLP2(shared_size + z_size, z_size)
+        self.pred_reward = MLP2(z_size, 1)
 
-        self.policy = MLP2(z_size, action_size)
+        self.policy = PolicySimple(z_size, shape=[action_size]) if policy is None else policy
         self.sigmoid = nn.Sigmoid()
+        self.softmax = nn.Softmax()
 
     def encode(self, state):
+        """
+        F(S) -> z
+        """
+
         img, feats = state
-        zs = self.encode_state(img)
-        zf = self.sigmoid(self.encode_target(feats))
-        return torch.cat((zs, zf))
+        zs = flatten(self.encode_state(img))
+        zf = self.encode_target(flatten(feats))
+        z = self.merge_sfz(torch.cat((zs, zf), -1))
+        return z
 
     def transition(self, state, action):
-        zs = self.encode_state(state)
-        za = self.encode_action(action)
+        """
+        Fs(s_t, a_t) -> s_t+1
+        """
+        # print(state.size())
+        zs = self.encode(state)
+        za = self.encode_action(flatten(action))
 
-        z = self.merge_saz(torch.cat(zs, za))
+        # next state does not care about zf
+        z = self.merge_saz(torch.cat((zs, za), -1))
         next_state = self.decode_state(z)
         return next_state
 
     def reward(self, state, action):
-        zs = self.encode_state(state)
-        za = self.encode_action(action)
+        """
+        Fs(s_t, a_t) -> r_t+1
+        """
+        zs = self.encode(state)
+        # print(size(action), size(flatten(action)))
+        za = self.encode_action(flatten(action))
 
-        z = self.merge_saz(torch.cat(zs, za))
+        z = self.merge_sfz(torch.cat((zs, za), -1))
         reward = self.sigmoid(self.pred_reward(z))
         return reward
-
-    def policy(self, state):
-        zs = self.encode_state(state)
-        action = self.policy(zs)
-        return action
 
     def forward(self, state):
         """ for supervised only - runs all modules
             action
             predict_next
 
+        F_pi(s_t) -> a_t, s_t+1, r_t+1
         """
-        zs = self.encode_state(state)
-        action = self.policy(zs)
+        zs = self.encode(state)
+        ac = self.policy(zs)    # [ 0, 1 ] fuck yo logits nigga
 
-        za = self.encode_action(action)
-        z = self.merge_saz(torch.cat(zs, za))
+        za = self.encode_action(flatten(ac))
+        z = self.merge_saz(torch.cat((zs, za), -1))
 
         next_state = self.decode_state(z)
-        reward = self.sigmoid(self.pred_reward(z))
-        return action, next_state, reward
+        next_reward = self.sigmoid(self.pred_reward(z))
+        return ac, next_state, next_reward
+
+
+class IDK(Module):
+    def __init__(self):
+        Module.__init__(self)
+
+    def forward(self, state, goal=None, hidden=None):
+        """
+
+        """
+        z_state = self.encode_state(state)
+        z_goal = self.make_goal(z_state)
 
 
 class PseudoKD(Module):

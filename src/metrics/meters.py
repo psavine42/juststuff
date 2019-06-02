@@ -59,9 +59,12 @@ class AllMeters(object):
         self._img_dir = './data/img/{}/'.format(self._title)
         self.viz = visdom.Visdom()
         if isinstance(arg_obj, Arguments):
+            # self._testing = True
             if arg_obj.train.testing is False:
+
                 arg_txt = arg_obj.print()
                 self.viz.text(arg_txt, opts=dict(title=self._title))
+
         if not os.path.exists(self._img_dir):
             os.makedirs(self._img_dir)
         self._mdict = {}
@@ -180,6 +183,53 @@ class AllMeters(object):
 
 
 # ----------------------------------------------------------------------------------------
+class SupervisedMeter(AllMeters):
+    def __init__(self, **kwargs):
+        AllMeters.__init__(self, **kwargs)
+        meters = ['policy_loss', 'reward_loss', 'recon_loss', 'loss']
+        meters_acc = ['error_index', 'error_geom']
+        self.add_meters(*meters + meters_acc, cls=tnt.meter.AverageValueMeter)
+        self.add_logger('loss', data=meters)
+        self.add_logger('action', data=meters_acc)
+
+    def log_detailed_episode(self, step, data):
+        print(step, data)
+
+    def np(self, xs):
+        if isinstance(xs, (list, tuple)):
+            return np.concatenate([self.np(x) for x in xs])
+        elif isinstance(xs, (float, int)):
+            return xs
+        return xs.cpu().detach().squeeze().numpy()
+
+    def log_step(self, step, loss_a, loss_r, loss_s, action_hat, action):
+        # print(action_hat.shape)
+        # action_hat = self.np(action_hat)
+        # action_tgt = self.np(action)
+        # action_hat[1:] *= 20
+        # action_tgt[1:] *= 20
+        # action_hat[0] *= 3
+        # action_tgt[0] *= 3
+        # a_tgt, a_pred = action_tgt.astype(int), action_hat.astype(int)
+
+        # acc_action = np.abs(action_hat - action)
+        # self.M['error_index'].add(1 if acc_action[0] > 0 else 0)
+        # self.M['error_geom'].add(acc_action[1:].sum())
+
+        self.M['policy_loss'].add(self.np(loss_a))
+        self.M['reward_loss'].add(self.np(loss_r))
+        self.M['recon_loss'].add(self.np(loss_s))
+        self.M['loss'].add(self.np(loss_a + loss_r + loss_s))
+
+        #if step % self.detail_every == 0:
+        #    self.log_detailed_episode(step, [a_tgt, a_pred])
+
+        if step % self.log_every == 0:
+            self.L['loss'].log(step, self.values('policy_loss', 'reward_loss', 'recon_loss', 'loss'))
+            self.L['action'].log(step, self.values('error_index', 'error_geom'))
+            self.reset()
+
+
 class Meters2(AllMeters):
     def __init__(self, **kwargs):
         AllMeters.__init__(self, **kwargs)
@@ -243,24 +293,4 @@ class Meters2(AllMeters):
             self.reset()
 
 
-class SupervisedMeter(AllMeters):
-    def __init__(self, **kwargs):
-        AllMeters.__init__(self, **kwargs)
-        meters = ['policy_loss', 'reward_loss', 'recon_loss', 'loss']
-        self.add_meters(*meters, cls=tnt.meter.AverageValueMeter)
-        self.add_logger('loss', data=meters)
-
-    def log_step(self, step, loss_a, loss_r, loss_s, action_hat, action):
-        self.M['policy_loss'].add(loss_a.cpu().squeeze())
-        self.M['reward_loss'].add(loss_r.cpu().squeeze())
-        self.M['recon_loss'].add(loss_s.cpu().squeeze())
-        self.M['loss'].add((loss_a + loss_r + loss_s).cpu().squeeze())
-
-        if step % self.log_every == 0:
-            self.log_detailed_episode(step, None)
-
-        if step % self.log_every == 0:
-            self.L['losses'].log(
-                step, self.values('policy_loss', 'reward_loss', 'recon_loss', 'loss')
-            )
 
