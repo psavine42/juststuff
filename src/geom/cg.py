@@ -2,6 +2,8 @@ import matplotlib
 import matplotlib.patches
 from sympy.geometry import Point, Polygon, Line
 import numpy as np
+import math
+from functools import reduce
 
 # class Point:
 #    pass
@@ -134,9 +136,26 @@ def perpendicular_vector(v):
     return np.cross(v, [1, 0, 0])
 
 
+
+def mag(vec):
+    return math.sqrt(reduce(lambda x, y: x + y**2, vec))
+
+
+def unit(vec):
+    _mag = mag(vec)
+    return [x/_mag for x in vec]
+
+
+def rot_mat2d(theta):
+    return np.asarray([
+        [np.cos(theta), -np.sin(theta)],
+        [np.sin(theta), np.cos(theta)]
+    ])
+
+
 def are_collinear(p1, p2, p3):
     arr = np.asarray([[p1[0] - p2[0], p2[0] - p3[0]],
-                            [p1[1] - p2[1], p2[1] - p3[1]]])
+                      [p1[1] - p2[1], p2[1] - p3[1]]])
     return np.isclose(np.linalg.det(arr), 0.)
 
 
