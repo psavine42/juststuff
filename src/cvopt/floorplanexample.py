@@ -15,7 +15,9 @@ import matplotlib.pyplot as plt
 from collections import Counter
 import matplotlib.patches as patches
 from .utils import display_face_bottom_left
-from .placements import Placement
+from .placements import *
+from .formulations import *
+from .mesh import *
 """
 CASSOWRY 
 “inside,” “above,” “below,” “left-of,”
@@ -50,10 +52,13 @@ def _pre_process_tile_limit(limits, num_con, mx=40):
 
 
 class FPProbllem(object):
+    def __init__(self):
+        self._problem = None
+
     def own_constraints(self, **kwargs):
         raise NotImplemented('not implemented in base class')
 
-    def display(self, problem, constraints=None):
+    def display(self, problem, **kwargs):
         return
 
     def action_eliminators(self):
@@ -74,15 +79,19 @@ class FPProbllem(object):
     def solution(self):
         return
 
-    def run(self, obj_args={}, const_args={}, show=True):
+    def run(self, obj_args={}, const_args={}, verbose=False, show=True, save=None):
         constraints = self.own_constraints(**const_args)
+        if verbose is True:
+            for c in constraints:
+                print(c)
         objective = self.objective(**obj_args)
-        problem = Problem(objective, constraints)
+        self._problem = Problem(objective, constraints)
         print('constraints registered ')
-        problem.solve()
+        self._problem.solve(verbose=verbose)
         print('solution created')
         if show:
-            self.display(problem, constraints=constraints)
+            self.display(self._problem, save=save, constraints=constraints)
+
         return self.solution
 
     def solve(self, **kwargs):
@@ -511,6 +520,7 @@ class AdjPlan(FPProbllem):
         plt.show()
 
 
+# ----------------------------------------------------------------
 class AdjPlanOO(FPProbllem):
     """
 
@@ -522,7 +532,6 @@ class AdjPlanOO(FPProbllem):
     def __init__(self, templates, mesh,
                  max_tiles=None,
                  min_tiles=None,
-                 verbose=False,
                  sinks=None,
                  edges_forbidden=None,
                  faces_forbidden=None,
@@ -569,8 +578,9 @@ class AdjPlanOO(FPProbllem):
                 face_ix = tile.placements[i][0]
                 yield tile, self._faces[face_ix].bottom_left
 
-    def __build_graph(self):
+    def _build_graph(self):
         self._edges = [self.G.get_edge(i,
+                                       cls=Edge,
                                        n_colors=self.n_half_edge_color
                                        )
                        for i in range(self.num_edge)]
@@ -580,6 +590,7 @@ class AdjPlanOO(FPProbllem):
         for i in range(self.num_half_edge):
             # he = self.G.get_half_edge(i, n_colors=self.t)
             he = self.G.get_half_edge(i,
+                                      cls=HalfEdge,
                                       n_colors=self.n_half_edge_color
                                       )
             j = he.edges(index=True)
@@ -596,6 +607,7 @@ class AdjPlanOO(FPProbllem):
         # Edge <-> Face
         for i in range(self.num_face):
             face = self.G.get_face(i,
+                                   cls=Face,
                                    n_colors=self.t,
                                    is_sink=int(i not in self.sink_faces),
                                    is_usable=int(i not in self.faces_forbidden))
@@ -639,7 +651,6 @@ class AdjPlanOO(FPProbllem):
 
         template = self.T[t]
         mapping = {}
-        verts = []
         t_edges = template.edges
         q1, q2 = t_edges[0]
         qvec = q2[0] - q1[0], q2[1] - q1[1]
@@ -652,8 +663,6 @@ class AdjPlanOO(FPProbllem):
             f1, f2 = ((p1[0] + p[0], p1[1] + p[1]), (p1[0] + q[0], p1[1] + q[1]))
             if (f1, f2) in self.G.edges:
                 mapping[(p, q)] = (f1, f2)
-                verts.append(f1)
-                verts.append(f2)
             else:
                 return None
 
@@ -661,11 +670,10 @@ class AdjPlanOO(FPProbllem):
                and start not in self.verts_forbidden
                and end not in self.verts_forbidden
                for start, end in mapping.values()):
-
             return mapping
         return None
 
-    def _precompute_placements(self):
+    def _pre_compute_placements(self):
         for t in range(self.t):
             tile = self.T[t]
             valid_edges, valid_faces, xforms = [], [], []
@@ -687,23 +695,25 @@ class AdjPlanOO(FPProbllem):
                 tile.max_uses = len(valid_edges)
 
             placement = Placement(self, t, valid_edges, valid_faces, xforms)
+            self._register_placement(placement)
 
-            # connections
-            for face in self._faces:
-                placement.connect(face)
-            for half_edge in self._half_edges:
-                placement.connect(half_edge)
-            for edge in self._edges:
-                placement.connect(edge)
+    def _register_placement(self, placement):
+        # connections
+        for face in self._faces:
+            placement.connect(face)
+        for half_edge in self._half_edges:
+            placement.connect(half_edge)
+        for edge in self._edges:
+            placement.connect(edge)
 
-            # registration
-            for half_edge in self._half_edges:
-                half_edge.register_placement(placement)
-            for edge in self._edges:
-                edge.register_placement(placement)
+        # registration
+        for half_edge in self._half_edges:
+            half_edge.register_placement(placement)
+        for edge in self._edges:
+            edge.register_placement(placement)
 
-            # save
-            self._placements.append(placement)
+        # save placement object
+        self._placements.append(placement)
 
     def objective(self, edge=True, face=True):
         # return Maximize(cvx.sum(cvx.vstack([x.objective_max for x in self._faces])))
@@ -718,9 +728,9 @@ class AdjPlanOO(FPProbllem):
         )
 
     def own_constraints(self, edge=True, face=True, tile=True):
-        self.__build_graph()
+        self._build_graph()
         print('graph built')
-        self._precompute_placements()
+        self._pre_compute_placements()
         print('placements computed')
 
         C = []
@@ -739,11 +749,307 @@ class AdjPlanOO(FPProbllem):
         print('constraints computed')
         return C
 
-    def display(self, problem, constraints=None, **kwargs):
-        self.print(problem)
+    def display(self, **kwargs):
+        self.print(self._problem)
         display_face_bottom_left(self, **kwargs)
 
 
+# ----------------------------------------------------------------
+class FormPlan(AdjPlanOO):
+    obj_space = ['edges', 'vertices', 'faces', 'half_edges']
+    atr_space = ['placement', 'color']
+
+    def __init__(self, templates, mesh):
+        AdjPlanOO.__init__(self, templates, mesh)
+        self.__formulations = []
+        self._build_graph()
+        print('graph built')
+        self._pre_compute_placements()
+        print('placements computed')
+
+    def add_constraint(self, formulation, **data):
+        if isinstance(formulation, type):
+            form_instance = formulation(self.G, **data)
+        else:
+            form_instance = formulation
+        self.__formulations.append(form_instance)
+        for p in self._placements:
+            form_instance.register_action(p)
+
+    def _register_formulations(self):
+        for form in self.__formulations:
+            for p in self._placements:
+                form.register_action(p)
+
+    def _anchor_on_half_edge(self, t, edge_ix):
+        geom = self._half_edges[edge_ix].geom
+        template = self.T[t]
+        transformation = template.align_to(geom)
+        if transformation is None:
+            return None
+        mapped = MeshMapping(self.G, template, transformation)
+        if mapped.is_valid():
+            return mapped
+        return None
+
+    def _pre_compute_placements(self):
+        for tile_index in range(self.t):
+            maps = []
+            for edge_ix in range(self.num_half_edge):
+                mapping = self._anchor_on_half_edge(tile_index, edge_ix)
+                if mapping is None:
+                    continue
+                maps.append(mapping)
+            placement = Placement2(self, tile_index, maps)
+            self._register_placement(placement)
+
+    @property
+    def formulations(self):
+        return self.__formulations
+
+    def _build(self):
+        self._register_formulations()
+        print('formulations registered')
+
+    def own_constraints(self, edge=True, face=True, tile=True):
+        C = []
+        for x in self.__formulations:
+            if x.is_constraint:
+                C += x.as_constraint()
+
+        for x in self._edges:
+            C += x.constraints
+        for x in self._half_edges:
+            C += x.constraints
+        for x in self._verts:
+            C += x.constraints
+        if face:
+            for x in self._faces:
+                C += x.constraints
+        if tile:
+            for x in self._placements:
+                C += x.constraints
+        print('constraints computed')
+        return C
+
+
+# ----------------------------------------------------------------
+# LINE BASED -
+# ----------------------------------------------------------------
+class LinePlan(AdjPlanOO):
+    obj_space = ['vertices', 'edges']
+    atr_space = []
+    discrete = True
+
+    def __init__(self,
+                 mesh: Mesh2d,
+                 sink,
+                 points,
+                 partitions):
+        """
+        the idea is that the layout is a selection of edges on mesh (undirected graph)
+        which is equivelant to a tree (alexandroff topology) with 'sink' as the root node,
+        and sources as the children.
+
+        Therefore -
+        mesh can be projected to R3 'distance to sink'
+        lets say X_i is sink, nodes with a distance of 1
+
+        ---------
+        either each 'room' has N source points.
+        therefore, each room has one entry and one exit point,
+        therefore, the problem can be stated as connection of Rooms
+            as either room.in, room.out
+
+        therefore,
+
+        :param mesh:
+        :param points:
+        :param sink:
+        """
+        AdjPlanOO.__init__(self, [], mesh)
+        self.M = mesh
+        self.sink = sink
+        # self.X = Variable(shape=len(self.M.edges), boolean=True)
+        self.partitions = partitions
+        self.points = points
+        self.__formulations = []
+        self._build_graph()
+        print('graph built')
+
+    @compute_once
+    def mesh_partitions(self):
+        """ """
+        return []
+
+    def add_constraint(self, formulation, **data):
+        if isinstance(formulation, type):
+            form_instance = formulation(self.G, **data)
+        else:
+            form_instance = formulation
+        self.__formulations.append(form_instance)
+        for p in self._placements:
+            form_instance.register_action(p)
+
+    def _register_formulations(self):
+        for form in self.__formulations:
+            for p in self._placements:
+                form.register_action(p)
+
+    def _pre_compute_placements(self):
+        placement = EdgeSet(self, 0)
+        self._register_placement(placement)
+        # ActiveEdgeSet(self.M)
+
+    @property
+    def formulations(self):
+        return self.__formulations
+
+    def _build(self):
+        """
+        objective will be to minimize number of edges used
+
+        X -> the set of all actions (edges)
+
+        constraints:
+            sum(Shortest_paths_ij) <= 1
+            Shortest_paths_ij = X @ SP
+            c += OR(X @ SP, )
+
+        """
+        C = []
+        dists = nx.shortest_path_length(self.M.G, self.sink)
+        # build 'Room Graph'
+        # for each partition (room), it must connect to another partition,
+        # therefore a graph can be built of all boundaries (walls)
+
+        # when points are NOT known, maximize distance between
+        # points within the partition, and Minimize path length
+        # each node T_k is a free location var, representing an index
+        # T_k >= max( norm(x_j - x_k) + T_j | there is an arc (j,k)}
+        M_sinks = np.ones((self.num_vert))
+        # M_sinks
+        cvx.max(cvx.norm1())
+        for k, node_k in enumerate(self._verts):
+            # for j in node_k.adj:
+            pass
+
+        # within a room, the following problem can be setup:
+        # distances of sources within that room
+        room_graph = ddict(set)
+        rooms_to_points = ddict(set)
+        shortest_paths = ddict(dict)
+        for i, room in enumerate(self.mesh_partitions()):
+            for j, p in enumerate(self.points):
+                if not room.contains(p):
+                    continue
+                rooms_to_points[i].add(j)
+
+        # for each pair of points in a partition,
+        # one of the shortest paths must be active
+        for room_ix, point_ixs in rooms_to_points.items():
+            for pi1, pi2 in itertools.combinations(point_ixs, 2):
+                pths = nx.all_shortest_paths(self.M.G, source=pi1, target=pi2)
+                shortest_paths[room_ix][(pi1, pi2)] = pths
+
+        # for optimizing between partitions:
+        # given that within a room there is some layout that is most
+        # efficient, which .. todo ...
+
+        # structural constraints
+        # 1) connectedness
+        X = Variable(shape=self.num_edge, boolean=True)
+
+        # minize selected edges
+        base_obj = cvx.Minimize(cvx.sum(X))
+
+        # s.t. a tree is formed which includes the specified points
+        ec = EdgeConnectivity(self.M)
+        ic = IncludeNodes(self.M, node=self.points)
+
+        C += ec.as_constraint(X)
+        C += ic.as_constraint(X)
+        # C += []
+        return base_obj, C
+
+
+def n_free(M:Mesh2d, nfree, sinks):
+    """
+    8.7  minimax delay problem
+    # todo - why this no work
+    """
+    T_k = Variable(shape=len(M.vertices()), pos=True)
+    objective = cvx.Minimize(cvx.max(T_k))
+    C = []
+    for i, u in enumerate(M.vertices()):
+        if i in sinks:
+            C += [T_k[i] <= 0]
+            continue
+        vars = []
+        for v in M.G[u].keys():
+            j = M.index_of_vertex(v)
+            vars.append(1 + T_k[j])
+        C += [T_k[i] >= cvx.max(cvx.hstack(vars))]
+
+    C += [cvx.sum(T_k) <= nfree]
+
+    problem = cvx.Problem(objective, C)
+    return problem
+
+
+def line_layout_problem(space=None, sink=None, points=None, partitions=None):
+    if partitions and points is None:
+        pass
+    if partitions is None and points:
+        pass
+
+
+
+class LinePlanCont(AdjPlanOO):
+    obj_space = ['vertices', 'half_edges']
+    atr_space = []
+
+    def __init__(self, mesh, points):
+        AdjPlanOO.__init__(self, mesh, [])
+        self.M = mesh
+        self.__formulations = []
+        self._build_graph()
+        print('graph built')
+
+    def add_constraint(self, formulation, **data):
+        if isinstance(formulation, type):
+            form_instance = formulation(self.G, **data)
+        else:
+            form_instance = formulation
+        self.__formulations.append(form_instance)
+        for p in self._placements:
+            form_instance.register_action(p)
+
+    def _register_formulations(self):
+        for form in self.__formulations:
+            for p in self._placements:
+                form.register_action(p)
+
+    def _anchor_on_half_edge(self, t, edge_ix):
+        geom = self._half_edges[edge_ix].geom
+        template = self.T[t]
+        transformation = template.align_to(geom)
+        if transformation is None:
+            return None
+        mapping = template.transform(transformation)
+        if mapping.is_valid():
+            return mapping
+        return None
+
+    @property
+    def formulations(self):
+        return self.__formulations
+
+
+
+# ----------------------------------------------------------------
+# HYBRID
+# ----------------------------------------------------------------
 class SnakePlan(object):
     """
     Computational Network Design from Functional Specifications
@@ -924,6 +1230,9 @@ class SnakePlan(object):
                  )
 
 
+# ----------------------------------------------------------------
+# Continuous - FIXED Tiling
+# ----------------------------------------------------------------
 class FloorPlan(object):
     """ A minimum perimeter floor plan. """
     MARGIN = 1.0
@@ -1023,22 +1332,6 @@ class FloorPlan(object):
 
 
 # ----------------------------------------------------------------
-def generate_packing_opts(base_adj, num):
-    """ start with minimal """
-    # specified
-    used = set(np.unique(np.array(base_adj)).tolist())
-
-    unspecified = set(list(range(num))).difference(used)
-    ix_vertical = []
-    ix_vertical = []
-
-    for kv in used:
-        kv
-
-    for pair in base_adj:
-        pass
-
-
 def __boxes1():
     return [Box(200, name=0), Box(80, name=1),
             Box(80, name=3), Box(120, name=2),
