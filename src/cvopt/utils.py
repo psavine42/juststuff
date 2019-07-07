@@ -2,6 +2,8 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 from matplotlib.patches import Rectangle
 import numpy as np
+from src.cvopt.mesh import Mesh2d
+import src.geom.r2 as r2
 
 
 def place_tile2(tile, point):
@@ -17,33 +19,34 @@ def display_face_bottom_left(problem, save=None, **kwargs):
     colors = ['blue', 'yellow', 'green', 'red', 'violet', 'orange']
     info = dict(edgecolor='black', linewidth=1)
     fig, ax = plt.subplots(1)
-    n, m = sorted(problem.G.vertices())[-1]
+    n, m = problem.G.vertices[-1]
 
     print('Placement-------------------------')
     for placement in problem._placements:
         print('', placement.solution)
 
     print('X-------------------------')
-    for tile, xy in problem.solution:
-        for x, y in place_tile2(tile, xy):
+    for placement, mapping in problem.solution:
+        for face_ix in mapping.faces:
+            x, y = problem.G.faces.geom[face_ix][0]
             ax.add_patch(
-                Rectangle((x, y), 1, 1, facecolor=colors[tile.index], **info)
+                Rectangle((x, y), 1, 1, facecolor=colors[placement.index], **info)
             )
 
+    # label faces
     for tile in problem._faces:
         x, y = tile.bottom_left
         ax.text(x + 0.5, y + 0.5, "{}".format(tile.index))
 
-    for i, he in problem.G.edges_to_half_edges().items():
+    # draw
+    for i, he in problem.G.edges.to_half_edges.items():
         (x1, y1), (x2, y2) = problem.G.edges[i]
         heis = ','.join([str(problem.G.index_of_half_edge(x)) for x in he])
         x = x1 + (x2 - x1) / 3
         y = y1 + (y2 - y1) / 3
         ax.text(x, y, "{}:{}".format(i, heis))
-
-    ax.axis([0, n, 0, m])
-    ax.axis('off')
-    ax.set_aspect('equal')
+    print(n, m)
+    finalize(ax, save=save, extents=[n, m])
     if isinstance(save, str):
         plt.savefig(save)
         plt.clf()
@@ -52,32 +55,83 @@ def display_face_bottom_left(problem, save=None, **kwargs):
         plt.show()
 
 
-def display_edges(edges):
-    for i, he in problem.G.edges_to_half_edges().items():
-        (x1, y1), (x2, y2) = problem.G.edges[i]
-        heis = ','.join([str(problem.G.index_of_half_edge(x)) for x in he])
-        x = x1 + (x2 - x1) / 3
-        y = y1 + (y2 - y1) / 3
-        ax.text(x, y, "{}:{}".format(i, heis))
-    return
+def finalize(ax, save=None, extents=None):
+    if extents is not None:
+        if len(extents) == 2:
+            n, m = extents
+            ax.axis([0, n, 0, m])
+        elif len(extents) == 1:
+            n = extents[0]
+            ax.axis([0, n, 0, n])
+        elif len(extents) == 4:
+            ax.axis(extents)
+    ax.axis('off')
+    ax.set_aspect('equal')
 
 
-# def deep_tup(x):
-#     """fully copies trees of tuples or lists to a tree of lists.
-#          deep_list( (1,2,(3,4)) ) returns [1,2,[3,4]]
-#          deep_list( (1,2,[3,(4,5)]) ) returns [1,2,[3,[4,5]]]"""
-#     if not isinstance(x, (tuple, list)):
-#         return x
-#     return tuple(list(map(deep_tup, x)))
+def _get_geom(imesh, fn):
+    if isinstance(imesh, Mesh2d):
+        return fn.fget(imesh).geom
+    elif isinstance(imesh, (list, tuple)):
+        return imesh
+    else:
+        raise Exception('')
 
 
-# def translate(point_list, plus):
-#     """
-#     verts d:2 list[tuple(int, int) ]
-#     edges d:3 list[tuple(tuple(int, int), tuple(int, int)) ]
-#     faces d:3 list[tuple(tuple(int, int), tuple(int, int), tuple(int, int) ... ) ]
-#     """
-#     res = []
-#     for el in (np.asarray(point_list) + np.asarray(plus)).tolist():
-#         res.append(deep_tup(el))
-#     return res
+def draw_edges(imesh:Mesh2d, ax, label=False, **kwargs):
+    info = dict(color='black', linewidth=1)
+    opts = {**info, **kwargs}
+    pts = _get_geom(imesh, Mesh2d.edges)
+
+    for i, pt in enumerate(pts):
+        (x1, y1), (x2, y2) = list(pt)
+        ax.plot([x1, x2], [y1, y2], **opts)
+        if label is True:
+            x = x1 + (x2 - x1) / 3
+            y = y1 + (y2 - y1) / 3
+            ax.text(x, y, "e.{}".format(i))
+    return ax
+
+
+def draw_half_edges(imesh: Mesh2d, ax, label=False, **kwargs):
+    info = dict(color='black', length_includes_head=True, linewidth=1)
+    opts = {**info, **kwargs}
+    pts = _get_geom(imesh, Mesh2d.half_edges)
+
+    for i, pt in enumerate(pts):
+        (x1, y1), (x2, y2) = list(pt)
+        ax.arrow(x1, y1, x2 - x1, y2 - y1, **opts)
+        if label is True:
+            x = x1 + (x2 - x1) / 3
+            y = y1 + (y2 - y1) / 3
+            ax.text(x, y, "e.{}".format(i))
+    return ax
+
+
+def label_edges(imesh, ax):
+    """ """
+    for tile in imesh._faces:
+        x, y = tile.bottom_left
+        ax.text(x + 0.5, y + 0.5, "{}".format(tile.index))
+    return ax
+
+
+def label_half_edges(imesh: Mesh2d, ax):
+    """ todo  """
+    for tile in imesh.half_edges:
+        x, y = tile.bottom_left
+        ax.text(x + 0.5, y + 0.5, "{}".format(tile.index))
+    return ax
+
+
+def label_faces(imesh: Mesh2d, ax, labels=None):
+    """ write the face index at the centroid"""
+    geom = _get_geom(imesh, Mesh2d.faces)
+    if labels and not len(geom) == len(labels):
+        raise Exception('llabel_len must == len(geoms)')
+
+    for face_ix, verts in imesh.faces.to_vertices.items():
+        x, y = r2.centroid(verts)
+        ax.text(x, y, "f:{}".format(face_ix))
+    return ax
+

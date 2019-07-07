@@ -12,7 +12,7 @@ domains = {'mesh', 'continuous'}
 class Formulation(object):
     KEY = ''
     DOMAIN = {}
-    META = {'constraint':True, 'objective':True}
+    META = {'constraint': True, 'objective': True}
 
     def __init__(self, space, is_constraint=None, name=None):
         self._space = space
@@ -55,15 +55,25 @@ class AdjacencyEdgeColor(Formulation):
         return C
 
 
-class FacePlacement(Formulation):
-    def as_constraint(self, *args):
-        return
+class NoOverlappingFaces(Formulation):
+    KEY = 'overlaps'
+    DOMAIN = {'discrete'}
 
+    def as_constraint(self, *args):
+        M = np.zeros((len(self.space.faces), self.num_actions), dtype=int)
+        cnt = 0
+        for p in self._actions:
+            for i, mapping in enumerate(p.maps):
+                ixs = list(mapping.face_map().values())
+                M[ixs, cnt] = 1
+                cnt += 1
+        actions = cvx.hstack([x.X for x in self._actions])
+        return [M @ actions <= 1]
 
 
 class GridLine(Formulation):
     KEY = 'grid_lines'
-    DOMAIN = {'mesh'} # both can work
+    DOMAIN = {'discrete'} # both can work
 
     def __init__(self, space, edges=[], **kwargs):
         """

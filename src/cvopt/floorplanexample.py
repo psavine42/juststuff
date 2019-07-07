@@ -2,7 +2,7 @@ from cvxpy import *
 import cvxpy.lin_ops
 import cvxpy.utilities
 import pylab
-
+import typing
 import cassowary
 import numpy as np
 from .constraining import *
@@ -523,7 +523,7 @@ class AdjPlan(FPProbllem):
 # ----------------------------------------------------------------
 class AdjPlanOO(FPProbllem):
     """
-
+    DEPRECATED for FormPlan
     optional:
         verts_forbidden - list [index] verticies that cannot be on the interior of a placment
         faces_forbidden - list [index] faces that cannot have any placement
@@ -545,11 +545,11 @@ class AdjPlanOO(FPProbllem):
         self.t = len(templates)
         self.G = mesh
 
-        self.num_vert = len(self.G.vertices())
-        self.num_half_edge = len(self.G.half_edges())
+        self.num_vert = len(self.G.vertices)
+        self.num_half_edge = len(self.G.half_edges)
         self.num_edge = len(self.G.edges)
-        self.num_face = len(self.G.faces_to_vertices())
-        self.num_ihes = len(self.G.interior_half_edge_index()[0])
+        self.num_face = len(self.G.faces)
+        # self.num_ihes = len(self.G.interior_half_edge_index[0])
         self.n_half_edge_color = len(set().union(*[np.abs(x.colors(half_edge=True))
                                                    for x in self.T]).difference([0]))
 
@@ -570,29 +570,30 @@ class AdjPlanOO(FPProbllem):
         return self._placements
 
     @property
-    def solution(self):
-        for tile in self._placements:
-            ix = np.where(np.asarray(tile.X.value, dtype=int) == 1)[0]
+    def solution(self):     # -> typing.Iterable[Placement2, MeshMapping]:
+        for placement in self._placements:
+            ix = np.where(np.asarray(placement.X.value, dtype=int) == 1)[0]
             for i in ix:
-                # if tile.value[i] > self.eps: face_ix # ,
-                face_ix = tile.placements[i][0]
-                yield tile, self._faces[face_ix].bottom_left
+                # if tile.value[i] > self.eps: face_ix
+                mapping = placement.maps[i]
+                yield placement, mapping
 
     def _build_graph(self):
-        self._edges = [self.G.get_edge(i,
-                                       cls=Edge,
-                                       n_colors=self.n_half_edge_color
-                                       )
-                       for i in range(self.num_edge)]
-        # self._verts = [self.G.get_vertex(i) for i in range(self.num_vert)]
+        self._edges = [
+            self.G.get_edge(i,
+                            cls=Edge,
+                            n_colors=self.n_half_edge_color
+                )
+            for i in range(self.num_edge)]
 
         # Edge <-> Half_Edge
         for i in range(self.num_half_edge):
             # he = self.G.get_half_edge(i, n_colors=self.t)
-            he = self.G.get_half_edge(i,
-                                      cls=HalfEdge,
-                                      n_colors=self.n_half_edge_color
-                                      )
+            he = self.G.get_half_edge(
+                i,
+                cls=HalfEdge,
+                n_colors=self.n_half_edge_color
+            )
             j = he.edges(index=True)
             self._edges[j].connect(he)
             he.connect(self._edges[j])
@@ -606,11 +607,14 @@ class AdjPlanOO(FPProbllem):
 
         # Edge <-> Face
         for i in range(self.num_face):
-            face = self.G.get_face(i,
-                                   cls=Face,
-                                   n_colors=self.t,
-                                   is_sink=int(i not in self.sink_faces),
-                                   is_usable=int(i not in self.faces_forbidden))
+            face = self.G.get_face(
+                i,
+                cls=Face,
+                n_colors=self.t,
+                is_sink=int(i not in self.sink_faces),
+                is_usable=int(i not in self.faces_forbidden)
+            )
+
             for j in face.edges(index=True):
                 self._edges[j].connect(face)
                 face.connect(self._edges[j])
@@ -756,6 +760,9 @@ class AdjPlanOO(FPProbllem):
 
 # ----------------------------------------------------------------
 class FormPlan(AdjPlanOO):
+    """
+    Plan
+    """
     obj_space = ['edges', 'vertices', 'faces', 'half_edges']
     atr_space = ['placement', 'color']
 
@@ -807,12 +814,21 @@ class FormPlan(AdjPlanOO):
     def formulations(self):
         return self.__formulations
 
-    def _build(self):
-        self._register_formulations()
-        print('formulations registered')
+    def objective(self, edge=True, face=True):
+        # return Maximize(cvx.sum(cvx.vstack([x.objective_max for x in self._faces])))
+        # edge_ob = 0
+        if edge is True:
+            edge_ob = cvx.sum(cvx.vstack([x.objective_max for x in self._edges]))
+
+        return Maximize(
+            cvx.sum(cvx.vstack([x.objective_max for x in self._placements]))
+            # + cvx.sum(cvx.vstack([x.objective_max for x in self._faces]))
+             + edge_ob
+        )
 
     def own_constraints(self, edge=True, face=True, tile=True):
         C = []
+        # self._register_formulations()
         for x in self.__formulations:
             if x.is_constraint:
                 C += x.as_constraint()
@@ -820,9 +836,9 @@ class FormPlan(AdjPlanOO):
         for x in self._edges:
             C += x.constraints
         for x in self._half_edges:
-            C += x.constraints
+           C += x.constraints
         for x in self._verts:
-            C += x.constraints
+           C += x.constraints
         if face:
             for x in self._faces:
                 C += x.constraints
@@ -1002,7 +1018,6 @@ def line_layout_problem(space=None, sink=None, points=None, partitions=None):
         pass
     if partitions is None and points:
         pass
-
 
 
 class LinePlanCont(AdjPlanOO):

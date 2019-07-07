@@ -172,7 +172,7 @@ class Placement(_ActionBase, _VarGraphBase):
             edge_col = self.template.edge_colors.get(tmpl_ix, {}).get('color', None)
             if edge_col is None:
                 continue
-            for face_i in self.G.edges_to_faces()[edge_ix]:
+            for face_i in self.G.edges.to_faces[edge_ix]:
                 # face_i is indexed to Parent
                 if face_i in face_ixs:
                     continue
@@ -294,7 +294,7 @@ class Placement2(_ActionBase, _VarGraphBase):
             edge_col = self.template.edge_colors.get(tmpl_ix, {}).get('color', None)
             if edge_col is None:
                 continue
-            for face_i in self.G.edges_to_faces()[edge_ix]:
+            for face_i in self.G.edges.to_faces[edge_ix]:
                 # face_i is indexed to Parent
                 if face_i in face_ixs:
                     continue

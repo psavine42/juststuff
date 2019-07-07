@@ -110,11 +110,14 @@ def unit_vector(vector):
 
 
 def angle_between(v1, v2):
-    """ Returns the angle in radians between vectors 'v1' and 'v2'::
+    """ Returns the angle in radians between vectors 'v1' and 'v2':
     """
     v1_u = unit_vector(v1)
     v2_u = unit_vector(v2)
-    return np.arccos(np.clip(np.dot(v1_u, v2_u), -1.0, 1.0))
+    angle = np.arccos(np.clip(np.dot(v1_u, v2_u), -1.0, 1.0))
+    if v1_u[0] * v2_u[1] - v1_u[1] * v2_u[0] < 0:
+        angle = -angle
+    return angle
 
 
 def align_vec(vec_src, vec_tgt):
@@ -124,8 +127,16 @@ def align_vec(vec_src, vec_tgt):
     """
     src = to_homo(vec_src)
     tgt = to_homo(vec_tgt)
-    # print(src, tgt)
     lin = tgt[0] - src[0]
     u1, u2 = src[1] - src[0], tgt[1] - tgt[0]
-    theta = angle_between( u2[:2], u1[:2] )
+    theta = angle_between(u1[:2], u2[:2])
     return compose_mat(angle=theta, translate=lin)
+
+
+def centroid(pts):
+    pts = np.asarray(pts)
+    return pts.mean(axis=0).tolist()
+
+
+
+

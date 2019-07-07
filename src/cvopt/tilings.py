@@ -7,21 +7,9 @@ import src.geom.r2 as r2
 import cvxpy as cvx
 import shapely
 import shapely.affinity
-from shapely.geometry import MultiPolygon, Polygon,\
-    LineString, GeometryCollection, LinearRing
-from abc import ABCMeta
+from shapely.geometry import MultiPolygon, Polygon, LineString, LinearRing
 import itertools
-
-
-class BTile(object):
-    def __init__(self, p1, p2=None):
-        self.p1 = p1
-        self.p2 = p2 if p2 else [p1[0] + 1, p1[1] + 1]
-
-    @property
-    def coords(self):
-        p1, p2 = self.p1, self.p2
-        return [tuple(x) for x in [p1, [p1[0], p2[1]], p2, [p2[0], p1[1]]]]
+from src.cvopt.shape import BTile
 
 
 class _TemplateBase():
@@ -71,7 +59,6 @@ class TemplateTile(Mesh2d, _TemplateBase):
                  allow_rot=True,
                  max_uses=None,
                  access=None, **kwargs):
-        # g = nx.grid_2d_graph(w + 1, h + 1)
         tiles = [BTile(x) for x in itertools.product(range(w), range(h))]
         _TemplateBase.__init__(self, **kwargs)
         Mesh2d.__init__(self, g=tiles)
@@ -108,8 +95,7 @@ class TemplateTile(Mesh2d, _TemplateBase):
 
         elif half_edges:
             for ix in half_edges:
-                self._half_edge_meta[ix]['color'] = value
-            # nx.set_edge_attributes(self.G, mapping['color'], 'color')
+                self.half_edges[(ix, 'color')] = value
 
         elif faces:
             for ix in faces:
@@ -118,7 +104,7 @@ class TemplateTile(Mesh2d, _TemplateBase):
         elif verts:
             for ix in verts:
                 mapping[ix]['color'] = value
-            # nx.set_node_attributes(self.G, mapping['color'], 'color')
+
         else:
             raise Exception('')
 
@@ -130,22 +116,16 @@ class TemplateTile(Mesh2d, _TemplateBase):
         if vertex:
             return self.vertices[0]
         elif half_edge:
-            return self.boundary.int_half_edges[0]
+            he = self._d_hes[0]
+            return (self.vertices[he[0]], self.vertices[he[1]])
         else:
             raise NotImplemented('must be half_edge or vertex')
 
-    def align_to(self, target_half_edge):
-        return r2.align_vec(self.anchor(half_edge=True), target_half_edge)
-
-    # def transform(self, xform):
-    #     verts = self.vertices()
-    #     hverts = r2.to_homo(verts, dtype=int) @ xform.T
-    #     new_vert = r2.from_homo(hverts, dtype=int, round=0)
-    #     #
-    #     new_mesh = self.G.copy()
-    #     mappings = {verts[i]: new_vert[i] for i in range(len(verts))}
-    #     new_mesh = nx.relabel_nodes(new_mesh, mappings)
-    #     return Mesh2d(new_mesh)
+    def align_to(self, target_half_edge_geom):
+        """ given a half edge tuple, returns a transformation matrix
+        """
+        return r2.align_vec(self.anchor(half_edge=True),
+                            target_half_edge_geom)
 
     @property
     def edge_colors(self):
@@ -155,14 +135,11 @@ class TemplateTile(Mesh2d, _TemplateBase):
         """
 
         """
-        res = []
-        if not edge and not face and not half_edge:
-            return {data.get('color', None)
-                    for _, _, data in self.half_edges.data}.difference([None])
-        elif half_edge:
-            for u, v in self.boundary.int_half_edges:
-                res.append(self.G[u][v].get('color', 0))
-        return res
+        res = set()
+        if half_edge:
+            for geom, data in self.half_edges.data:
+                res.add(data.get('color', None))
+        return list(res.difference([None]))
 
     def as_graph(self):
         return self.G
