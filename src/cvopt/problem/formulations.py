@@ -11,24 +11,47 @@ domains = {'mesh', 'continuous'}
 
 class Formulation(object):
     KEY = ''
+    has_var = False
     DOMAIN = {}
     META = {'constraint': True, 'objective': True}
 
     def __init__(self, space, is_constraint=None, name=None):
+        """ Base Class """
         self._space = space
         self._actions = []
         self.name = name
         self.is_constraint = is_constraint
+        self.is_objective = not self.is_constraint
 
     def register_action(self, a):
+        """ register an Action/Placement object
+        """
         if a not in self._actions:
             self._actions.append(a)
 
     def set_geom(self, geom):
         raise NotImplemented('not implemented in base class ')
 
+    def __getitem__(self, item):
+        """ return the mapping corresponding to the action item """
+        if item >= self.num_actions:
+            raise Exception('index out bounds')
+        cums = 0
+        for a in self._actions:
+            next_sum = len(a) + cums
+            if next_sum > item:
+                return a, a.maps[item - cums]
+            else:
+                cums = next_sum
+
+    @property
+    def stacked(self):
+        """ returns the vars for all actions concatted to a single row"""
+        return cvx.hstack([x.X for x in self._actions])
+
     @property
     def space(self):
+        """ domain """
         return self._space
 
     @property
@@ -36,25 +59,25 @@ class Formulation(object):
         return sum([len(a) for a in self._actions])
 
     def as_objective(self, maximize=True):
-        pass
+        raise NotImplemented()
 
     def as_constraint(self, *args):
         """ list of Constraint Expressions """
-        pass
+        raise NotImplemented()
+
+    def __str__(self):
+        st = '{}'.format(self.__class__.__name__)
+        if self.name:
+            st += ':'.format(self.name)
+        return st
+
+
+class TestingFormulation(Formulation):
+    """ just keeping track of what to use aor not"""
+    pass
 
 
 # ------------------------------------------------
-class AdjacencyEdgeColor(Formulation):
-    KEY = 'adj_edge_color'
-    DOMAIN = {}
-
-    def as_constraint(self):
-        """
-        """
-        C = []
-        return C
-
-
 class NoOverlappingFaces(Formulation):
     KEY = 'overlaps'
     DOMAIN = {'discrete'}
@@ -67,7 +90,7 @@ class NoOverlappingFaces(Formulation):
                 ixs = list(mapping.face_map().values())
                 M[ixs, cnt] = 1
                 cnt += 1
-        actions = cvx.hstack([x.X for x in self._actions])
+        actions = self.stacked # cvx.hstack([x.X for x in self._actions])
         return [M @ actions <= 1]
 
 
@@ -100,7 +123,6 @@ class GridLine(Formulation):
         for p in self._actions:
             M_p = np.ones(len(p), dtype=int)
             for i in range(len(p)):
-                # edges_ti = p.transformed(i, edges=True, interior=True)
                 edges_ti = p.maps[i].edges
                 edges_bnd = p.maps[i].boundary.edges
                 edges_ti = [x for x in edges_ti if x in edges_bnd]
@@ -203,87 +225,25 @@ class VerticesNotOnInterior(Formulation):
 
 
 class TileLimit(Formulation):
-    def __init__(self, space, tiles=[], upper=None, **kwargs):
+    def __init__(self, space, tile, upper=None, lower=None, **kwargs):
         """
 
         """
         Formulation.__init__(self, space, **kwargs)
-        self._tiles = tiles
+        self._tile_index = tile
         self._upper = upper
+        self._lower = lower
+        self.is_constraint = True
 
-
-class ActiveEdgeSet(Formulation):
-    def __init__(self, *args, edges=[], sums=None, **kwargs):
-        """
-        edges list of lists of edge indicies
-
-        example:
-
-        M = ....
-        edges = [[0, 2, 3], [0, 3, 9]]
-        sums = [1, 2]
-        cgen = ActiveEdgeSet(M, edges=edges, sums=sums, as_constraint=True)
-        cgen.as_constraint()
-        >>
-
-        """
-        Formulation.__init__(*args, **kwargs)
-        if sums is None:
-            sums = [1] * len(edges)
-        assert isinstance(edges, list)
-        assert isinstance(edges[0], list)
-        self.edges = edges
-        self._max_sum = np.asarray(sums, dtype=int)
-
-    def as_constraint(self, X):
-        """
-        assumes that indices of edges are elements of actions space
-
-        action sum( X_i, X_j ... X_n) <= mx_sum
-
-        size of A @ X < B
-            A: [num_edge_groups, num_actions]
-            X: [num_actions]
-            B: [num_edge_groups]
-        """
-        M = np.zeros((len(self.edges), self.num_actions))
-        for i, edge_group in enumerate(self.edges):
-            M[i, edge_group] = 1
-        return [M @ X <= self._max_sum]
-
-    def as_objective(self, maximize=True):
-        raise NotImplemented('nyi')
-
-
-class EdgeConnectivity(Formulation):
-    def as_constraint(self, X):
-        """
-        statement
-        'if edge i is active, one of the adjacent edges should be active'
-
-        """
+    def as_constraint(self, *args):
         C = []
-        # M = np.array()
-        for i in range(self.num_actions):
-            # nodes on u, v
-            n1, n2 = self.space.edges[i]
-            conn_u = list(self.space.G[n1].keys())
-            conn_v = list(self.space.G[n2].keys())
-            # sum of adjacent edges nmust be >= 1
-            adj_vars = []
-            for adj_v in conn_u:
-                if adj_v == n2:
-                    continue
-                edge = sorted([n1, adj_v])
-                adj_vars.append(self.space.index_of_edge(edge))
-            for adj_n in conn_v:
-                if adj_n == n1:
-                    continue
-                edge = sorted([n2, adj_n])
-                adj_vars.append(self.space.index_of_edge(edge))
-            cvx.sum(cvx.hstack(X[adj_vars]))
-
+        if self._upper:
+            C += [cvx.sum(self._actions[self._tile_index].X) <= self._upper]
+        if self._lower:
+            C += [cvx.sum(self._actions[self._tile_index].X) >= self._lower]
         return C
+
+
 
 
 class IncludeNodes(Formulation):
@@ -327,20 +287,6 @@ class TileAt(Formulation):
         Formulation.__init__(*args, **kwargs)
         self._placement = placement
         self._half_edge = he
-
-    def as_constraint(self, *args):
-        return
-
-    def as_objective(self, maximize=True):
-        return
-
-
-class EdgeColorsAt(Formulation):
-    def __init__(self, *args, color=None, he=None, **kwargs):
-        """ placement """
-        Formulation.__init__(*args, **kwargs)
-        self._color = color
-        self._half_edges = he
 
     def as_constraint(self, *args):
         return

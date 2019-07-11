@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 
 
 class MeshMapping(object):
-    def __init__(self, space: Mesh2d, tile: Mesh2d, xform):
+    def __init__(self, space: Mesh2d, tile: Mesh2d, xform, tgt=None, ttype=None):
         """
         map tile mesh onto space mesh with affine transformation
         stores a transformed copy of the tile, the space, and the original tile
@@ -19,6 +19,8 @@ class MeshMapping(object):
             tile: Mesh2d - the mesh after transform is applied
 
         """
+        self.tgt = tgt
+        self.transform_type = ttype
         self._data = odcit()
         self.space = space
         self.transform = xform
@@ -36,12 +38,6 @@ class MeshMapping(object):
     def _data_inv(self):
         """ {new_vert_geom : base_vert_geom}"""
         return [(v, k) for k, v in self._data]
-
-    # def _rec_vert(self, new_vert_geom):
-    #     """ given a """
-    #     base_vert_geom = self._data_inv[new_vert_geom]
-    #     base_vert_idx = self._index[base_vert_geom]
-    #     return base_vert_idx
 
     def _mapping(self, fn, m2t=None, geom=None, mgeom=None, tgeom=None):
         """
@@ -78,10 +74,8 @@ class MeshMapping(object):
                     el_trns, el_main = trns_ix, main_ix
 
                 k, v = (el_main, el_trns) if m2t is True else (el_trns, el_main)
-                # k, v = (main_ix, base_ix) if m2t is True else (base_ix, main_ix)
                 mapping[k] = v
             else:
-                # print('missing', trns_geom)
                 return None
         return mapping
 
@@ -109,9 +103,13 @@ class MeshMapping(object):
         return list(map(lambda x:x[1], sorted([(k, v) for k, v in self.edge_map().items()])))
 
     @lazyprop
+    def half_edges(self):
+        return list(map(lambda x: x[1], sorted([(k, v) for k, v in self.half_edges().items()])))
+
+    @lazyprop
     def vertices(self):
         """ [ transformed_vert_index ... ]"""
-        return list(map(lambda x:x[1], sorted([(k, v) for k, v in self.vertex_map().items()])))
+        return list(map(lambda x: x[1], sorted([(k, v) for k, v in self.vertex_map().items()])))
 
     def show(self, save=None, size=7, he=False):
         """ show the initial and transformed
@@ -134,28 +132,52 @@ class MeshMapping(object):
 
         u.finalize(ax, save=save)
         print(self.__repr__())
-        # todo - why cant I call this from finalize in anothter File??
-        if isinstance(save, str):
-            plt.savefig(save)
-            plt.clf()
-            plt.close()
-        else:
-            plt.show()
-        return
+
+    def match_col(self, he=None):
+        """
+        return a map of edge colors given action in mapping
+        dict { edge_index, signed int }
+        """
+        template_colors = {}
+        colors = self.base._half_edge_meta
+        for local_edge, he_index in self.half_edge_map().items():
+            # convert half edges to edges
+            if he:
+                edge_index = he_index
+            else:
+                edge_index = self.space.half_edges.to_edges_index[he_index]
+            if local_edge in colors and colors[local_edge].get('color', None):
+                template_colors[edge_index] = colors[local_edge]['color']
+        # print(template_colors)
+        return template_colors
+
+    def describe(self, v=None, e=None, f=None):
+        """ printing utility """
+        def _desc(s, l, kvs):
+            for k, v in kvs.items():
+                s += '\n{}.{} -> {}'.format(l, k, v)
+            return s
+
+        st = 'transform {} {} to {}\n'.format(
+            self.transform_type, self.tgt, self.tile.anchor(half_edge=True)
+        )
+
+        if v:
+            st = _desc(st, 'v', self.vertex_map())
+        if e:
+            st = _desc(st, 'v', self.edge_map())
+        if f:
+            st = _desc(st, 'v', self.face_map())
+        return st
 
     def __repr__(self):
-        st = ''
-        for k, v in self.vertex_map().items():
-            st += '\nv.{} -> {}'.format(k, v)
-        for k, v in self.edge_map().items():
-            st += '\ne.{} -> {}'.format(k, v)
-        for k, v in self.face_map().items():
-            st += '\nf.{} -> {}'.format(k, v)
-        return st
+        return self.describe(True, True, True)
 
     @compute_once
     def is_valid(self):
         m1 = self.vertex_map()
+        if m1 is None:
+            return False
         m2 = self.face_map()
         m3 = self.edge_map()
         m4 = self.half_edge_map()

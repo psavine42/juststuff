@@ -132,20 +132,28 @@ class HalfEdge(Mesh2d.HalfEdge, _VarGraphBase):
         if p.index in self._map:
             print('placement {} already registered to HE {}'.format(p.index, self.index))
             return
-        self._map[p.index] = [0] * len(p)
-        # indexed to template.inner_boundary_half_edge (CW)
-        template_colors = p.template.colors(half_edge=True)
-        own_edge_index = self.edges(index=True)
+        self._map[p.index] = [0] * len(p.maps)
+        colors = p.template.half_edge_meta
+        template_colors = []
+        for i in range(len(p.template.boundary.ext_half_edges)):
+            if i in colors:
+                template_colors.append(colors[i].get('color', None))
+            else:
+                template_colors.append(None)
 
-        for i, edge_index_list in enumerate(p.placement_edges):
-            if own_edge_index not in edge_index_list:
+        own_edge_index = self.edges(index=True)
+        for i, mapping in enumerate(p.maps):
+            if own_edge_index not in mapping.edges:
                 continue
             # boundary transformed by X_i
-            bnd = p.boundary_xformed(i, half_edges=True)
-
+            bnd = [self._P.index_of_vertex(x) for x in mapping.transformed.boundary.vertices]
+            bnd = r2.verts_to_edges(bnd)
+            bnd = [self._P.index_of_half_edge(x) for x in bnd]
             if self.index not in bnd:
                 continue
             ix_template_boundary = bnd.index(self.index)
+            if template_colors[ix_template_boundary] is None:
+                continue
             self._map[p.index][i] = template_colors[ix_template_boundary]
 
     @property
@@ -164,7 +172,9 @@ class Edge(Mesh2d.Edge, _VarGraphBase):
         _VarGraphBase.__init__(self)
         Mesh2d.Edge.__init__(self, *args, **kwargs)
         self._usable = max([0, min(1, is_usable)])
-        self.X = Variable(shape=n_colors, boolean=True, name='edge.{}'.format(self.index))
+        self.X = Variable(shape=n_colors,
+                          boolean=True,
+                          name='edge.{}'.format(self.index))
         self._map = ddict(dict)
         self._placements = []
         self._check_acks = []
@@ -192,7 +202,8 @@ class Edge(Mesh2d.Edge, _VarGraphBase):
 
         available options:
 
-        if X_i, get he_color_j, he_color_k
+        if X_i, get he_color_j, he_color_k s.t. k = -j
+
         if color_j == 0 or color_k == 0 -> J_i => 0
         if color_j != color_k           -> J_i => 0
         if color_j == color_k           -> J_i => 1
@@ -203,6 +214,7 @@ class Edge(Mesh2d.Edge, _VarGraphBase):
 
         # if J_i = 1, this implies that one of the configurations
         # such that both half edges have matching colors
+        #
         if len(self._half_edges) != 2 or self._usable == 0:
             C += [self.J == 0]
             return C

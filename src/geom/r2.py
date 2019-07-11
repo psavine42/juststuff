@@ -22,8 +22,8 @@ def deep_tup(x):
 
 def rot_mat(theta):
     return np.asarray([
-        [np.cos(theta), np.sin(theta), 0],
-        [-np.sin(theta), np.cos(theta), 0],
+        [np.cos(theta), -np.sin(theta), 0],
+        [np.sin(theta), np.cos(theta), 0],
         [0, 0, 1]
     ])
 
@@ -128,9 +128,28 @@ def align_vec(vec_src, vec_tgt):
     src = to_homo(vec_src)
     tgt = to_homo(vec_tgt)
     lin = tgt[0] - src[0]
+    # print(lin)
     u1, u2 = src[1] - src[0], tgt[1] - tgt[0]
     theta = angle_between(u1[:2], u2[:2])
+    # print(theta, vec_src, vec_tgt)
     return compose_mat(angle=theta, translate=lin)
+
+
+def _align_vec(vec_src, vec_tgt):
+    src_v = to_homo(vec_src)
+    tgt_v = to_homo(vec_tgt)
+    u1, u2 = src_v[1] - src_v[0], tgt_v[1] - tgt_v[0]
+    v1_u = unit_vector(u1)
+    v2_u = unit_vector(u2)
+    print(v1_u, v2_u)
+    src = np.eye(3)
+    src[0, 2] = v1_u[0]
+    src[1, 2] = v1_u[1]
+    tgt = np.eye(3)
+    tgt[0, 2] = v2_u[0]
+    tgt[1, 2] = v2_u[1]
+    trans = np.dot(np.linalg.inv(src), tgt)
+    return trans
 
 
 def centroid(pts):

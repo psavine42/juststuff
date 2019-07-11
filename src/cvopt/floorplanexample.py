@@ -1,13 +1,7 @@
-from cvxpy import *
-import cvxpy.lin_ops
-import cvxpy.utilities
 import pylab
-import typing
-import cassowary
-import numpy as np
+from src.cvopt.problem.base import FPProbllem
 from .constraining import *
 from .spatial import *
-from .tilings import *
 from cvxpy.utilities.performance_utils import compute_once
 import networkx as nx
 import itertools
@@ -16,7 +10,7 @@ from collections import Counter
 import matplotlib.patches as patches
 from .utils import display_face_bottom_left
 from .placements import *
-from .formulations import *
+from src.cvopt.problem.formulations import *
 from .mesh import *
 """
 CASSOWRY 
@@ -51,51 +45,6 @@ def _pre_process_tile_limit(limits, num_con, mx=40):
     raise Exception('limits must be same length as t')
 
 
-class FPProbllem(object):
-    def __init__(self):
-        self._problem = None
-
-    def own_constraints(self, **kwargs):
-        raise NotImplemented('not implemented in base class')
-
-    def display(self, problem, **kwargs):
-        return
-
-    def action_eliminators(self):
-        return []
-
-    def objective(self, **kwargs):
-        raise NotImplemented('not implemented in base class')
-
-    def print(self, problem):
-        print('Problem:----------')
-        # print(problem)
-        print('----------')
-        print(problem.solution.status)
-        print(problem.solution.opt_val)
-        print(problem.solution.attr)
-
-    @property
-    def solution(self):
-        return
-
-    def run(self, obj_args={}, const_args={}, verbose=False, show=True, save=None):
-        constraints = self.own_constraints(**const_args)
-        if verbose is True:
-            for c in constraints:
-                print(c)
-        objective = self.objective(**obj_args)
-        self._problem = Problem(objective, constraints)
-        print('constraints registered ')
-        self._problem.solve(verbose=verbose)
-        print('solution created')
-        if show:
-            self.display(self._problem, save=save, constraints=constraints)
-
-        return self.solution
-
-    def solve(self, **kwargs):
-        return self.run(**kwargs)
 
 
 class MIPFloorPlan(FPProbllem):
@@ -455,8 +404,8 @@ class AdjPlan(FPProbllem):
         base = [
             sum(var_by_t, axis=1) <= 1,         # ok in OO
             self.Faces @ self.X <= 1,           # todo OO
-            self.X <= B,                        # ok in OO
-            self.X >= 0                         # ok in OO ??
+            # self.X <= B,                        # ok in OO
+            # self.X >= 0                         # ok in OO ??
         ]
 
         # max - min tile usages - Note - these are mutex
@@ -561,13 +510,8 @@ class AdjPlanOO(FPProbllem):
         self._faces = []
         self._verts = []
         self._edges = []
-        self._placements = []
         self._half_edges = []
         self.eps = 0.4
-
-    @property
-    def placements(self):
-        return self._placements
 
     @property
     def solution(self):     # -> typing.Iterable[Placement2, MeshMapping]:
@@ -768,81 +712,87 @@ class FormPlan(AdjPlanOO):
 
     def __init__(self, templates, mesh):
         AdjPlanOO.__init__(self, templates, mesh)
-        self.__formulations = []
         self._build_graph()
         print('graph built')
         self._pre_compute_placements()
         print('placements computed')
 
-    def add_constraint(self, formulation, **data):
-        if isinstance(formulation, type):
-            form_instance = formulation(self.G, **data)
-        else:
-            form_instance = formulation
-        self.__formulations.append(form_instance)
-        for p in self._placements:
-            form_instance.register_action(p)
+    def __repr__(self):
+        st = ''
+        return
+
+    def add_constraint(self, *formulations, **data):
+        for formulation in formulations:
+            if isinstance(formulation, type):
+                form_instance = formulation(self.G, **data)
+            else:
+                form_instance = formulation
+            self._formulations.append(form_instance)
+            for p in self._placements:
+                form_instance.register_action(p)
 
     def _register_formulations(self):
-        for form in self.__formulations:
+        for form in self._formulations:
             for p in self._placements:
                 form.register_action(p)
 
     def _anchor_on_half_edge(self, t, edge_ix):
         geom = self._half_edges[edge_ix].geom
         template = self.T[t]
-        transformation = template.align_to(geom)
+        transformation = template.align_to(geom).astype(int)
+        # st = 'he:{} at {} -> {}'.format(edge_ix, template.anchor(half_edge=True), geom)
         if transformation is None:
+            # print(st + 'False')
             return None
-        mapped = MeshMapping(self.G, template, transformation)
-        if mapped.is_valid():
-            return mapped
+        mapping = MeshMapping(self.G, template, transformation, tgt=geom, ttype='he')
+        if mapping.is_valid():
+            # print(st + 'ok')
+            return mapping
+        # print(st + 'no map')
+        # print(mapping.half_edge_map())
         return None
 
     def _pre_compute_placements(self):
         for tile_index in range(self.t):
             maps = []
-            for edge_ix in range(self.num_half_edge):
-                mapping = self._anchor_on_half_edge(tile_index, edge_ix)
-                if mapping is None:
-                    continue
-                maps.append(mapping)
+            for half_edge_ix in range(self.num_half_edge):
+                mapping = self._anchor_on_half_edge(tile_index, half_edge_ix)
+                if mapping is not None:
+                    maps.append(mapping)
             placement = Placement2(self, tile_index, maps)
             self._register_placement(placement)
-
-    @property
-    def formulations(self):
-        return self.__formulations
 
     def objective(self, edge=True, face=True):
         # return Maximize(cvx.sum(cvx.vstack([x.objective_max for x in self._faces])))
         # edge_ob = 0
+        base = cvx.sum(cvx.vstack([x.objective_max for x in self._placements]))
         if edge is True:
+            # print('edgeobj')
             edge_ob = cvx.sum(cvx.vstack([x.objective_max for x in self._edges]))
+            # base = base + edge_ob
+        for x in self._formulations:
+            if x.is_objective is True:
+                base = base + x.as_objective()
+        return Maximize(base)
 
-        return Maximize(
-            cvx.sum(cvx.vstack([x.objective_max for x in self._placements]))
-            # + cvx.sum(cvx.vstack([x.objective_max for x in self._faces]))
-             + edge_ob
-        )
-
-    def own_constraints(self, edge=True, face=True, tile=True):
+    def own_constraints(self, half_edge=True, edge=True, face=True, vertex=True, tile=True):
         C = []
-        # self._register_formulations()
-        for x in self.__formulations:
+        for x in self._formulations:
             if x.is_constraint:
                 C += x.as_constraint()
-
-        for x in self._edges:
-            C += x.constraints
-        for x in self._half_edges:
-           C += x.constraints
-        for x in self._verts:
-           C += x.constraints
-        if face:
+        if edge is True:
+            for x in self._edges:
+                C += x.constraints
+        if half_edge is True:
+            for x in self._half_edges:
+                C += x.constraints
+        if vertex is True:
+            for x in self._verts:
+                C += x.constraints
+        if face is True:
             for x in self._faces:
                 C += x.constraints
-        if tile:
+        if tile is True:
             for x in self._placements:
                 C += x.constraints
         print('constraints computed')
@@ -889,7 +839,6 @@ class LinePlan(AdjPlanOO):
         # self.X = Variable(shape=len(self.M.edges), boolean=True)
         self.partitions = partitions
         self.points = points
-        self.__formulations = []
         self._build_graph()
         print('graph built')
 
@@ -903,12 +852,12 @@ class LinePlan(AdjPlanOO):
             form_instance = formulation(self.G, **data)
         else:
             form_instance = formulation
-        self.__formulations.append(form_instance)
+        self._formulations.append(form_instance)
         for p in self._placements:
             form_instance.register_action(p)
 
     def _register_formulations(self):
-        for form in self.__formulations:
+        for form in self._formulations:
             for p in self._placements:
                 form.register_action(p)
 
@@ -919,7 +868,7 @@ class LinePlan(AdjPlanOO):
 
     @property
     def formulations(self):
-        return self.__formulations
+        return self._formulations
 
     def _build(self):
         """
@@ -1027,23 +976,8 @@ class LinePlanCont(AdjPlanOO):
     def __init__(self, mesh, points):
         AdjPlanOO.__init__(self, mesh, [])
         self.M = mesh
-        self.__formulations = []
         self._build_graph()
         print('graph built')
-
-    def add_constraint(self, formulation, **data):
-        if isinstance(formulation, type):
-            form_instance = formulation(self.G, **data)
-        else:
-            form_instance = formulation
-        self.__formulations.append(form_instance)
-        for p in self._placements:
-            form_instance.register_action(p)
-
-    def _register_formulations(self):
-        for form in self.__formulations:
-            for p in self._placements:
-                form.register_action(p)
 
     def _anchor_on_half_edge(self, t, edge_ix):
         geom = self._half_edges[edge_ix].geom
@@ -1055,10 +989,6 @@ class LinePlanCont(AdjPlanOO):
         if mapping.is_valid():
             return mapping
         return None
-
-    @property
-    def formulations(self):
-        return self.__formulations
 
 
 

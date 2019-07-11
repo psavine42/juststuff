@@ -29,17 +29,15 @@ class _TemplateBase():
         self._half_edge_meta = ddict(dict)
 
     @property
-    def data(self):
-        return {'weight': self.weight, 'name': self.name,
+    def meta(self):
+        return {'weight': self.weight,
+                'name': self.name,
                 'color': self.color}
 
     def colors(self, edge=None, face=None, half_edge=None):
         raise NotImplemented()
 
     def add_color(self, value, **kwargs):
-        raise NotImplemented()
-
-    def add_formulation(self, formulation):
         raise NotImplemented()
 
 
@@ -73,37 +71,73 @@ class TemplateTile(Mesh2d, _TemplateBase):
         return
 
     def __str__(self):
-        bs = ''
-        for i, (u, v) in enumerate(self.edges):
-            bnd = 1 if (u, v) in self.boundary.edges else 0
-            bs += '\n\t Edge {}, bnd {}, {} {} - color: {}'.format(i, bnd, u, v, self._edge_meta[i].get('color', ''))
+        return self.describe(True, True, True, True)
 
-        for i, (u, v) in enumerate(self.boundary.int_half_edges):
-            data = self.G[u][v]
-            bs += '\n\t HalfEdge {}, {} {} - color: {}'.format(i, u, v, data.get('color', ''))
-        return bs
+    def describe(self, v=None, he=None, e=None, f=None):
+        """ printing utility """
+        def _desc(l, geom_index, meta_map):
+            s = ''
+            for k, v in enumerate(geom_index):
+                s += '\n{}.{} -> {} '.format(l, k, v)
+                if l in ['half_edge']:
+                    if v in self.boundary.ext_half_edges:
+                        s += 'on-bnd index {} '.format(self.boundary.ext_half_edges.index(v))
+                if k in meta_map:
+                    s += '::meta: {}'.format(meta_map[k])
+            return s
+
+        st = 'Temaplate {}, anchored at {}'.format(
+            self.name, self.anchor(half_edge=True)
+        )
+
+        if v:
+            st += _desc('vert', self.vertices.geom, self._vertex_meta)
+        if he:
+            st += _desc('half_edge', self.half_edges.geom, self._half_edge_meta)
+        if e:
+            st += _desc('edge', self.edges.geom, self._edge_meta)
+        if f:
+            st += _desc('face', self.faces.geom, self._face_meta)
+        return st
 
     # -----------------------------------------------------------
-    def add_color(self, value, half_edges=None, edges=None, faces=None, verts=None):
-        """ set interior bountary """
-        mapping = {'color': {}, 'sign': {}}
+    def add_color(self, value, **kwargs):
+        self.add_meta(value, 'color', **kwargs)
+
+    def add_meta(self,
+                 value,
+                 k,
+                 half_edges=None,
+                 edges=None,
+                 faces=None,
+                 verts=None,
+                 boundary=None):
+        """ set metadata """
         if edges:
             for ix in edges:
-                bnd_edge = self.boundary.edges[ix]
-                eix = self.index_of_edge(bnd_edge)
-                self._edge_meta[eix]['color'] = value
+                if boundary:
+                    bnd_edge = self.boundary.edges[ix]
+                    eix = self.index_of_edge(bnd_edge)
+                    self._edge_meta[eix][k] = value
+                else:
+                    self._edge_meta[ix][k] = value
 
         elif half_edges:
             for ix in half_edges:
-                self.half_edges[(ix, 'color')] = value
+                if boundary:
+                    bnd_edge = self.boundary.ext_half_edges[ix]
+                    eix = self.index_of_half_edge(bnd_edge)
+                    self._half_edge_meta[eix][k] = value
+                else:
+                    self._edge_meta[ix][k] = value
 
         elif faces:
             for ix in faces:
-                self._face_meta[ix]['color'] = value
+                self._face_meta[ix][k] = value
 
         elif verts:
             for ix in verts:
-                mapping[ix]['color'] = value
+                self._vertex_meta[ix][k] = value
 
         else:
             raise Exception('')
@@ -113,6 +147,9 @@ class TemplateTile(Mesh2d, _TemplateBase):
         return True
 
     def anchor(self, vertex=False, edge=False, half_edge=False):
+        """ return the vertex, half_edge, edge or face that is
+            used to embed this template within a space
+        """
         if vertex:
             return self.vertices[0]
         elif half_edge:
@@ -122,14 +159,16 @@ class TemplateTile(Mesh2d, _TemplateBase):
             raise NotImplemented('must be half_edge or vertex')
 
     def align_to(self, target_half_edge_geom):
-        """ given a half edge tuple, returns a transformation matrix
-        """
-        return r2.align_vec(self.anchor(half_edge=True),
-                            target_half_edge_geom)
+        """ given a half edge tuple, returns a transformation matrix """
+        return r2.align_vec(self.anchor(half_edge=True), target_half_edge_geom)
 
     @property
     def edge_colors(self):
         return self._edge_meta
+
+    @property
+    def half_edge_meta(self):
+        return self._half_edge_meta
 
     def colors(self, edge=None, face=None, half_edge=None):
         """
@@ -137,7 +176,7 @@ class TemplateTile(Mesh2d, _TemplateBase):
         """
         res = set()
         if half_edge:
-            for geom, data in self.half_edges.data:
+            for geom, data in self._half_edge_meta.items():
                 res.add(data.get('color', None))
         return list(res.difference([None]))
 
@@ -157,7 +196,7 @@ class BoundaryTemplate(LineString, _TemplateBase):
 
     def transform(self, xform):
         pts = shapely.affinity.affine_transform(self, xform)
-        return TemplateTile(pts, **self.data)
+        return TemplateTile(pts, **self.meta)
 
     @property
     def edge_colors(self):

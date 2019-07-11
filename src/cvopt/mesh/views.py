@@ -119,6 +119,11 @@ class HalfEdgeView(_View):
     def to_vertices(self):
         return
 
+    @lazyprop
+    def to_vertex_geom(self):
+        return {i:(self._p._ix2g_verts[v[0]], self._p._ix2g_verts[v[1]])
+                for i, v in self.base.items()}
+
     @lazyprop   # Lexigraphic
     def to_edges(self):
         """ dict: { half_edge_coord : edge_index } """
@@ -126,6 +131,15 @@ class HalfEdgeView(_View):
         he2e = dict()
         for k, (u, v) in self.base.items():
             he2e[(u, v)] = self._p.index_of_edge({u, v})
+        return he2e
+
+    @lazyprop  # Lexigraphic
+    def to_edges_index(self):
+        """ dict: { half_edge_coord : edge_index } """
+        _edges = self._p
+        he2e = dict()
+        for k, (u, v) in self.base.items():
+            he2e[k] = self._p.index_of_edge({u, v})
         return he2e
 
     @lazyprop

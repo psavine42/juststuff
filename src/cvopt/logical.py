@@ -76,7 +76,11 @@ def or_constraint(xs, y):
 def and_constraint(xs, y):
     """ y is true if all elements in xs is True
 
-    returns list of Constraints
+    if dimenison of xs is 2 then:
+        dimension 0 -> number of ands
+
+
+    returns: list of Constraints
     """
     N = len(xs)
     if isinstance(xs, list):

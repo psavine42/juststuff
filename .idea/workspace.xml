@@ -5,21 +5,26 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="771e5915-3dd4-4610-8ec7-e40bf3b700d8" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/src/cvopt/problem/buildmat.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/cvopt/shape/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/cvopt/shape/base.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/cvopt/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/cvopt/problem/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/cvopt/problem/base.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/cvopt/problem/edgeform.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../DeepRL/deep_rl/component/replay.py" beforeDir="false" afterPath="$PROJECT_DIR$/../DeepRL/deep_rl/component/replay.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../DeepRL/examples.py" beforeDir="false" afterPath="$PROJECT_DIR$/../DeepRL/examples.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../draw_pytorch/draw_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/../draw_pytorch/draw_model.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../isolation-nn/aindnn/MCTS" beforeDir="false" afterPath="$PROJECT_DIR$/../isolation-nn/aindnn/MCTS" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/example/cvopt/garage.py" beforeDir="false" afterPath="$PROJECT_DIR$/example/cvopt/garage.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/spec/test_formls.py" beforeDir="false" afterPath="$PROJECT_DIR$/spec/test_formls.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/cvopt/floorplanexample.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/cvopt/floorplanexample.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/cvopt/formulations.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/cvopt/formulations.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/cvopt/formulations.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/cvopt/problem/formulations.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/cvopt/logical.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/cvopt/logical.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/cvopt/mesh/boundary.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/cvopt/mesh/boundary.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/cvopt/mesh/mapping.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/cvopt/mesh/mapping.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/cvopt/mesh/mesh2d.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/cvopt/mesh/mesh2d.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/cvopt/mesh/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/cvopt/mesh/views.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/cvopt/placements.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/cvopt/placements.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/cvopt/spatial.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/cvopt/spatial.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/cvopt/tilings.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/cvopt/tilings.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/cvopt/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/cvopt/utils.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/geom/r2.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/geom/r2.py" afterDir="false" />
@@ -63,6 +68,7 @@
           <entry key="project.open.time.112" value="1" />
           <entry key="project.open.time.12" value="1" />
           <entry key="project.open.time.162" value="1" />
+          <entry key="project.open.time.21" value="1" />
           <entry key="project.open.time.38" value="1" />
           <entry key="project.open.time.43" value="1" />
           <entry key="project.open.time.45" value="1" />
@@ -70,12 +76,13 @@
           <entry key="project.open.time.55" value="1" />
           <entry key="project.open.time.57" value="3" />
           <entry key="project.open.time.64" value="1" />
+          <entry key="project.open.time.67" value="1" />
           <entry key="project.open.time.7" value="2" />
           <entry key="project.open.time.81" value="1" />
           <entry key="project.open.time.84" value="1" />
           <entry key="project.open.time.88" value="1" />
           <entry key="project.open.time.9" value="1" />
-          <entry key="project.opened" value="21" />
+          <entry key="project.opened" value="23" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.open">
@@ -83,7 +90,7 @@
           <entry key="geom_utils" value="2" />
           <entry key="gitignore" value="2" />
           <entry key="md" value="6" />
-          <entry key="py" value="797" />
+          <entry key="py" value="823" />
           <entry key="pyi" value="14" />
           <entry key="rst" value="1" />
         </counts>
@@ -92,129 +99,64 @@
         <counts>
           <entry key="Markdown" value="6" />
           <entry key="PLAIN_TEXT" value="2" />
-          <entry key="Python" value="799" />
+          <entry key="Python" value="825" />
           <entry key="PythonStub" value="14" />
           <entry key="ReST" value="1" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
-          <entry key="Python Console" value="14453" />
+          <entry key="Python Console" value="15181" />
           <entry key="dummy" value="2" />
           <entry key="geom_utils" value="393" />
           <entry key="gitignore" value="45" />
           <entry key="md" value="312" />
-          <entry key="py" value="288285" />
+          <entry key="py" value="297163" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
           <entry key="Markdown" value="312" />
           <entry key="PLAIN_TEXT" value="47" />
-          <entry key="Python" value="303131" />
+          <entry key="Python" value="312737" />
         </counts>
       </usages-collector>
     </session>
   </component>
   <component name="FileEditorManager">
-    <splitter split-orientation="horizontal" split-proportion="0.28488147">
+    <splitter split-orientation="horizontal" split-proportion="0.23123679">
       <split-first>
-        <splitter split-orientation="vertical" split-proportion="0.3206687">
+        <splitter split-orientation="vertical" split-proportion="0.2501243">
           <split-first>
             <leaf SIDE_TABS_SIZE_LIMIT_KEY="375">
-              <file pinned="false" current-in-tab="false">
+              <file pinned="false" current-in-tab="true">
                 <entry file="file://$PROJECT_DIR$/src/cvopt/logical.py">
                   <provider selected="true" editor-type-id="text-editor">
-                    <state relative-caret-position="700">
-                      <caret line="81" column="28" selection-start-line="81" selection-start-column="28" selection-end-line="81" selection-end-column="28" />
+                    <state relative-caret-position="405">
+                      <caret line="63" column="31" lean-forward="true" selection-start-line="63" selection-start-column="31" selection-end-line="63" selection-end-column="31" />
                       <folding>
-                        <element signature="e#1341#1424#1" expanded="true" />
-                        <element signature="e#1634#1718#1" expanded="true" />
-                        <element signature="e#1926#2065#2" expanded="true" />
-                        <marker date="1560727273392" expanded="true" signature="94:716" ph="..." />
-                        <marker date="1560727273392" expanded="true" signature="1254:1309" ph="..." />
+                        <element signature="e#1634#1793#1" expanded="true" />
+                        <marker date="1562552064642" expanded="true" signature="94:716" ph="..." />
+                        <marker date="1562552064642" expanded="true" signature="1254:1309" ph="..." />
                       </folding>
                     </state>
                   </provider>
                 </entry>
               </file>
               <file pinned="false" current-in-tab="false">
-                <entry file="file://$PROJECT_DIR$/src/cvopt/mesh/mesh2d.py">
-                  <provider selected="true" editor-type-id="text-editor">
-                    <state relative-caret-position="576">
-                      <caret line="153" selection-start-line="153" selection-end-line="153" />
-                      <folding>
-                        <element signature="e#15427#16423#0" />
-                        <element signature="e#16527#16773#0" />
-                        <element signature="e#16809#17198#0" />
-                        <element signature="e#17238#18772#0" />
-                        <element signature="e#18808#19535#0" />
-                        <element signature="e#19541#19875#1" />
-                        <element signature="e#20052#20318#0" />
-                        <element signature="e#21161#21352#0" />
-                        <element signature="e#21217#21280#0" />
-                        <element signature="e#21420#22862#0" />
-                        <element signature="e#22904#23141#0" />
-                        <element signature="e#23624#23709#1" expanded="true" />
-                        <element signature="e#23171#23488#0" />
-                        <element signature="e#24355#24603#0" />
-                        <element signature="e#24648#24669#0" />
-                        <element signature="e#24714#24735#0" />
-                        <element signature="e#24783#24806#0" />
-                        <element signature="e#24856#24881#0" />
-                      </folding>
-                    </state>
-                  </provider>
-                </entry>
-              </file>
-              <file pinned="false" current-in-tab="false">
-                <entry file="file://$PROJECT_DIR$/src/cvopt/problem/buildmat.py">
-                  <provider selected="true" editor-type-id="text-editor">
-                    <state relative-caret-position="378">
-                      <caret line="21" selection-start-line="21" selection-end-line="21" />
-                      <folding>
-                        <marker date="1562535566519" expanded="true" signature="479:539" ph="..." />
-                        <marker date="1562535566519" expanded="true" signature="719:740" ph="..." />
-                        <marker date="1562535566519" expanded="true" signature="823:844" ph="..." />
-                      </folding>
-                    </state>
-                  </provider>
-                </entry>
-              </file>
-              <file pinned="false" current-in-tab="false">
-                <entry file="file://$PROJECT_DIR$/src/cvopt/shape/base.py">
-                  <provider selected="true" editor-type-id="text-editor">
-                    <state relative-caret-position="288">
-                      <caret line="12" selection-start-line="12" selection-end-line="12" />
-                    </state>
-                  </provider>
-                </entry>
-              </file>
-              <file pinned="false" current-in-tab="true">
                 <entry file="file://$PROJECT_DIR$/src/cvopt/placements.py">
                   <provider selected="true" editor-type-id="text-editor">
-                    <state relative-caret-position="516">
-                      <caret line="272" column="34" lean-forward="true" selection-start-line="272" selection-start-column="34" selection-end-line="272" selection-end-column="34" />
+                    <state relative-caret-position="770">
+                      <caret line="224" column="39" selection-start-line="224" selection-start-column="39" selection-end-line="224" selection-end-column="39" />
                       <folding>
-                        <element signature="e#573#6409#0" />
-                        <marker date="1562528948042" expanded="true" signature="1383:1392" ph="..." />
-                        <marker date="1562528948042" expanded="true" signature="1416:1420" ph="..." />
-                        <marker date="1562528948042" expanded="true" signature="1448:1457" ph="..." />
-                        <marker date="1562528948042" expanded="true" signature="4574:5364" ph="..." />
-                        <marker date="1562528948042" expanded="true" signature="7582:7588" ph="..." />
-                        <marker date="1562528948042" expanded="true" signature="7626:7631" ph="..." />
-                      </folding>
-                    </state>
-                  </provider>
-                </entry>
-              </file>
-              <file pinned="false" current-in-tab="false">
-                <entry file="file://$USER_HOME$/anaconda3/envs/layout/lib/python3.6/site-packages/cvxpy/lin_ops/lin_utils.py">
-                  <provider selected="true" editor-type-id="text-editor">
-                    <state relative-caret-position="3582">
-                      <caret line="576" column="22" selection-start-line="576" selection-start-column="11" selection-end-line="576" selection-end-column="22" />
-                      <folding>
-                        <element signature="e#6427#6731#1" expanded="true" />
+                        <element signature="e#8192#9582#0" />
+                        <element signature="e#9698#10608#0" />
+                        <marker date="1562714745443" expanded="true" signature="1383:1392" ph="..." />
+                        <marker date="1562714745443" expanded="true" signature="1416:1420" ph="..." />
+                        <marker date="1562714745443" expanded="true" signature="1448:1457" ph="..." />
+                        <marker date="1562714745443" expanded="true" signature="4574:5364" ph="..." />
+                        <marker date="1562714745443" expanded="true" signature="7642:7648" ph="..." />
+                        <marker date="1562714745443" expanded="true" signature="7686:7691" ph="..." />
                       </folding>
                     </state>
                   </provider>
@@ -225,48 +167,36 @@
           <split-second>
             <leaf SIDE_TABS_SIZE_LIMIT_KEY="375">
               <file pinned="false" current-in-tab="false">
-                <entry file="file://$PROJECT_DIR$/src/cvopt/utils.py">
+                <entry file="file://$PROJECT_DIR$/src/cvopt/mesh/mesh2d.py">
                   <provider selected="true" editor-type-id="text-editor">
-                    <state relative-caret-position="527">
-                      <caret line="53" column="9" lean-forward="true" selection-start-line="53" selection-start-column="9" selection-end-line="53" selection-end-column="9" />
+                    <state relative-caret-position="3600">
+                      <caret line="336" column="19" lean-forward="true" selection-start-line="336" selection-start-column="19" selection-end-line="336" selection-end-column="19" />
                       <folding>
-                        <marker date="1562530301228" expanded="true" signature="1889:1890" ph="..." />
-                        <marker date="1562530301228" expanded="true" signature="3255:3258" ph="..." />
-                      </folding>
-                    </state>
-                  </provider>
-                </entry>
-              </file>
-              <file pinned="false" current-in-tab="false">
-                <entry file="file://$PROJECT_DIR$/src/cvopt/tilings.py">
-                  <provider selected="true" editor-type-id="text-editor">
-                    <state relative-caret-position="168">
-                      <caret line="61" selection-start-line="61" selection-end-line="61" />
-                      <folding>
-                        <element signature="e#4945#6427#0" />
-                        <marker date="1562535831566" expanded="true" signature="2772:2780" ph="..." />
-                        <marker date="1562535831566" expanded="true" signature="3398:3399" ph="..." />
-                        <marker date="1562535831566" expanded="true" signature="3399:3718" ph="..." />
+                        <element signature="e#2294#3978#0" />
+                        <element signature="e#5137#7823#0" />
+                        <element signature="e#7925#8238#0" />
+                        <element signature="e#8268#8585#0" />
+                        <element signature="e#8905#9455#0" />
+                        <marker date="1562813287041" expanded="true" signature="4487:4497" ph="..." />
                       </folding>
                     </state>
                   </provider>
                 </entry>
               </file>
               <file pinned="false" current-in-tab="true">
-                <entry file="file://$PROJECT_DIR$/src/cvopt/formulations.py">
+                <entry file="file://$PROJECT_DIR$/src/cvopt/problem/formulations.py">
                   <provider selected="true" editor-type-id="text-editor">
-                    <state relative-caret-position="432">
-                      <caret line="75" column="41" lean-forward="true" selection-start-line="75" selection-start-column="41" selection-end-line="75" selection-end-column="41" />
+                    <state relative-caret-position="174">
+                      <caret line="18" column="8" lean-forward="true" selection-start-line="18" selection-start-column="8" selection-end-line="18" selection-end-column="8" />
                       <folding>
-                        <element signature="e#1375#1483#1" expanded="true" />
-                        <element signature="e#3012#3287#1" expanded="true" />
-                        <marker date="1562540240101" expanded="true" signature="138:969" ph="..." />
-                        <marker date="1562540240101" expanded="true" signature="640:673" ph="..." />
-                        <marker date="1562540240101" expanded="true" signature="1007:1642" ph="..." />
-                        <marker date="1562540240101" expanded="true" signature="4030:4777" ph="..." />
-                        <marker date="1562540240101" expanded="true" signature="6929:6938" ph="..." />
-                        <marker date="1562540240101" expanded="true" signature="9566:9882" ph="..." />
-                        <marker date="1562540240101" expanded="true" signature="9806:9827" ph="..." />
+                        <marker date="1562816123003" expanded="true" signature="138:1909" ph="..." />
+                        <marker date="1562816123003" expanded="true" signature="502:508" ph="..." />
+                        <marker date="1562816123003" expanded="true" signature="1275:1337" ph="..." />
+                        <marker date="1562816123003" expanded="true" signature="1390:1423" ph="..." />
+                        <marker date="1562816123003" expanded="true" signature="1909:2427" ph="..." />
+                        <marker date="1562816123003" expanded="true" signature="4742:5489" ph="..." />
+                        <marker date="1562816123003" expanded="true" signature="8423:8739" ph="..." />
+                        <marker date="1562816123003" expanded="true" signature="8663:8684" ph="..." />
                       </folding>
                     </state>
                   </provider>
@@ -277,107 +207,157 @@
         </splitter>
       </split-first>
       <split-second>
-        <splitter split-orientation="horizontal" split-proportion="0.51902175">
+        <splitter split-orientation="horizontal" split-proportion="0.7243039">
           <split-first>
-            <leaf SIDE_TABS_SIZE_LIMIT_KEY="375">
-              <file pinned="false" current-in-tab="false">
-                <entry file="file://$PROJECT_DIR$/src/cvopt/spatial.py">
-                  <provider selected="true" editor-type-id="text-editor">
-                    <state relative-caret-position="1908">
-                      <caret line="263" column="47" lean-forward="true" selection-start-line="263" selection-start-column="47" selection-end-line="263" selection-end-column="47" />
-                      <folding>
-                        <element signature="e#3408#3660#1" expanded="true" />
-                        <marker date="1561415600870" expanded="true" signature="362:691" ph="..." />
-                        <marker date="1561415600870" expanded="true" signature="1049:1177" ph="..." />
-                        <marker date="1561415600870" expanded="true" signature="1156:1177" ph="..." />
-                        <marker date="1561415600870" expanded="true" signature="2739:3363" ph="..." />
-                        <marker date="1561415600870" expanded="true" signature="5571:7972" ph="..." />
-                      </folding>
-                    </state>
-                  </provider>
-                </entry>
-              </file>
-              <file pinned="false" current-in-tab="true">
-                <entry file="file://$PROJECT_DIR$/src/cvopt/floorplanexample.py">
-                  <provider selected="true" editor-type-id="text-editor">
-                    <state relative-caret-position="544">
-                      <caret line="801" column="8" lean-forward="true" selection-start-line="801" selection-start-column="8" selection-end-line="801" selection-end-column="8" />
-                      <folding>
-                        <element signature="e#867#1439#0" />
-                        <element signature="e#1472#2764#0" />
-                        <element signature="e#2803#6616#0" />
-                        <element signature="e#18608#18805#1" expanded="true" />
-                        <element signature="e#21426#21468#0" />
-                        <element signature="e#21746#22195#0" />
-                        <element signature="e#22085#22158#0" />
-                        <element signature="e#22253#23130#0" />
-                        <element signature="e#23188#24070#0" />
-                        <element signature="e#24155#25035#0" />
-                        <element signature="e#24296#24821#0" />
-                        <element signature="e#25091#25601#0" />
-                        <element signature="e#26148#26708#0" />
-                        <element signature="e#26506#26562#0" />
-                        <element signature="e#26774#26790#1" expanded="true" />
-                        <element signature="e#29555#33983#0" />
-                        <element signature="e#34026#34590#0" />
-                        <element signature="e#34675#34772#0" />
-                        <marker date="1562540325727" expanded="true" signature="1504:1539" ph="..." />
-                        <marker date="1562540325727" expanded="true" signature="1730:1754" ph="..." />
-                        <marker date="1562540325727" expanded="true" signature="9962:9966" ph="..." />
-                        <marker date="1562540325727" expanded="true" signature="12154:13881" ph="..." />
-                        <marker date="1562540325727" expanded="true" signature="12206:12215" ph="..." />
-                        <marker date="1562540325727" expanded="true" signature="14123:14128" ph="..." />
-                        <marker date="1562540325727" expanded="true" signature="14156:15218" ph="..." />
-                        <marker date="1562540325727" expanded="true" signature="24919:25444" ph="..." />
-                        <marker date="1562540325727" expanded="true" signature="27141:27147" ph="..." />
-                        <marker date="1562540325727" expanded="true" signature="28045:28450" ph="..." />
-                        <marker date="1562540325727" expanded="true" signature="28487:28523" ph="..." />
-                        <marker date="1562540325727" expanded="true" signature="29000:29004" ph="..." />
-                        <marker date="1562540325727" expanded="true" signature="31093:31133" ph="..." />
-                        <marker date="1562540325727" expanded="true" signature="31660:31779" ph="..." />
-                        <marker date="1562540325727" expanded="true" signature="34944:35049" ph="..." />
-                      </folding>
-                    </state>
-                  </provider>
-                </entry>
-              </file>
-            </leaf>
-          </split-first>
-          <split-second>
-            <splitter split-orientation="vertical" split-proportion="0.39513677">
+            <splitter split-orientation="horizontal" split-proportion="0.44729346">
               <split-first>
                 <leaf SIDE_TABS_SIZE_LIMIT_KEY="375">
-                  <file pinned="false" current-in-tab="true">
-                    <entry file="file://$PROJECT_DIR$/src/cvopt/mesh/mapping.py">
+                  <file pinned="false" current-in-tab="false">
+                    <entry file="file://$PROJECT_DIR$/src/cvopt/tilings.py">
                       <provider selected="true" editor-type-id="text-editor">
-                        <state relative-caret-position="713">
-                          <caret line="166" lean-forward="true" selection-start-line="166" selection-end-line="166" />
+                        <state relative-caret-position="504">
+                          <caret line="28" column="28" selection-start-line="28" selection-start-column="13" selection-end-line="28" selection-end-column="28" />
                           <folding>
-                            <marker date="1562539963741" expanded="true" signature="1593:1599" ph="..." />
+                            <element signature="e#3748#3828#1" expanded="true" />
+                            <element signature="e#4478#5960#0" />
+                            <marker date="1562728889074" expanded="true" signature="3218:3272" ph="..." />
+                            <marker date="1562728889074" expanded="true" signature="3518:3526" ph="..." />
+                            <marker date="1562728889074" expanded="true" signature="4478:4479" ph="..." />
+                            <marker date="1562728889074" expanded="true" signature="4479:4928" ph="..." />
+                            <marker date="1562728889074" expanded="true" signature="5245:5287" ph="..." />
+                          </folding>
+                        </state>
+                      </provider>
+                    </entry>
+                  </file>
+                  <file pinned="false" current-in-tab="true">
+                    <entry file="file://$PROJECT_DIR$/src/cvopt/utils.py">
+                      <provider selected="true" editor-type-id="text-editor">
+                        <state relative-caret-position="1143">
+                          <caret line="146" column="34" lean-forward="true" selection-start-line="146" selection-start-column="34" selection-end-line="146" selection-end-column="34" />
+                          <folding>
+                            <marker date="1562815213222" expanded="true" signature="2032:2033" ph="..." />
+                            <marker date="1562815213222" expanded="true" signature="2849:2866" ph="..." />
+                            <marker date="1562815213222" expanded="true" signature="4929:4932" ph="..." />
                           </folding>
                         </state>
                       </provider>
                     </entry>
                   </file>
                   <file pinned="false" current-in-tab="false">
+                    <entry file="file://$PROJECT_DIR$/src/geom/r2.py">
+                      <provider selected="true" editor-type-id="text-editor">
+                        <state relative-caret-position="114">
+                          <caret line="6" column="4" selection-start-line="6" selection-start-column="4" selection-end-line="6" selection-end-column="4" />
+                          <folding>
+                            <marker date="1562721497367" expanded="true" signature="3891:4091" ph="..." />
+                          </folding>
+                        </state>
+                      </provider>
+                    </entry>
+                  </file>
+                  <file pinned="false" current-in-tab="false">
+                    <entry file="file://$PROJECT_DIR$/src/cvopt/floorplanexample.py">
+                      <provider selected="true" editor-type-id="text-editor">
+                        <state relative-caret-position="1087">
+                          <caret line="701" column="20" selection-start-line="701" selection-start-column="20" selection-end-line="701" selection-end-column="20" />
+                          <folding>
+                            <element signature="e#1419#5232#0" />
+                            <element signature="e#28669#29356#1" expanded="true" />
+                            <element signature="e#32926#32998#1" expanded="true" />
+                            <marker date="1562719394490" expanded="true" signature="8565:8569" ph="..." />
+                            <marker date="1562719394490" expanded="true" signature="10757:12484" ph="..." />
+                            <marker date="1562719394490" expanded="true" signature="10809:10818" ph="..." />
+                            <marker date="1562719394490" expanded="true" signature="12726:12731" ph="..." />
+                            <marker date="1562719394490" expanded="true" signature="12759:13821" ph="..." />
+                            <marker date="1562719394490" expanded="true" signature="23423:23948" ph="..." />
+                            <marker date="1562719394490" expanded="true" signature="25637:25674" ph="..." />
+                            <marker date="1562719394490" expanded="true" signature="25668:25674" ph="..." />
+                            <marker date="1562719394490" expanded="true" signature="26905:27294" ph="..." />
+                            <marker date="1562719394490" expanded="true" signature="27859:27863" ph="..." />
+                            <marker date="1562719394490" expanded="true" signature="30030:30070" ph="..." />
+                            <marker date="1562719394490" expanded="true" signature="30595:30714" ph="..." />
+                            <marker date="1562719394490" expanded="true" signature="33878:33983" ph="..." />
+                          </folding>
+                        </state>
+                      </provider>
+                    </entry>
+                  </file>
+                </leaf>
+              </split-first>
+              <split-second>
+                <leaf SIDE_TABS_SIZE_LIMIT_KEY="375">
+                  <file pinned="false" current-in-tab="false">
                     <entry file="file://$PROJECT_DIR$/src/cvopt/mesh/views.py">
                       <provider selected="true" editor-type-id="text-editor">
-                        <state relative-caret-position="278">
-                          <caret line="256" column="18" lean-forward="true" selection-start-line="256" selection-start-column="18" selection-end-line="256" selection-end-column="18" />
+                        <state relative-caret-position="1242">
+                          <caret line="122" column="8" lean-forward="true" selection-start-line="122" selection-start-column="8" selection-end-line="122" selection-end-column="22" />
                           <folding>
-                            <element signature="e#2187#3283#0" />
-                            <element signature="e#3315#3976#0" />
-                            <element signature="e#4006#5251#0" />
-                            <element signature="e#5339#5394#0" />
-                            <marker date="1562529909131" expanded="true" signature="230:332" ph="..." />
-                            <marker date="1562529909131" expanded="true" signature="458:478" ph="..." />
-                            <marker date="1562529909131" expanded="true" signature="1233:1237" ph="..." />
-                            <marker date="1562529909131" expanded="true" signature="1495:1501" ph="..." />
-                            <marker date="1562529909131" expanded="true" signature="1600:1606" ph="..." />
-                            <marker date="1562529909131" expanded="true" signature="1677:1723" ph="..." />
-                            <marker date="1562529909131" expanded="true" signature="1760:1761" ph="..." />
-                            <marker date="1562529909131" expanded="true" signature="1833:1875" ph="..." />
+                            <marker date="1562814506556" expanded="true" signature="230:332" ph="..." />
+                            <marker date="1562814506556" expanded="true" signature="458:478" ph="..." />
+                            <marker date="1562814506556" expanded="true" signature="1233:1237" ph="..." />
+                            <marker date="1562814506556" expanded="true" signature="1495:1501" ph="..." />
+                            <marker date="1562814506556" expanded="true" signature="1600:1606" ph="..." />
+                            <marker date="1562814506556" expanded="true" signature="1677:1723" ph="..." />
+                            <marker date="1562814506556" expanded="true" signature="1760:1761" ph="..." />
+                            <marker date="1562814506556" expanded="true" signature="1833:1875" ph="..." />
+                            <marker date="1562814506556" expanded="true" signature="2795:2921" ph="..." />
                           </folding>
+                        </state>
+                      </provider>
+                    </entry>
+                  </file>
+                  <file pinned="false" current-in-tab="false">
+                    <entry file="file://$PROJECT_DIR$/src/cvopt/mesh/mapping.py">
+                      <provider selected="true" editor-type-id="text-editor">
+                        <state relative-caret-position="1171">
+                          <caret line="132" column="33" lean-forward="true" selection-start-line="132" selection-start-column="33" selection-end-line="132" selection-end-column="33" />
+                          <folding>
+                            <marker date="1562814506504" expanded="true" signature="1464:1469" ph="..." />
+                            <marker date="1562814506504" expanded="true" signature="3956:3961" ph="..." />
+                            <marker date="1562814506504" expanded="true" signature="5825:5826" ph="..." />
+                            <marker date="1562814506504" expanded="true" signature="5825:5916" ph="..." />
+                            <marker date="1562814506504" expanded="true" signature="6305:6358" ph="..." />
+                          </folding>
+                        </state>
+                      </provider>
+                    </entry>
+                  </file>
+                  <file pinned="false" current-in-tab="true">
+                    <entry file="file://$PROJECT_DIR$/src/cvopt/problem/edgeform.py">
+                      <provider selected="true" editor-type-id="text-editor">
+                        <state relative-caret-position="955">
+                          <caret line="146" column="12" selection-start-line="146" selection-start-column="12" selection-end-line="146" selection-end-column="31" />
+                          <folding>
+                            <marker date="1562815666589" expanded="true" signature="5242:6357" ph="..." />
+                            <marker date="1562815666589" expanded="true" signature="5277:5286" ph="..." />
+                          </folding>
+                        </state>
+                      </provider>
+                    </entry>
+                  </file>
+                  <file pinned="false" current-in-tab="false">
+                    <entry file="file://$PROJECT_DIR$/src/cvopt/problem/base.py">
+                      <provider selected="true" editor-type-id="text-editor">
+                        <state relative-caret-position="940">
+                          <caret line="47" column="33" selection-start-line="47" selection-start-column="33" selection-end-line="47" selection-end-column="33" />
+                        </state>
+                      </provider>
+                    </entry>
+                  </file>
+                </leaf>
+              </split-second>
+            </splitter>
+          </split-first>
+          <split-second>
+            <splitter split-orientation="vertical" split-proportion="0.6235704">
+              <split-first>
+                <leaf SIDE_TABS_SIZE_LIMIT_KEY="375">
+                  <file pinned="false" current-in-tab="true">
+                    <entry file="file://$PROJECT_DIR$/example/cvopt/garage.py">
+                      <provider selected="true" editor-type-id="text-editor">
+                        <state relative-caret-position="720">
+                          <caret line="40" lean-forward="true" selection-start-line="40" selection-end-line="40" />
                         </state>
                       </provider>
                     </entry>
@@ -385,21 +365,12 @@
                   <file pinned="false" current-in-tab="false">
                     <entry file="file://$PROJECT_DIR$/src/cvopt/mesh/boundary.py">
                       <provider selected="true" editor-type-id="text-editor">
-                        <state relative-caret-position="18">
-                          <caret line="8" column="1" selection-start-line="8" selection-start-column="1" selection-end-line="8" selection-end-column="1" />
+                        <state relative-caret-position="846">
+                          <caret line="81" lean-forward="true" selection-start-line="81" selection-end-line="81" />
                           <folding>
-                            <marker date="1561593015436" expanded="true" signature="1381:1385" ph="..." />
-                            <marker date="1561593015436" expanded="true" signature="2409:2430" ph="..." />
+                            <element signature="e#314#1379#0" />
+                            <marker date="1562812465753" expanded="true" signature="1415:1419" ph="..." />
                           </folding>
-                        </state>
-                      </provider>
-                    </entry>
-                  </file>
-                  <file pinned="false" current-in-tab="false">
-                    <entry file="file://$PROJECT_DIR$/example/cvopt/garage.py">
-                      <provider selected="true" editor-type-id="text-editor">
-                        <state relative-caret-position="126">
-                          <caret line="7" column="11" lean-forward="true" selection-start-line="7" selection-start-column="11" selection-end-line="7" selection-end-column="11" />
                         </state>
                       </provider>
                     </entry>
@@ -411,26 +382,31 @@
                   <file pinned="false" current-in-tab="true">
                     <entry file="file://$PROJECT_DIR$/spec/test_formls.py">
                       <provider selected="true" editor-type-id="text-editor">
-                        <state relative-caret-position="178">
-                          <caret line="172" lean-forward="true" selection-start-line="172" selection-end-line="172" />
+                        <state relative-caret-position="457">
+                          <caret line="279" column="16" selection-start-line="279" selection-start-column="16" selection-end-line="279" selection-end-column="16" />
                           <folding>
-                            <element signature="e#740#1298#0" />
-                            <element signature="e#1329#2361#0" />
-                            <element signature="e#2598#2671#0" />
-                            <element signature="e#2702#3912#0" />
-                            <element signature="e#3972#4012#1" expanded="true" />
-                            <element signature="e#4068#4302#0" />
-                            <element signature="e#4335#4499#0" />
-                            <element signature="e#4540#4556#1" expanded="true" />
-                            <marker date="1562539481003" expanded="true" signature="304:357" ph="..." />
-                            <marker date="1562539481003" expanded="true" signature="719:1041" ph="..." />
-                            <marker date="1562539481003" expanded="true" signature="1057:1066" ph="..." />
-                            <marker date="1562539481003" expanded="true" signature="2915:3003" ph="..." />
-                            <marker date="1562539481003" expanded="true" signature="4369:4476" ph="..." />
-                            <marker date="1562539481003" expanded="true" signature="4513:4977" ph="..." />
-                            <marker date="1562539481003" expanded="true" signature="5028:5033" ph="..." />
-                            <marker date="1562539481003" expanded="true" signature="5248:5658" ph="..." />
+                            <element signature="e#307#4150#0" />
+                            <element signature="e#359#574#0" />
+                            <element signature="e#609#947#0" />
+                            <element signature="e#978#1536#0" />
+                            <element signature="e#1567#2599#0" />
+                            <element signature="e#2940#4150#0" />
+                            <element signature="e#4212#4308#0" />
+                            <marker date="1562811234559" expanded="true" signature="1629:1634" ph="..." />
+                            <marker date="1562811234559" expanded="true" signature="3448:3457" ph="..." />
+                            <marker date="1562811234559" expanded="true" signature="3582:3672" ph="..." />
+                            <marker date="1562811234559" expanded="true" signature="5722:5727" ph="..." />
+                            <marker date="1562811234559" expanded="true" signature="9310:9316" ph="..." />
                           </folding>
+                        </state>
+                      </provider>
+                    </entry>
+                  </file>
+                  <file pinned="false" current-in-tab="false">
+                    <entry file="file://$PROJECT_DIR$/src/cvopt/problem/__init__.py">
+                      <provider selected="true" editor-type-id="text-editor">
+                        <state relative-caret-position="36">
+                          <caret line="2" column="23" selection-start-line="2" selection-start-column="23" selection-end-line="2" selection-end-column="23" />
                         </state>
                       </provider>
                     </entry>
@@ -438,7 +414,7 @@
                   <file pinned="false" current-in-tab="false">
                     <entry file="file://$PROJECT_DIR$/spec/testopt.py">
                       <provider selected="true" editor-type-id="text-editor">
-                        <state relative-caret-position="1998">
+                        <state relative-caret-position="4320">
                           <caret line="240" column="46" selection-start-line="240" selection-start-column="46" selection-end-line="240" selection-end-column="46" />
                           <folding>
                             <marker date="1560823244948" expanded="true" signature="1251:1680" ph="..." />
@@ -498,10 +474,6 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/src/algo/nns.py" />
-        <option value="$PROJECT_DIR$/src/probablistic/funcs.py" />
-        <option value="$PROJECT_DIR$/src/model/storage.py" />
-        <option value="$PROJECT_DIR$/src/regimes/__init__.py" />
         <option value="$PROJECT_DIR$/src/layout.py" />
         <option value="$PROJECT_DIR$/src/objectives.py" />
         <option value="$PROJECT_DIR$/spec/testshp.py" />
@@ -525,30 +497,34 @@
         <option value="$PROJECT_DIR$/src/cvopt/constraining.py" />
         <option value="$USER_HOME$/anaconda3/envs/layout/lib/python3.6/site-packages/cvxpy/atoms/__init__.py" />
         <option value="$USER_HOME$/anaconda3/envs/layout/lib/python3.6/site-packages/cvxpy/atoms/atom.py" />
-        <option value="$PROJECT_DIR$/src/cvopt/logical.py" />
         <option value="$PROJECT_DIR$/example/cvopt/apartment_discrete.py" />
         <option value="$PROJECT_DIR$/spec/testmesh.py" />
         <option value="$PROJECT_DIR$/src/geom/cg.py" />
         <option value="$PROJECT_DIR$/spec/testopt.py" />
-        <option value="$PROJECT_DIR$/example/cvopt/garage.py" />
         <option value="$PROJECT_DIR$/src/geom/geom_utils" />
         <option value="$PROJECT_DIR$/src/geom/__init__.py" />
         <option value="$PROJECT_DIR$/src/cvopt/mesh/__init__.py" />
-        <option value="$PROJECT_DIR$/src/cvopt/spatial.py" />
-        <option value="$PROJECT_DIR$/src/cvopt/mesh/boundary.py" />
         <option value="$PROJECT_DIR$/src/cvopt/shape/base.py" />
         <option value="$PROJECT_DIR$/src/cvopt/shape/__init__.py" />
-        <option value="$PROJECT_DIR$/src/cvopt/placements.py" />
-        <option value="$PROJECT_DIR$/src/cvopt/mesh/views.py" />
-        <option value="$PROJECT_DIR$/src/cvopt/utils.py" />
-        <option value="$PROJECT_DIR$/src/geom/r2.py" />
-        <option value="$PROJECT_DIR$/src/cvopt/mesh/mesh2d.py" />
         <option value="$PROJECT_DIR$/src/cvopt/problem/buildmat.py" />
+        <option value="$PROJECT_DIR$/src/cvopt/formulations.py" />
+        <option value="$PROJECT_DIR$/src/cvopt/logical.py" />
+        <option value="$PROJECT_DIR$/src/cvopt/problem/__init__.py" />
+        <option value="$PROJECT_DIR$/src/cvopt/spatial.py" />
+        <option value="$PROJECT_DIR$/src/cvopt/problem/base.py" />
+        <option value="$PROJECT_DIR$/src/cvopt/placements.py" />
+        <option value="$PROJECT_DIR$/src/cvopt/floorplanexample.py" />
+        <option value="$PROJECT_DIR$/src/geom/r2.py" />
         <option value="$PROJECT_DIR$/src/cvopt/tilings.py" />
         <option value="$PROJECT_DIR$/spec/test_formls.py" />
+        <option value="$PROJECT_DIR$/src/cvopt/mesh/boundary.py" />
+        <option value="$PROJECT_DIR$/src/cvopt/mesh/mesh2d.py" />
         <option value="$PROJECT_DIR$/src/cvopt/mesh/mapping.py" />
-        <option value="$PROJECT_DIR$/src/cvopt/formulations.py" />
-        <option value="$PROJECT_DIR$/src/cvopt/floorplanexample.py" />
+        <option value="$PROJECT_DIR$/src/cvopt/mesh/views.py" />
+        <option value="$PROJECT_DIR$/src/cvopt/utils.py" />
+        <option value="$PROJECT_DIR$/src/cvopt/problem/edgeform.py" />
+        <option value="$PROJECT_DIR$/example/cvopt/garage.py" />
+        <option value="$PROJECT_DIR$/src/cvopt/problem/formulations.py" />
       </list>
     </option>
   </component>
@@ -558,11 +534,11 @@
     <detection-done>true</detection-done>
     <sorting>DEFINITION_ORDER</sorting>
   </component>
-  <component name="ProjectFrameBounds">
-    <option name="x" value="1208" />
-    <option name="y" value="35" />
-    <option name="width" value="2629" />
-    <option name="height" value="2125" />
+  <component name="ProjectFrameBounds" extendedState="6">
+    <option name="x" value="3840" />
+    <option name="y" value="-2" />
+    <option name="width" value="3840" />
+    <option name="height" value="2162" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="true">
     <ConfirmationsSetting value="2" id="Add" />
@@ -572,6 +548,60 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scope">
+        <subPane subId="Scope 'Project Files'; set:Project Files; class com.intellij.psi.search.scope.ProjectFilesScope">
+          <expand>
+            <path>
+              <item name="layout" type="3d21c010:ScopeViewTreeModel$ProjectNode" />
+              <item name="" type="442cc68d:ScopeViewTreeModel$RootNode" />
+            </path>
+            <path>
+              <item name="layout" type="3d21c010:ScopeViewTreeModel$ProjectNode" />
+              <item name="" type="442cc68d:ScopeViewTreeModel$RootNode" />
+              <item name="spec" type="9f88c78c:ScopeViewTreeModel$FileNode" />
+            </path>
+            <path>
+              <item name="layout" type="3d21c010:ScopeViewTreeModel$ProjectNode" />
+              <item name="" type="442cc68d:ScopeViewTreeModel$RootNode" />
+              <item name="src" type="9f88c78c:ScopeViewTreeModel$FileNode" />
+            </path>
+            <path>
+              <item name="layout" type="3d21c010:ScopeViewTreeModel$ProjectNode" />
+              <item name="" type="442cc68d:ScopeViewTreeModel$RootNode" />
+              <item name="src" type="9f88c78c:ScopeViewTreeModel$FileNode" />
+              <item name="cvopt" type="9f88c78c:ScopeViewTreeModel$FileNode" />
+            </path>
+            <path>
+              <item name="layout" type="3d21c010:ScopeViewTreeModel$ProjectNode" />
+              <item name="" type="442cc68d:ScopeViewTreeModel$RootNode" />
+              <item name="src" type="9f88c78c:ScopeViewTreeModel$FileNode" />
+              <item name="cvopt" type="9f88c78c:ScopeViewTreeModel$FileNode" />
+              <item name="mesh" type="9f88c78c:ScopeViewTreeModel$FileNode" />
+            </path>
+            <path>
+              <item name="layout" type="3d21c010:ScopeViewTreeModel$ProjectNode" />
+              <item name="" type="442cc68d:ScopeViewTreeModel$RootNode" />
+              <item name="src" type="9f88c78c:ScopeViewTreeModel$FileNode" />
+              <item name="cvopt" type="9f88c78c:ScopeViewTreeModel$FileNode" />
+              <item name="problem" type="9f88c78c:ScopeViewTreeModel$FileNode" />
+            </path>
+            <path>
+              <item name="layout" type="3d21c010:ScopeViewTreeModel$ProjectNode" />
+              <item name="" type="442cc68d:ScopeViewTreeModel$RootNode" />
+              <item name="src" type="9f88c78c:ScopeViewTreeModel$FileNode" />
+              <item name="cvopt" type="9f88c78c:ScopeViewTreeModel$FileNode" />
+              <item name="shape" type="9f88c78c:ScopeViewTreeModel$FileNode" />
+            </path>
+            <path>
+              <item name="layout" type="3d21c010:ScopeViewTreeModel$ProjectNode" />
+              <item name="" type="442cc68d:ScopeViewTreeModel$RootNode" />
+              <item name="src" type="9f88c78c:ScopeViewTreeModel$FileNode" />
+              <item name="geom" type="9f88c78c:ScopeViewTreeModel$FileNode" />
+            </path>
+          </expand>
+          <select />
+        </subPane>
+      </pane>
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -634,53 +664,6 @@
           <select />
         </subPane>
       </pane>
-      <pane id="Scope">
-        <subPane subId="Scope 'Project Files'; set:Project Files; class com.intellij.psi.search.scope.ProjectFilesScope">
-          <expand>
-            <path>
-              <item name="layout" type="3d21c010:ScopeViewTreeModel$ProjectNode" />
-              <item name="" type="442cc68d:ScopeViewTreeModel$RootNode" />
-            </path>
-            <path>
-              <item name="layout" type="3d21c010:ScopeViewTreeModel$ProjectNode" />
-              <item name="" type="442cc68d:ScopeViewTreeModel$RootNode" />
-              <item name="spec" type="9f88c78c:ScopeViewTreeModel$FileNode" />
-            </path>
-            <path>
-              <item name="layout" type="3d21c010:ScopeViewTreeModel$ProjectNode" />
-              <item name="" type="442cc68d:ScopeViewTreeModel$RootNode" />
-              <item name="src" type="9f88c78c:ScopeViewTreeModel$FileNode" />
-            </path>
-            <path>
-              <item name="layout" type="3d21c010:ScopeViewTreeModel$ProjectNode" />
-              <item name="" type="442cc68d:ScopeViewTreeModel$RootNode" />
-              <item name="src" type="9f88c78c:ScopeViewTreeModel$FileNode" />
-              <item name="cvopt" type="9f88c78c:ScopeViewTreeModel$FileNode" />
-            </path>
-            <path>
-              <item name="layout" type="3d21c010:ScopeViewTreeModel$ProjectNode" />
-              <item name="" type="442cc68d:ScopeViewTreeModel$RootNode" />
-              <item name="src" type="9f88c78c:ScopeViewTreeModel$FileNode" />
-              <item name="cvopt" type="9f88c78c:ScopeViewTreeModel$FileNode" />
-              <item name="mesh" type="9f88c78c:ScopeViewTreeModel$FileNode" />
-            </path>
-            <path>
-              <item name="layout" type="3d21c010:ScopeViewTreeModel$ProjectNode" />
-              <item name="" type="442cc68d:ScopeViewTreeModel$RootNode" />
-              <item name="src" type="9f88c78c:ScopeViewTreeModel$FileNode" />
-              <item name="cvopt" type="9f88c78c:ScopeViewTreeModel$FileNode" />
-              <item name="shape" type="9f88c78c:ScopeViewTreeModel$FileNode" />
-            </path>
-            <path>
-              <item name="layout" type="3d21c010:ScopeViewTreeModel$ProjectNode" />
-              <item name="" type="442cc68d:ScopeViewTreeModel$RootNode" />
-              <item name="src" type="9f88c78c:ScopeViewTreeModel$FileNode" />
-              <item name="geom" type="9f88c78c:ScopeViewTreeModel$FileNode" />
-            </path>
-          </expand>
-          <select />
-        </subPane>
-      </pane>
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -691,15 +674,9 @@
     <property name="nodejs_npm_path_reset_for_default_project" value="true" />
     <property name="settings.editor.selected.configurable" value="configurable.group.tools" />
   </component>
-  <component name="PyConsoleOptionsProvider">
-    <option name="myPythonConsoleState">
-      <console-settings>
-        <option name="useSoftWraps" value="true" />
-      </console-settings>
-    </option>
-  </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/src/cvopt/problem" />
       <recent name="$PROJECT_DIR$/lib" />
       <recent name="$PROJECT_DIR$/src" />
       <recent name="$PROJECT_DIR$/spec" />
@@ -845,14 +822,14 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="1208" y="35" width="2629" height="2125" extended-state="0" />
+    <frame x="3840" y="-2" width="3840" height="2162" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" x="84" y="876" width="366" height="1082" id="Project" order="0" type="FLOATING" visible="true" weight="0.19339895" />
+      <window_info content_ui="combo" x="148" y="61" width="366" height="634" id="Project" order="0" type="FLOATING" visible="true" weight="0.19339895" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
-      <window_info anchor="bottom" id="Find" order="1" weight="0.19452888" />
+      <window_info anchor="bottom" id="Find" order="1" weight="0.19443063" />
       <window_info anchor="bottom" id="Run" order="2" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
@@ -862,7 +839,7 @@
       <window_info anchor="bottom" id="Version Control" order="8" show_stripe_button="false" />
       <window_info anchor="bottom" id="Event Log" order="9" side_tool="true" weight="0.32955715" />
       <window_info anchor="bottom" id="Terminal" order="10" />
-      <window_info active="true" anchor="bottom" x="85" y="515" width="767" height="1565" id="Python Console" order="11" type="FLOATING" visible="true" weight="0.32978722" />
+      <window_info active="true" anchor="bottom" x="2700" y="226" width="1067" height="1577" id="Python Console" order="11" type="FLOATING" visible="true" weight="0.32978722" />
       <window_info anchor="right" id="Commander" order="0" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
@@ -876,33 +853,6 @@
     <option name="myLimit" value="2678400000" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/src/cvopt/constraining.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="936">
-          <caret line="52" selection-start-line="52" selection-end-line="52" />
-          <folding>
-            <element signature="e#3961#3973#1" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/anaconda3/envs/layout/lib/python3.6/site-packages/cvxpy/atoms/__init__.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="954">
-          <caret line="67" column="37" selection-start-line="67" selection-start-column="37" selection-end-line="67" selection-end-column="37" />
-          <folding>
-            <element signature="e#0#562#1" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/example/cvopt/apartment_discrete.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="374">
-          <caret line="22" column="27" selection-start-line="22" selection-start-column="27" selection-end-line="22" selection-end-column="27" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/cvopt/testing.py">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
@@ -1060,27 +1010,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$USER_HOME$/anaconda3/envs/layout/lib/python3.6/site-packages/cvxpy/lin_ops/lin_utils.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="3582">
-          <caret line="576" column="22" selection-start-line="576" selection-start-column="11" selection-end-line="576" selection-end-column="22" />
-          <folding>
-            <element signature="e#6427#6731#1" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/problem/example.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1512">
           <caret line="84" column="27" selection-start-line="84" selection-start-column="14" selection-end-line="84" selection-end-column="27" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/anaconda3/envs/layout/lib/python3.6/site-packages/matplotlib/pyplot.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="59">
-          <caret line="552" column="19" selection-start-line="552" selection-start-column="19" selection-end-line="552" selection-end-column="19" />
         </state>
       </provider>
     </entry>
@@ -1106,10 +1039,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="9288">
           <caret line="1091" column="13" selection-start-line="1091" selection-start-column="13" selection-end-line="1091" selection-end-column="13" />
-          <folding>
-            <element signature="e#9293#9459#1" expanded="true" />
-            <element signature="e#9571#9777#1" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -1117,17 +1046,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="662">
           <caret line="142" lean-forward="true" selection-start-line="142" selection-end-line="142" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/cvopt/mesh/boundary.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="18">
-          <caret line="8" column="1" selection-start-line="8" selection-start-column="1" selection-end-line="8" selection-end-column="1" />
-          <folding>
-            <marker date="1561593015436" expanded="true" signature="1381:1385" ph="..." />
-            <marker date="1561593015436" expanded="true" signature="2409:2430" ph="..." />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -1142,15 +1060,73 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="558">
           <caret line="55" column="16" selection-start-line="55" selection-start-column="13" selection-end-line="55" selection-end-column="16" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/cvopt/shape/__init__.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="36">
+          <caret line="2" selection-start-line="2" selection-end-line="2" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/cvopt/problem/buildmat.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="378">
+          <caret line="21" selection-start-line="21" selection-end-line="21" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/anaconda3/envs/layout/lib/python3.6/site-packages/cvxpy/lin_ops/lin_utils.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1661">
+          <caret line="576" column="22" selection-start-line="576" selection-start-column="11" selection-end-line="576" selection-end-column="22" />
           <folding>
-            <marker date="1558232754964" expanded="true" signature="20340:20348" ph="..." />
+            <element signature="e#6427#6731#1" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/anaconda3/envs/layout/lib/python3.6/site-packages/matplotlib/pyplot.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="59">
+          <caret line="571" column="4" selection-start-line="571" selection-start-column="4" selection-end-line="571" selection-end-column="4" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/cvopt/shape/base.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="288">
+          <caret line="12" selection-start-line="12" selection-end-line="12" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/cvopt/spatial.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="2268">
+          <caret line="141" column="34" selection-start-line="141" selection-start-column="34" selection-end-line="141" selection-end-column="34" />
+          <folding>
+            <element signature="e#2748#2764#0" />
+            <element signature="e#2811#2925#1" expanded="true" />
+            <marker date="1562639882614" expanded="true" signature="362:691" ph="..." />
+            <marker date="1562639882614" expanded="true" signature="1049:1177" ph="..." />
+            <marker date="1562639882614" expanded="true" signature="1156:1177" ph="..." />
+            <marker date="1562639882614" expanded="true" signature="2739:3363" ph="..." />
+            <marker date="1562639882614" expanded="true" signature="6011:8435" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/cvopt/problem/__init__.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="36">
+          <caret line="2" column="23" selection-start-line="2" selection-start-column="23" selection-end-line="2" selection-end-column="23" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/spec/testopt.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1998">
+        <state relative-caret-position="4320">
           <caret line="240" column="46" selection-start-line="240" selection-start-column="46" selection-end-line="240" selection-end-column="46" />
           <folding>
             <marker date="1560823244948" expanded="true" signature="1251:1680" ph="..." />
@@ -1164,254 +1140,215 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/cvopt/shape/base.py">
+    <entry file="file://$PROJECT_DIR$/src/cvopt/placements.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="288">
-          <caret line="12" selection-start-line="12" selection-end-line="12" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/cvopt/shape/__init__.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="36">
-          <caret line="2" selection-start-line="2" selection-end-line="2" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/cvopt/logical.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="700">
-          <caret line="81" column="28" selection-start-line="81" selection-start-column="28" selection-end-line="81" selection-end-column="28" />
+        <state relative-caret-position="770">
+          <caret line="224" column="39" selection-start-line="224" selection-start-column="39" selection-end-line="224" selection-end-column="39" />
           <folding>
-            <element signature="e#1341#1424#1" expanded="true" />
-            <element signature="e#1634#1718#1" expanded="true" />
-            <element signature="e#1926#2065#2" expanded="true" />
-            <marker date="1560727273392" expanded="true" signature="94:716" ph="..." />
-            <marker date="1560727273392" expanded="true" signature="1254:1309" ph="..." />
+            <element signature="e#8192#9582#0" />
+            <element signature="e#9698#10608#0" />
+            <marker date="1562714745443" expanded="true" signature="1383:1392" ph="..." />
+            <marker date="1562714745443" expanded="true" signature="1416:1420" ph="..." />
+            <marker date="1562714745443" expanded="true" signature="1448:1457" ph="..." />
+            <marker date="1562714745443" expanded="true" signature="4574:5364" ph="..." />
+            <marker date="1562714745443" expanded="true" signature="7642:7648" ph="..." />
+            <marker date="1562714745443" expanded="true" signature="7686:7691" ph="..." />
           </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/cvopt/utils.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="527">
-          <caret line="53" column="9" lean-forward="true" selection-start-line="53" selection-start-column="9" selection-end-line="53" selection-end-column="9" />
-          <folding>
-            <marker date="1562530301228" expanded="true" signature="1889:1890" ph="..." />
-            <marker date="1562530301228" expanded="true" signature="3255:3258" ph="..." />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/cvopt/mesh/views.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="278">
-          <caret line="256" column="18" lean-forward="true" selection-start-line="256" selection-start-column="18" selection-end-line="256" selection-end-column="18" />
-          <folding>
-            <element signature="e#2187#3283#0" />
-            <element signature="e#3315#3976#0" />
-            <element signature="e#4006#5251#0" />
-            <element signature="e#5339#5394#0" />
-            <marker date="1562529909131" expanded="true" signature="230:332" ph="..." />
-            <marker date="1562529909131" expanded="true" signature="458:478" ph="..." />
-            <marker date="1562529909131" expanded="true" signature="1233:1237" ph="..." />
-            <marker date="1562529909131" expanded="true" signature="1495:1501" ph="..." />
-            <marker date="1562529909131" expanded="true" signature="1600:1606" ph="..." />
-            <marker date="1562529909131" expanded="true" signature="1677:1723" ph="..." />
-            <marker date="1562529909131" expanded="true" signature="1760:1761" ph="..." />
-            <marker date="1562529909131" expanded="true" signature="1833:1875" ph="..." />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/example/cvopt/garage.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="126">
-          <caret line="7" column="11" lean-forward="true" selection-start-line="7" selection-start-column="11" selection-end-line="7" selection-end-column="11" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/geom/r2.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1005">
-          <caret line="121" lean-forward="true" selection-start-line="121" selection-end-line="121" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/cvopt/mesh/mesh2d.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="576">
-          <caret line="153" selection-start-line="153" selection-end-line="153" />
+        <state relative-caret-position="114">
+          <caret line="6" column="4" selection-start-line="6" selection-start-column="4" selection-end-line="6" selection-end-column="4" />
           <folding>
-            <element signature="e#15427#16423#0" />
-            <element signature="e#16527#16773#0" />
-            <element signature="e#16809#17198#0" />
-            <element signature="e#17238#18772#0" />
-            <element signature="e#18808#19535#0" />
-            <element signature="e#19541#19875#1" />
-            <element signature="e#20052#20318#0" />
-            <element signature="e#21161#21352#0" />
-            <element signature="e#21217#21280#0" />
-            <element signature="e#21420#22862#0" />
-            <element signature="e#22904#23141#0" />
-            <element signature="e#23624#23709#1" expanded="true" />
-            <element signature="e#23171#23488#0" />
-            <element signature="e#24355#24603#0" />
-            <element signature="e#24648#24669#0" />
-            <element signature="e#24714#24735#0" />
-            <element signature="e#24783#24806#0" />
-            <element signature="e#24856#24881#0" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/cvopt/problem/buildmat.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="378">
-          <caret line="21" selection-start-line="21" selection-end-line="21" />
-          <folding>
-            <marker date="1562535566519" expanded="true" signature="479:539" ph="..." />
-            <marker date="1562535566519" expanded="true" signature="719:740" ph="..." />
-            <marker date="1562535566519" expanded="true" signature="823:844" ph="..." />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/cvopt/tilings.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="168">
-          <caret line="61" selection-start-line="61" selection-end-line="61" />
-          <folding>
-            <element signature="e#4945#6427#0" />
-            <marker date="1562535831566" expanded="true" signature="2772:2780" ph="..." />
-            <marker date="1562535831566" expanded="true" signature="3398:3399" ph="..." />
-            <marker date="1562535831566" expanded="true" signature="3399:3718" ph="..." />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/cvopt/placements.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="516">
-          <caret line="272" column="34" lean-forward="true" selection-start-line="272" selection-start-column="34" selection-end-line="272" selection-end-column="34" />
-          <folding>
-            <element signature="e#573#6409#0" />
-            <marker date="1562528948042" expanded="true" signature="1383:1392" ph="..." />
-            <marker date="1562528948042" expanded="true" signature="1416:1420" ph="..." />
-            <marker date="1562528948042" expanded="true" signature="1448:1457" ph="..." />
-            <marker date="1562528948042" expanded="true" signature="4574:5364" ph="..." />
-            <marker date="1562528948042" expanded="true" signature="7582:7588" ph="..." />
-            <marker date="1562528948042" expanded="true" signature="7626:7631" ph="..." />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/cvopt/spatial.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1908">
-          <caret line="263" column="47" lean-forward="true" selection-start-line="263" selection-start-column="47" selection-end-line="263" selection-end-column="47" />
-          <folding>
-            <element signature="e#3408#3660#1" expanded="true" />
-            <marker date="1561415600870" expanded="true" signature="362:691" ph="..." />
-            <marker date="1561415600870" expanded="true" signature="1049:1177" ph="..." />
-            <marker date="1561415600870" expanded="true" signature="1156:1177" ph="..." />
-            <marker date="1561415600870" expanded="true" signature="2739:3363" ph="..." />
-            <marker date="1561415600870" expanded="true" signature="5571:7972" ph="..." />
+            <marker date="1562721497367" expanded="true" signature="3891:4091" ph="..." />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/spec/test_formls.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="178">
-          <caret line="172" lean-forward="true" selection-start-line="172" selection-end-line="172" />
+        <state relative-caret-position="457">
+          <caret line="279" column="16" selection-start-line="279" selection-start-column="16" selection-end-line="279" selection-end-column="16" />
           <folding>
-            <element signature="e#740#1298#0" />
-            <element signature="e#1329#2361#0" />
-            <element signature="e#2598#2671#0" />
-            <element signature="e#2702#3912#0" />
-            <element signature="e#3972#4012#1" expanded="true" />
-            <element signature="e#4068#4302#0" />
-            <element signature="e#4335#4499#0" />
-            <element signature="e#4540#4556#1" expanded="true" />
-            <marker date="1562539481003" expanded="true" signature="304:357" ph="..." />
-            <marker date="1562539481003" expanded="true" signature="719:1041" ph="..." />
-            <marker date="1562539481003" expanded="true" signature="1057:1066" ph="..." />
-            <marker date="1562539481003" expanded="true" signature="2915:3003" ph="..." />
-            <marker date="1562539481003" expanded="true" signature="4369:4476" ph="..." />
-            <marker date="1562539481003" expanded="true" signature="4513:4977" ph="..." />
-            <marker date="1562539481003" expanded="true" signature="5028:5033" ph="..." />
-            <marker date="1562539481003" expanded="true" signature="5248:5658" ph="..." />
+            <element signature="e#307#4150#0" />
+            <element signature="e#359#574#0" />
+            <element signature="e#609#947#0" />
+            <element signature="e#978#1536#0" />
+            <element signature="e#1567#2599#0" />
+            <element signature="e#2940#4150#0" />
+            <element signature="e#4212#4308#0" />
+            <marker date="1562811234559" expanded="true" signature="1629:1634" ph="..." />
+            <marker date="1562811234559" expanded="true" signature="3448:3457" ph="..." />
+            <marker date="1562811234559" expanded="true" signature="3582:3672" ph="..." />
+            <marker date="1562811234559" expanded="true" signature="5722:5727" ph="..." />
+            <marker date="1562811234559" expanded="true" signature="9310:9316" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/cvopt/problem/base.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="940">
+          <caret line="47" column="33" selection-start-line="47" selection-start-column="33" selection-end-line="47" selection-end-column="33" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/cvopt/floorplanexample.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1087">
+          <caret line="701" column="20" selection-start-line="701" selection-start-column="20" selection-end-line="701" selection-end-column="20" />
+          <folding>
+            <element signature="e#1419#5232#0" />
+            <element signature="e#28669#29356#1" expanded="true" />
+            <element signature="e#32926#32998#1" expanded="true" />
+            <marker date="1562719394490" expanded="true" signature="8565:8569" ph="..." />
+            <marker date="1562719394490" expanded="true" signature="10757:12484" ph="..." />
+            <marker date="1562719394490" expanded="true" signature="10809:10818" ph="..." />
+            <marker date="1562719394490" expanded="true" signature="12726:12731" ph="..." />
+            <marker date="1562719394490" expanded="true" signature="12759:13821" ph="..." />
+            <marker date="1562719394490" expanded="true" signature="23423:23948" ph="..." />
+            <marker date="1562719394490" expanded="true" signature="25637:25674" ph="..." />
+            <marker date="1562719394490" expanded="true" signature="25668:25674" ph="..." />
+            <marker date="1562719394490" expanded="true" signature="26905:27294" ph="..." />
+            <marker date="1562719394490" expanded="true" signature="27859:27863" ph="..." />
+            <marker date="1562719394490" expanded="true" signature="30030:30070" ph="..." />
+            <marker date="1562719394490" expanded="true" signature="30595:30714" ph="..." />
+            <marker date="1562719394490" expanded="true" signature="33878:33983" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/cvopt/mesh/boundary.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="846">
+          <caret line="81" lean-forward="true" selection-start-line="81" selection-end-line="81" />
+          <folding>
+            <element signature="e#314#1379#0" />
+            <marker date="1562812465753" expanded="true" signature="1415:1419" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/cvopt/mesh/mesh2d.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="3600">
+          <caret line="336" column="19" lean-forward="true" selection-start-line="336" selection-start-column="19" selection-end-line="336" selection-end-column="19" />
+          <folding>
+            <element signature="e#2294#3978#0" />
+            <element signature="e#5137#7823#0" />
+            <element signature="e#7925#8238#0" />
+            <element signature="e#8268#8585#0" />
+            <element signature="e#8905#9455#0" />
+            <marker date="1562813287041" expanded="true" signature="4487:4497" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/cvopt/mesh/views.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1242">
+          <caret line="122" column="8" lean-forward="true" selection-start-line="122" selection-start-column="8" selection-end-line="122" selection-end-column="22" />
+          <folding>
+            <marker date="1562814506556" expanded="true" signature="230:332" ph="..." />
+            <marker date="1562814506556" expanded="true" signature="458:478" ph="..." />
+            <marker date="1562814506556" expanded="true" signature="1233:1237" ph="..." />
+            <marker date="1562814506556" expanded="true" signature="1495:1501" ph="..." />
+            <marker date="1562814506556" expanded="true" signature="1600:1606" ph="..." />
+            <marker date="1562814506556" expanded="true" signature="1677:1723" ph="..." />
+            <marker date="1562814506556" expanded="true" signature="1760:1761" ph="..." />
+            <marker date="1562814506556" expanded="true" signature="1833:1875" ph="..." />
+            <marker date="1562814506556" expanded="true" signature="2795:2921" ph="..." />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/cvopt/mesh/mapping.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="713">
-          <caret line="166" lean-forward="true" selection-start-line="166" selection-end-line="166" />
+        <state relative-caret-position="1171">
+          <caret line="132" column="33" lean-forward="true" selection-start-line="132" selection-start-column="33" selection-end-line="132" selection-end-column="33" />
           <folding>
-            <marker date="1562539963741" expanded="true" signature="1593:1599" ph="..." />
+            <marker date="1562814506504" expanded="true" signature="1464:1469" ph="..." />
+            <marker date="1562814506504" expanded="true" signature="3956:3961" ph="..." />
+            <marker date="1562814506504" expanded="true" signature="5825:5826" ph="..." />
+            <marker date="1562814506504" expanded="true" signature="5825:5916" ph="..." />
+            <marker date="1562814506504" expanded="true" signature="6305:6358" ph="..." />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/cvopt/formulations.py">
+    <entry file="file://$PROJECT_DIR$/src/cvopt/tilings.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="432">
-          <caret line="75" column="41" lean-forward="true" selection-start-line="75" selection-start-column="41" selection-end-line="75" selection-end-column="41" />
+        <state relative-caret-position="504">
+          <caret line="28" column="28" selection-start-line="28" selection-start-column="13" selection-end-line="28" selection-end-column="28" />
           <folding>
-            <element signature="e#1375#1483#1" expanded="true" />
-            <element signature="e#3012#3287#1" expanded="true" />
-            <marker date="1562540240101" expanded="true" signature="138:969" ph="..." />
-            <marker date="1562540240101" expanded="true" signature="640:673" ph="..." />
-            <marker date="1562540240101" expanded="true" signature="1007:1642" ph="..." />
-            <marker date="1562540240101" expanded="true" signature="4030:4777" ph="..." />
-            <marker date="1562540240101" expanded="true" signature="6929:6938" ph="..." />
-            <marker date="1562540240101" expanded="true" signature="9566:9882" ph="..." />
-            <marker date="1562540240101" expanded="true" signature="9806:9827" ph="..." />
+            <element signature="e#3748#3828#1" expanded="true" />
+            <element signature="e#4478#5960#0" />
+            <marker date="1562728889074" expanded="true" signature="3218:3272" ph="..." />
+            <marker date="1562728889074" expanded="true" signature="3518:3526" ph="..." />
+            <marker date="1562728889074" expanded="true" signature="4478:4479" ph="..." />
+            <marker date="1562728889074" expanded="true" signature="4479:4928" ph="..." />
+            <marker date="1562728889074" expanded="true" signature="5245:5287" ph="..." />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/cvopt/floorplanexample.py">
+    <entry file="file://$PROJECT_DIR$/src/cvopt/utils.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="544">
-          <caret line="801" column="8" lean-forward="true" selection-start-line="801" selection-start-column="8" selection-end-line="801" selection-end-column="8" />
+        <state relative-caret-position="1143">
+          <caret line="146" column="34" lean-forward="true" selection-start-line="146" selection-start-column="34" selection-end-line="146" selection-end-column="34" />
           <folding>
-            <element signature="e#867#1439#0" />
-            <element signature="e#1472#2764#0" />
-            <element signature="e#2803#6616#0" />
-            <element signature="e#18608#18805#1" expanded="true" />
-            <element signature="e#21426#21468#0" />
-            <element signature="e#21746#22195#0" />
-            <element signature="e#22085#22158#0" />
-            <element signature="e#22253#23130#0" />
-            <element signature="e#23188#24070#0" />
-            <element signature="e#24155#25035#0" />
-            <element signature="e#24296#24821#0" />
-            <element signature="e#25091#25601#0" />
-            <element signature="e#26148#26708#0" />
-            <element signature="e#26506#26562#0" />
-            <element signature="e#26774#26790#1" expanded="true" />
-            <element signature="e#29555#33983#0" />
-            <element signature="e#34026#34590#0" />
-            <element signature="e#34675#34772#0" />
-            <marker date="1562540325727" expanded="true" signature="1504:1539" ph="..." />
-            <marker date="1562540325727" expanded="true" signature="1730:1754" ph="..." />
-            <marker date="1562540325727" expanded="true" signature="9962:9966" ph="..." />
-            <marker date="1562540325727" expanded="true" signature="12154:13881" ph="..." />
-            <marker date="1562540325727" expanded="true" signature="12206:12215" ph="..." />
-            <marker date="1562540325727" expanded="true" signature="14123:14128" ph="..." />
-            <marker date="1562540325727" expanded="true" signature="14156:15218" ph="..." />
-            <marker date="1562540325727" expanded="true" signature="24919:25444" ph="..." />
-            <marker date="1562540325727" expanded="true" signature="27141:27147" ph="..." />
-            <marker date="1562540325727" expanded="true" signature="28045:28450" ph="..." />
-            <marker date="1562540325727" expanded="true" signature="28487:28523" ph="..." />
-            <marker date="1562540325727" expanded="true" signature="29000:29004" ph="..." />
-            <marker date="1562540325727" expanded="true" signature="31093:31133" ph="..." />
-            <marker date="1562540325727" expanded="true" signature="31660:31779" ph="..." />
-            <marker date="1562540325727" expanded="true" signature="34944:35049" ph="..." />
+            <marker date="1562815213222" expanded="true" signature="2032:2033" ph="..." />
+            <marker date="1562815213222" expanded="true" signature="2849:2866" ph="..." />
+            <marker date="1562815213222" expanded="true" signature="4929:4932" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/cvopt/logical.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="405">
+          <caret line="63" column="31" lean-forward="true" selection-start-line="63" selection-start-column="31" selection-end-line="63" selection-end-column="31" />
+          <folding>
+            <element signature="e#1634#1793#1" expanded="true" />
+            <marker date="1562552064642" expanded="true" signature="94:716" ph="..." />
+            <marker date="1562552064642" expanded="true" signature="1254:1309" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/example/cvopt/garage.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="720">
+          <caret line="40" lean-forward="true" selection-start-line="40" selection-end-line="40" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/cvopt/problem/formulations.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="174">
+          <caret line="18" column="8" lean-forward="true" selection-start-line="18" selection-start-column="8" selection-end-line="18" selection-end-column="8" />
+          <folding>
+            <marker date="1562816123003" expanded="true" signature="138:1909" ph="..." />
+            <marker date="1562816123003" expanded="true" signature="502:508" ph="..." />
+            <marker date="1562816123003" expanded="true" signature="1275:1337" ph="..." />
+            <marker date="1562816123003" expanded="true" signature="1390:1423" ph="..." />
+            <marker date="1562816123003" expanded="true" signature="1909:2427" ph="..." />
+            <marker date="1562816123003" expanded="true" signature="4742:5489" ph="..." />
+            <marker date="1562816123003" expanded="true" signature="8423:8739" ph="..." />
+            <marker date="1562816123003" expanded="true" signature="8663:8684" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/cvopt/problem/edgeform.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="955">
+          <caret line="146" column="12" selection-start-line="146" selection-start-column="12" selection-end-line="146" selection-end-column="31" />
+          <folding>
+            <marker date="1562815666589" expanded="true" signature="5242:6357" ph="..." />
+            <marker date="1562815666589" expanded="true" signature="5277:5286" ph="..." />
           </folding>
         </state>
       </provider>

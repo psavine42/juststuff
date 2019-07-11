@@ -163,6 +163,10 @@ class Mesh2d(object):
             area = np.abs(np.sum([x1 * y2 - x2 * y1 for x1, y1, x2, y2 in lines]))
             return 0.5 * area
 
+        @property
+        def geom(self):
+            return self.verts
+
         def adjacent_faces(self):
             return
 
@@ -244,8 +248,8 @@ class Mesh2d(object):
 
             heinv = {v_ixs: k for k, v_ixs in self._d_hes.items()}
             seen = []
-            # for (u, v) in sorted(edges): todo check this
-            for (u, v) in edges:
+            for (u, v) in sorted(edges):#todo check this
+                # for (u, v) in edges:
                 iu, iv = self._g2ix_verts[u], self._g2ix_verts[v]
                 if {u, v} not in seen:
                     i = len(seen)
@@ -308,12 +312,13 @@ class Mesh2d(object):
     # Views --------------------------------------------------
     @lazyprop
     def boundary(self):
-        bnds = []
+        ks, bnds = [], []
         for k, he_ixs in self._e2he.items():
             if len(he_ixs) == 1:
                 vert_index = self._d_hes[he_ixs[0]][0]
                 bnds.append(self._ix2g_verts[vert_index])
-        return Boundary.from_points(self, bnds)
+                ks.append(k)
+        return Boundary.from_kvs(self, ks, bnds)
 
     @lazyprop
     def faces(self):
@@ -336,7 +341,10 @@ class Mesh2d(object):
         return self.faces.inv[geom]
 
     def index_of_half_edge(self, geom):
-        return self.half_edges.index(geom)
+        if isinstance(geom[0], int):
+            return self.half_edges.index(geom)
+        elif isinstance(geom[0], tuple):
+            return self.half_edges.index_geom(geom)
 
     def index_of_edge(self, geom):
         if isinstance(geom, (set, frozenset)):

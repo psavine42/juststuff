@@ -200,11 +200,14 @@ class Placement2(_ActionBase, _VarGraphBase):
         self.template = parent.T[template_index]
         self.maps = maps
         self.X = Variable(shape=len(maps),
-                          name='plcmt.{}'.format(self.template.color),
+                          name='plcmt.{}'.format(template_index),
                           boolean=True)
 
     def __len__(self):
         return self.X.shape[0]
+
+    def __getitem__(self, item):
+        return self.maps[item]
 
     # backward v1 compatability ----------------------
     @property
