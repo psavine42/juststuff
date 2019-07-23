@@ -91,6 +91,7 @@ def and_constraint(xs, y):
     ]
     return C
 
+
 def xor_constraint(xs, y):
     """
     y is true if elements in x sum to odd. y is false if elements in x sum to even

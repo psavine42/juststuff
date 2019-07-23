@@ -112,7 +112,11 @@ class TemplateTile(Mesh2d, _TemplateBase):
                  faces=None,
                  verts=None,
                  boundary=None):
-        """ set metadata """
+        """
+        set metadata
+        # todo - move this to the mesh2d API
+
+        """
         if edges:
             for ix in edges:
                 if boundary:
@@ -154,7 +158,7 @@ class TemplateTile(Mesh2d, _TemplateBase):
             return self.vertices[0]
         elif half_edge:
             he = self._d_hes[0]
-            return (self.vertices[he[0]], self.vertices[he[1]])
+            return self.vertices[he[0]], self.vertices[he[1]]
         else:
             raise NotImplemented('must be half_edge or vertex')
 
@@ -182,6 +186,11 @@ class TemplateTile(Mesh2d, _TemplateBase):
 
     def as_graph(self):
         return self.G
+
+
+class SimpleTiling(_TemplateBase):
+    def colors(self, edge=None, face=None, half_edge=None):
+        return []
 
 
 class BoundaryTemplate(LineString, _TemplateBase):

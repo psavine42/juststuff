@@ -283,11 +283,6 @@ class TestConcEnv(TestMHEnv):
                                 bounds=bounds,
                                 # loss='soft_l1',
                                 constraints=tuple(constraints))
-        # res = optimize.least_squares(costfn, x0,
-        #                         method='dogbox',
-        #                         # bounds=bounds,
-        #                         # constraints=tuple(constraints)
-        #                         )
         print(res)
         print(costfn(res.x))
 

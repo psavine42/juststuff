@@ -9,6 +9,7 @@
     <mapping directory="$PROJECT_DIR$/../isolation-nn" vcs="Git" />
     <mapping directory="$PROJECT_DIR$" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/lib/Spaceplanning_ADSK_PW" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/lib/dccp" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/lib/hessian" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/lib/pythonocc-utils" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/../pytorch-a2c-ppo-acktr-gail" vcs="Git" />

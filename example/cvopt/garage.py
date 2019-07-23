@@ -2,9 +2,12 @@ from src.cvopt.tilings import TemplateTile
 
 
 def parking_simple(verbose=False):
+    """
+    road and parking tile 
+    """
     road_tile = TemplateTile(1, 1, color=0, weight=0.1, name='road')
     lot_tile1 = TemplateTile(2, 1, color=1, weight=2, name='lot1')
-    # print(lot_tile1)
+
     road_tile.add_color(-1, half_edges=[0, 1, 2], boundary=True)
     road_tile.add_color(+1, half_edges=[3], boundary=True)
 

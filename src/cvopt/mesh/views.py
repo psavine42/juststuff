@@ -121,7 +121,7 @@ class HalfEdgeView(_View):
 
     @lazyprop
     def to_vertex_geom(self):
-        return {i:(self._p._ix2g_verts[v[0]], self._p._ix2g_verts[v[1]])
+        return {i: (self._p._ix2g_verts[v[0]], self._p._ix2g_verts[v[1]])
                 for i, v in self.base.items()}
 
     @lazyprop   # Lexigraphic
@@ -183,6 +183,29 @@ class VertexView(_View):
                     v2f[v].add(f)
         return v2f
 
+    @lazyprop
+    def to_edges(self):
+        v2e = ddict(set)
+        for edge_ix, node_ixs in self._p._d_edges.items():
+            for node_ix in node_ixs:
+                v2e[node_ix].add(edge_ix)
+        return v2e
+
+    @lazyprop
+    def half_edges_from(self):
+        """ dict of { vertex_index : {outgoing_he } """
+        v2he = ddict(set)
+        for he, vert_ixs in self._p._d_hes.items():
+            v2he[vert_ixs[0]].add(he)
+        return v2he
+
+    @lazyprop
+    def half_edges_to(self):
+        v2he = ddict(set)
+        for he, vert_ixs in self._p._d_hes.items():
+            v2he[vert_ixs[1]].add(he)
+        return v2he
+
 
 class EdgeView(_View):
     DAT_KEY = 'edge'
@@ -193,6 +216,7 @@ class EdgeView(_View):
 
     @property
     def base(self):
+        """ dict of { edge_index : { vertex_index1,  vertex_index2 } ... } """
         return self._p._d_edges
 
     @property
@@ -205,7 +229,7 @@ class EdgeView(_View):
 
     @lazyprop
     def to_vertices(self):
-        """ dict of { edge_index : { vertex_coord ... } ... } """
+        """ dict of { edge_index : { edge_index... } ... } """
         return
 
     @lazyprop
@@ -232,6 +256,11 @@ class EdgeView(_View):
             for e in edges:
                 e2f[self._p.index_of_edge(e)].add(face_ix)
         return e2f
+
+    @lazyprop
+    def adjacent_edges(self):
+        return
+
 
 
 class FaceView(_View):

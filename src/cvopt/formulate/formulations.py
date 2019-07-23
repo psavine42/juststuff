@@ -6,22 +6,54 @@ import cvxpy as cvx
 """
 
 
-domains = {'mesh', 'continuous'}
+domains = {'discrete', 'mesh', 'continuous'}
+
+
+def sum_objectives(objs):
+    """ utility for gathering objectives into a single expression """
+    base = None
+    for route in objs:
+        o = route.objective()
+        if base is None:
+            base = o
+            continue
+        if o is None:
+            continue
+        base = base + o
+    return base
 
 
 class Formulation(object):
-    KEY = ''
-    has_var = False
+    creates_var = False
     DOMAIN = {}
     META = {'constraint': True, 'objective': True}
 
-    def __init__(self, space, is_constraint=None, name=None):
-        """ Base Class """
+    def __init__(self, space, is_constraint=None, is_objective=None, name=None):
+        """ Base Class
+
+        inputs: Can be formulations, Variables, geometries or matricies
+        actions: Variables outputs
+        spaces : the domain in which the formulation exists
+
+
+        DOMAIN - {
+            discrete -> Quadratic assignment problem
+
+        }
+
+        problem_impl : using this implies that
+
+        """
         self._space = space
-        self._actions = []
+        self._inputs = []   #
+        self._actions = []  # outputs lol
+
         self.name = name
         self.is_constraint = is_constraint
-        self.is_objective = not self.is_constraint
+        self.is_objective = is_objective
+
+        self._generated_constraints = False
+        self._generated_objectives = False
 
     def register_action(self, a):
         """ register an Action/Placement object
@@ -47,7 +79,21 @@ class Formulation(object):
     @property
     def stacked(self):
         """ returns the vars for all actions concatted to a single row"""
+        if len(self._actions) == 1:
+            return self._actions[0].X
         return cvx.hstack([x.X for x in self._actions])
+
+    @property
+    def action(self):
+        return self.stacked
+
+    @property
+    def inputs(self):
+        return self._actions
+
+    @property
+    def outputs(self):
+        return None
 
     @property
     def space(self):
@@ -58,18 +104,74 @@ class Formulation(object):
     def num_actions(self):
         return sum([len(a) for a in self._actions])
 
-    def as_objective(self, maximize=True):
+    # display -----------------------
+    def __str__(self):
+        st = '{}'.format(self.__class__.__name__)
+        if self.name:
+            st += ':'.format(self.name)
+        return st
+
+    def __repr__(self):
+        return self.__str__()
+
+    def display(self) -> dict:
+        """
+        returns a dictionary of how results are to be displayed
+        each key contains indicies of corresponding items on self.space
+        to add addtional attributes, each list entry can be tuple of (index, dict)
+        """
+        return {'vertices': [],
+                'half_edges': [],
+                'faces': [],
+                'edges': []}
+
+    def describe(self, **kwargs):
+        s = ''
+        for s in self._inputs:
+            s += s.describe(**kwargs)
+        return s
+
+    # generators -----------------------
+    def reset(self):
+        """ reset the generator states - used for relaxation problems"""
+        self._generated_constraints = False
+        self._generated_objectives = False
+        for c in self._inputs:
+            c.reset()
+
+    def as_objective(self, **kwargs):
+        """ objective Expression """
         raise NotImplemented()
 
     def as_constraint(self, *args):
         """ list of Constraint Expressions """
         raise NotImplemented()
 
-    def __str__(self):
-        st = '{}'.format(self.__class__.__name__)
-        if self.name:
-            st += ':'.format(self.name)
-        return st
+    def constraints(self):
+        if self._generated_constraints is True \
+                or self.is_constraint is False:
+            return []
+        self._generated_constraints = True
+        return self.as_constraint()
+
+    def objective(self):
+        if self._generated_objectives is True \
+                or self.is_objective is False:
+            return None
+        self._generated_objectives = True
+        return self.as_objective()
+
+
+class ConstaintFormulation(Formulation):
+    pass
+
+
+class ObjectiveFormulation(Formulation):
+    pass
+
+
+class Stage(Formulation):
+    pass
 
 
 class TestingFormulation(Formulation):
@@ -79,7 +181,6 @@ class TestingFormulation(Formulation):
 
 # ------------------------------------------------
 class NoOverlappingFaces(Formulation):
-    KEY = 'overlaps'
     DOMAIN = {'discrete'}
 
     def as_constraint(self, *args):
@@ -94,58 +195,8 @@ class NoOverlappingFaces(Formulation):
         return [M @ actions <= 1]
 
 
-class GridLine(Formulation):
-    KEY = 'grid_lines'
-    DOMAIN = {'discrete'} # both can work
-
-    def __init__(self, space, edges=[], **kwargs):
-        """
-        maximize the number of edges on gridlines
-        :param space:
-        :param geom:
-        """
-        Formulation.__init__(self, space, **kwargs)
-        self._edge_indices = edges
-
-    def as_constraint(self):
-        """
-        'no interior edges can intersect a gridline'
-
-        **note** - the statement:
-            'all tile boundary edges must lie on gridlines'
-            is either too restrictive, or equivelant to the original problem
-
-        returns list of Constraint Inequality Expressions X <= M
-        """
-        C = []
-        M = np.ones(self.num_actions)
-        cnt = 0
-        for p in self._actions:
-            M_p = np.ones(len(p), dtype=int)
-            for i in range(len(p)):
-                edges_ti = p.maps[i].edges
-                edges_bnd = p.maps[i].boundary.edges
-                edges_ti = [x for x in edges_ti if x in edges_bnd]
-                # check if v is in the boundary
-                for v in self._edge_indices:
-                    if v in edges_ti:
-                        M_p[i] = 0
-                        M[cnt] = 0
-                        break
-                cnt += 1
-            C += [p.X <= M_p]
-        return C
-
-    def as_objective(self, maximize=True):
-        """
-        todo 'maximize the number of edges that intersect with the edges marked as gridlines'
-        """
-        raise NotImplemented('not yet implemented')
-
-
 class VerticesNotOnInterior(Formulation):
-    KEY = 'columns'
-    DOMAIN = {'mesh'}
+    DOMAIN = {'discrete'}
 
     def __init__(self, space, vertices=[], weights=[], **kwargs):
         """
@@ -219,9 +270,7 @@ class VerticesNotOnInterior(Formulation):
                 cnt += 1
 
         objective = cvx.sum(self._weights * (M @ cvx.vstack(X)))
-        return {'constraints': None,
-                'sign': +1,
-                'objective': objective}
+        return objective
 
 
 class TileLimit(Formulation):
@@ -242,8 +291,6 @@ class TileLimit(Formulation):
         if self._lower:
             C += [cvx.sum(self._actions[self._tile_index].X) >= self._lower]
         return C
-
-
 
 
 class IncludeNodes(Formulation):

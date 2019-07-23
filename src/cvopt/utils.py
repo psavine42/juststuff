@@ -1,10 +1,14 @@
 import matplotlib
 import matplotlib.pyplot as plt
+import matplotlib.cm as cm
 import matplotlib.patches as patches
 from matplotlib.patches import Rectangle
 import numpy as np
 from src.cvopt.mesh import Mesh2d
 import src.geom.r2 as r2
+import cycler
+
+_colors = ['#68b382', '#67c2ba', 'green', 'red', 'violet', 'orange']
 
 
 def place_tile2(tile, point):
@@ -34,11 +38,9 @@ def display_face_bottom_left(problem, save=None, edges=False, **kwargs):
         for face_ix in mapping.faces:
             x, y = imesh.faces.geom[face_ix][0]
             ax.add_patch(
-                Rectangle((x, y), 1, 1, facecolor=colors[placement.index], **info)
+                Rectangle((x, y), 1, 1, facecolor=colors[placement.index],
+                          **info)
             )
-        # for edge in mapping.boundary.edges:
-        #    ax = draw_edge(ax, edge, color='black')
-
         ax = draw_half_edges(mapping, ax, offset=True, bnd_only=True)
 
     # label faces
@@ -57,18 +59,19 @@ def display_face_bottom_left(problem, save=None, edges=False, **kwargs):
     finalize(ax, save=save, extents=[n, m])
 
 
-def finalize(ax, save=None, extents=None):
-    if extents is not None:
-        if len(extents) == 2:
-            n, m = extents
-            ax.axis([0, n, 0, m])
-        elif len(extents) == 1:
-            n = extents[0]
-            ax.axis([0, n, 0, n])
-        elif len(extents) == 4:
-            ax.axis(extents)
-    ax.axis('off')
-    ax.set_aspect('equal')
+def finalize(ax=None, save=None, extents=None):
+    if ax is not None:
+        if extents is not None:
+            if len(extents) == 2:
+                n, m = extents
+                ax.axis([0, n, 0, m])
+            elif len(extents) == 1:
+                n = extents[0]
+                ax.axis([0, n, 0, n])
+            elif len(extents) == 4:
+                ax.axis(extents)
+        ax.axis('off')
+        ax.set_aspect('equal')
     plt.gcf()
     if isinstance(save, str):
         plt.savefig(save)
@@ -87,6 +90,21 @@ def _get_geom(imesh, fn):
         raise Exception('')
 
 
+def _parse_drawable(x):
+    if isinstance(x, int):
+        return x, {}
+    elif isinstance(x, dict):
+        i = x.pop('index')
+        data = x
+        return i, data
+    elif isinstance(x, tuple):
+        i, data = x
+        return i, data
+    else:
+        raise Exception('unkown display object')
+
+
+#  Items-----------------------------------------------------
 def draw_edge(ax, geom, index=None, **kwargs):
     (x1, y1), (x2, y2) = list(geom)
     ax.plot([x1, x2], [y1, y2], **kwargs)
@@ -94,6 +112,14 @@ def draw_edge(ax, geom, index=None, **kwargs):
         x = x1 + (x2 - x1) / 3
         y = y1 + (y2 - y1) / 3
         ax.text(x, y, "e.{}".format(index))
+    return ax
+
+
+def draw_vertex(geom, ax, index=None, marker='o', **kwargs):
+    x, y = geom
+    ax.plot([x], [y], marker=marker, **kwargs)
+    if index:
+        ax.text(x, y, "v.{}".format(index))
     return ax
 
 
@@ -107,25 +133,66 @@ def draw_edges(imesh:Mesh2d, ax, label=False, **kwargs):
     return ax
 
 
+def draw_box(d, ax, label=True, edgecolor='black', **kwargs):
+    i, data = _parse_drawable(d)
+    x, y = data.pop('x'), data.pop('y')
+    w = data.pop('w') if 'w' in data else 1
+    h = data.pop('h') if 'h' in data else 1
+
+    ax.add_patch(Rectangle((x, y), w, h, edgecolor=edgecolor,
+                           **kwargs))
+    if label is True:
+        name = data.get('name', None)
+        txt = name if name is not None else str(i)
+        ax.text(x + w / 2, y + h / 2, "box.{}".format(txt))
+    return ax
+
+
+# formulation -----------------------------------------------------
+def draw_formulation_he(form, ax):
+    he = form.space.half_edges.geom
+    for i in form.display()['half_edges']:
+        ax = draw_edge(ax, he[i], index=i, color='black')
+    return ax
+
+
+def draw_formulation_discrete(form, ax, **kwargs):
+    vg = form.space.vertices.geom
+    for x in form.display()['vertices']:
+        i, data = _parse_drawable(x)
+        draw_vertex(vg[i], ax, index=i, **data)
+    ax = draw_formulation_he(form, ax)
+    return ax
+
+
+def draw_formulation_cont(form, ax, **kwargs):
+    disp_dict = form.display()
+    colors = cm.viridis(np.linspace(0, 1, len(disp_dict['boxes'])))
+    for i, d in enumerate(disp_dict['boxes']):
+        draw_box(d, ax, facecolor=colors[i], **kwargs)
+    # ax = draw_formulation_he(form, ax)
+    return ax
+
+
+# --------------------------------------------------
 def draw_half_edges(imesh, ax, bnd_only=False, label=False, offset=False, **kwargs):
     neg_colors = ['#ff0000']
     pos_colors = ['#ff00f7']
     info = dict(length_includes_head=True, linewidth=1)
     opts = {**info, **kwargs}
     from src.cvopt.mesh import MeshMapping
+    from src.cvopt.placements import ActionBase
     if isinstance(imesh, MeshMapping):
         mapping = imesh
         he_cols = mapping.match_col(he=True)
-
         imesh = mapping.transformed
+    elif isinstance(imesh, ActionBase):
+        return
     else:
         mapping = None
         he_cols = None
     hes = imesh.half_edges.to_vertex_geom
     bnd = imesh.boundary.ext_half_edges
-    # print(he_cols)
-    # print(hes)
-    # print(mapping.half_edge_map())
     for i, pt in hes.items():
         if bnd_only is True and pt not in bnd:
             continue
@@ -142,10 +209,8 @@ def draw_half_edges(imesh, ax, bnd_only=False, label=False, offset=False, **kwar
 
         if mapping:
             i = mapping.half_edge_map()[i]
-        # print(i)
         if he_cols and i in he_cols:
             col_index = he_cols[i]
-            # print(col_index)
             if col_index < 0:
                 color = neg_colors[-1*col_index -1]
             else:

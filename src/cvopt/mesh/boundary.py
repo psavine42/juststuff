@@ -9,6 +9,7 @@ class Boundary(object):
         self._parent = parent
         self._vertices = pts
         self._ixs = hes
+        # todo fix the interior / exterior thing
 
     @compute_once
     def _xvertices(self):

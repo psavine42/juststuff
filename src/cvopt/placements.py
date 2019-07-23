@@ -7,7 +7,7 @@ import numpy as np
 import src.geom.r2 as r2
 
 
-class _ActionBase(object):
+class ActionBase(object):
     """
 
     """
@@ -22,7 +22,7 @@ class _ActionBase(object):
         return False
 
 
-class Placement(_ActionBase, _VarGraphBase):
+class Placement(ActionBase, _VarGraphBase):
     def __init__(self, parent, template, edge_placements=[], face_placements=[],
                  xforms=[]):
         """
@@ -33,7 +33,7 @@ class Placement(_ActionBase, _VarGraphBase):
         self.X[i] will
         """
         _VarGraphBase.__init__(self)
-        _ActionBase.__init__(self, parent, parent.T[template])
+        ActionBase.__init__(self, parent, parent.T[template])
         self._maximize_adj = True
         self.template = parent.T[template]
         self.placement_edges = edge_placements
@@ -185,7 +185,7 @@ class Placement(_ActionBase, _VarGraphBase):
         return base
 
 
-class Placement2(_ActionBase, _VarGraphBase):
+class Placement2(ActionBase, _VarGraphBase):
     def __init__(self, parent, template_index: int, maps):
         """
         :param template: <class>TemplateTile
@@ -195,7 +195,7 @@ class Placement2(_ActionBase, _VarGraphBase):
         self.X[i] will
         """
         _VarGraphBase.__init__(self)
-        _ActionBase.__init__(self, parent, template_index)
+        ActionBase.__init__(self, parent, template_index)
         self._maximize_adj = True
         self.template = parent.T[template_index]
         self.maps = maps
@@ -281,41 +281,31 @@ class Placement2(_ActionBase, _VarGraphBase):
     def G(self) -> Mesh2d:
         return self.P.G
 
-    def _implied_faces_colors(self, i):
-        """
-        # for i, face_ixs in enumerate(self.placements):
-        # compute edges that will be colored by placement I
-        # if X_i is 1 => Tiling_i st that
-
-        returns list  [(face_index, color_index) ...]
-        """
-        implied_face_colors = []
-        bnd = self.maps[i].boundary.edges
-        face_ixs = list(self.maps[i].face_map().values())
-        for bnd_ix, edge_ix in enumerate(bnd):
-            tmpl_ix = self.template.index_of_edge(self.template.boundary.edges[bnd_ix])
-            edge_col = self.template.edge_colors.get(tmpl_ix, {}).get('color', None)
-            if edge_col is None:
-                continue
-            for face_i in self.G.edges.to_faces[edge_ix]:
-                # face_i is indexed to Parent
-                if face_i in face_ixs:
-                    continue
-                implied_face_colors.append((face_i, edge_col))
-        return implied_face_colors
-
     @property
     def objective_max(self):
         base = self.template.weight * cvx.sum(self.X)
         return base
 
 
+class R3Action(ActionBase):
+    def __init__(self, parent, index):
+        ActionBase.__init__(self, parent, index)
+        self.X = Variable(shape=(1, 3), pos=True)
+
+    def __len__(self):
+        return self.X.shape[0]
 
 
-class EdgeSet(_ActionBase):
+class EdgeSet(ActionBase):
     def __init__(self, parent, index=None):
-        _ActionBase.__init__(self, parent, index)
+        ActionBase.__init__(self, parent, index)
         self.X = Variable(shape=len(self.P.edges), boolean=True)
 
-    # def objective_max(self):
 
+class HalfEdgeSet(ActionBase, _VarGraphBase):
+    def __init__(self, parent, index=None):
+        ActionBase.__init__(self, parent, index)
+        self.X = Variable(shape=len(self.P.half_edges), boolean=True)
+
+    def __len__(self):
+        return self.X.shape[0]

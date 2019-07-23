@@ -4,51 +4,68 @@ from cvxpy import Problem
 class FPProbllem(object):
     def __init__(self):
         self._problem = None
+        self._constraints = None
+        self.G = None
         self._formulations = []
         self._placements = []
-
-    def own_constraints(self, **kwargs):
-        raise NotImplemented('not implemented in base class')
-
-    def display(self, problem, **kwargs):
-        return
+        self._meta = {}
 
     def action_eliminators(self):
         return []
 
-    def objective(self, **kwargs):
-        raise NotImplemented('not implemented in base class')
-
     def print(self, problem):
         print('Problem:----------')
-        # print(problem)
         print('----------')
         print(problem.solution.status)
         print(problem.solution.opt_val)
         print(problem.solution.attr)
 
-    @property
-    def solution(self):
-        return
+    def make(self,
+             verbose=False,
+             obj_args={},
+             const_args={}):
+        constraints = self.own_constraints(**const_args)
+
+        objective = self.objective(**obj_args)
+        self._problem = Problem(objective, constraints)
+        if verbose is True:
+            print('Constraints')
+            print('---------------------------')
+            for c in constraints:
+                print(c)
+            print('Objective')
+            print('---------------------------')
+            print(self._problem.objective)
+            print('problem ready')
 
     def run(self, obj_args={},
             const_args={},
+            solve_args={},
             verbose=False,
             show=True,
             save=None):
-        constraints = self.own_constraints(**const_args)
-        if verbose is True:
-            for c in constraints:
-                print(c)
-        objective = self.objective(**obj_args)
-        self._problem = Problem(objective, constraints)
-        print(self._problem.objective)
-        print('problem ready')
-        self._problem.solve(verbose=verbose)
+        if self._problem is None:
+            self.make(verbose=verbose,
+                      const_args=const_args,
+                      obj_args=obj_args)
+        # constraints = self.own_constraints(**const_args)
+        # if verbose is True:
+        #     for c in constraints:
+        #         print(c)
+        # objective = self.objective(**obj_args)
+        # self._problem = Problem(objective, constraints)
+        # print(self._problem.objective)
+        # print('problem ready')
+
+        self._problem.solve(verbose=verbose, **solve_args)
+        if self._problem.solution.status == 'infeasible':
+            print(self._problem._solver_stats.__dict__)
+            for x in self._problem.constraints:
+                print(x)
         print('solution created')
         print(self._problem.solution)
         if show:
-            self.display(self._problem, save=save, constraints=constraints)
+            self.display(self._problem, save=save)
         return self.solution
 
     def solve(self, **kwargs):
@@ -62,4 +79,35 @@ class FPProbllem(object):
     def placements(self):
         return self._placements
 
+    # implement in supercalss ----------------
+    @property
+    def solution(self):
+        return
+
+    @property
+    def domain(self):
+        return self.G
+
+    @property
+    def meta(self):
+        return self._meta
+
+    @property
+    def problem(self):
+        return self._problem
+
+    def _anchor(self, *args):
+        return
+
+    def _pre_compute_placements(self):
+        return
+
+    def own_constraints(self, **kwargs):
+        raise NotImplemented('not implemented in base class')
+
+    def objective(self, **kwargs):
+        raise NotImplemented('not implemented in base class')
+
+    def display(self, problem, **kwargs):
+        return
 

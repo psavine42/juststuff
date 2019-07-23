@@ -18,6 +18,9 @@ class MeshMapping(object):
             base: Mesh2d - the mesh to be transformed
             tile: Mesh2d - the mesh after transform is applied
 
+        # todo -> transformed should return the state of a subset of 'space'
+        # todo -> including all metadata
+
         """
         self.tgt = tgt
         self.transform_type = ttype
@@ -96,14 +99,17 @@ class MeshMapping(object):
 
     @lazyprop
     def faces(self):
-        return list(map(lambda x:x[1], sorted([(k, v) for k, v in self.face_map().items()])))
+        """ list of [ transformed_face_index ... ] elements of self.space """
+        return list(map(lambda x: x[1], sorted([(k, v) for k, v in self.face_map().items()])))
 
     @lazyprop
     def edges(self):
-        return list(map(lambda x:x[1], sorted([(k, v) for k, v in self.edge_map().items()])))
+        """ list of [ transformed_edge_index ... ] elements of self.space """
+        return list(map(lambda x: x[1], sorted([(k, v) for k, v in self.edge_map().items()])))
 
     @lazyprop
     def half_edges(self):
+        """ list of [ transformed_half_edge_index ... ] elements of self.space """
         return list(map(lambda x: x[1], sorted([(k, v) for k, v in self.half_edges().items()])))
 
     @lazyprop

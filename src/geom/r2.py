@@ -128,10 +128,8 @@ def align_vec(vec_src, vec_tgt):
     src = to_homo(vec_src)
     tgt = to_homo(vec_tgt)
     lin = tgt[0] - src[0]
-    # print(lin)
     u1, u2 = src[1] - src[0], tgt[1] - tgt[0]
     theta = angle_between(u1[:2], u2[:2])
-    # print(theta, vec_src, vec_tgt)
     return compose_mat(angle=theta, translate=lin)
 
 

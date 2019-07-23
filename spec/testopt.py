@@ -1,7 +1,10 @@
 import unittest
 from src.cvopt.floorplanexample import *
+from src.cvopt.placements import *
+from src.cvopt.formulate import *
 from collections import Counter
 from pprint import pprint
+
 
 class BoxDumb(Box):
     class DumbyVar:
@@ -35,6 +38,7 @@ def boxes_groups():
           Group(name=1, min_area=100, aspect=2)]
     adj = [(0, 1)]
     return bx, adj
+
 
 def boxes_group2():
     bxs = [

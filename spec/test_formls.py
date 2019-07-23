@@ -4,10 +4,21 @@ from src.cvopt.floorplanexample import *
 from src.cvopt.problem import *
 from src.cvopt.mesh.mapping import MeshMapping
 from pprint import pprint
+from example.cvopt.famoius import *
+from src.cvopt.formulate.fp_cont import *
+from src.cvopt.shape.base import R2
+from scipy.spatial import voronoi_plot_2d, Voronoi
 
 
 def re(exp, got):
     return 'expected {}, got {}'.format(exp, got)
+
+
+const_args_formuls = dict(face=False,
+                          edge=False,
+                          tile=False,
+                          vertex=False,
+                          half_edge=False)
 
 
 def dumb_problem(tiles, w=2, h=3):
@@ -22,6 +33,18 @@ def dumb_problem(tiles, w=2, h=3):
     return form
 
 
+def env():
+    T = TestFrm()
+    return T.mini_problem()
+
+
+def save_vor(self, vor, save=None):
+    from scipy.spatial import voronoi_plot_2d
+    fig = voronoi_plot_2d(vor)
+    finalize(ax=None, save=self._save_loc(save), extents=None)
+
+
+# ---------------------------
 class TestMap(unittest.TestCase):
     tgt = ((1, 4), (2, 4))
     def setup(self):
@@ -159,7 +182,6 @@ class TestMap(unittest.TestCase):
         assert mapped.boundary.vertices == [()]
 
 
-# ---------------------------
 class TestMap2(TestMap):
     """
     todo: test that mapping in all directions is ok
@@ -185,17 +207,6 @@ class LineLayouts(unittest.TestCase):
         assert len(road_tile) == 24, re(24, len(road_tile))
         assert len(lot_tile) == 14, re(14, len(lot_tile))
 
-
-def env():
-    T = TestFrm()
-    return T.mini_problem()
-
-
-const_args_formuls = dict(face=False,
-                          edge=False,
-                          tile=False,
-                          vertex=False,
-                          half_edge=False)
 
 class TestFrm(unittest.TestCase):
     """
@@ -253,7 +264,7 @@ class TestFrm(unittest.TestCase):
         prob.solve(show=False, verbose=True,
                    obj_args=obj_args,
                    const_args=const_args_formuls)
-        prob.display(save='./data/opt/TestFrm_test_ovr2.png')
+        prob.display(save='test_ovr2.png')
 
     def test_overlap3(self):
         tiles = parking_tiling_nd()
@@ -265,7 +276,7 @@ class TestFrm(unittest.TestCase):
         c3 = TileLimit(prob.G, 0, upper=7)
 
         prob.add_constraint(c1, c2, c3)
-        self.run_detailed(prob, dict(edge=False), save='./data/opt/TestFrm_test_ovr3.png')
+        self.run_detailed(prob, dict(edge=False), save='test_ovr3.png')
 
     def test_overlap4(self):
         tiles = parking_tiling_nd()
@@ -277,26 +288,70 @@ class TestFrm(unittest.TestCase):
         c3 = TileLimit(prob.G, 0, upper=7)
 
         prob.add_constraint(c1, c2, c3)
-        print(c2)
-        self.run_detailed(prob, dict(edge=False), save='./data/opt/TestFrm_test_ovr4.png')
+        self.run_detailed(prob, dict(edge=False), save='test_ovr4.png')
 
-    def test_overlap5(self):
-        tiles = parking_tiling_2color()
-        prob = dumb_problem(tiles, 5, 7)
+    def _setup_path_small(self):
+        space = Mesh2d.from_grid(5, 7)
+        plc = HalfEdgeSet(space)
+        prob = SimplePlan([plc], space)
+        return prob, space
 
-        # constraints
-        c1 = NoOverlappingFaces(prob.G, is_constraint=True)
-        c2 = AdjacencyEC(prob.G, is_constraint=False)
-        c3 = TileLimit(prob.G, 0, upper=7)
+    def _setup_path_medium(self):
+        space = Mesh2d.from_grid(5, 7)
+        plc = HalfEdgeSet(space)
+        prob = SimplePlan([plc], space)
+        return prob, space
 
-        prob.add_constraint(c1, c2, c3)
-        self.run_detailed(prob, dict(edge=False), save='./data/opt/TestFrm_test_ovr5.png')
+    def test_shortest_path(self):
+        prob, space = self._setup_path_small()
+        c1 = ShortestPath(space, [3], [30])
+        prob.add_constraints(c1)
+        self.run_detailed(prob, {}, save='shortpath.png')
+
+    def test_shortest_trees(self):
+        prob, space = self._setup_path_small()
+        c1 = ShortestTree(space, [3], [30, 33])
+        prob.add_constraints(c1)
+        assert c1.num_actions > 0
+        self.run_detailed(prob, {}, save='shortestTree.png')
+
+    def test_shortest_trees2(self):
+        prob, space = self._setup_path_small()
+        c2 = ShortestTree(space, [2], [25, 23])
+        prob.add_constraints( c2)
+        self.run_detailed(prob, {}, save='shortestTree2.png')
+
+    def test_shortest_2trees(self):
+        prob, space = self._setup_path_small()
+        c1 = ShortestTree(space, [2], [25, 23])
+        c2 = ShortestTree(space, [6], [33, 31])
+        prob.add_constraints(c1, c2)
+        self.run_detailed(prob, {}, save='shortest2Trees.png')
+
+    def test_shortest_path_no_ovrlap(self):
+        prob, space = self._setup_path_small()
+        pths = [ShortestTree(space, [2], [25, 23]),
+                ShortestTree(space, [6], [24, 31])]
+        c1 = RouteNoEdgeOverlap(space, pths)
+        prob.add_constraints(c1)
+        self.run_detailed(prob, {}, save='noOverlapTrees.png')
+
+    def test_path_no_ovrlap_verts(self):
+        prob, space = self._setup_path_small()
+        pths = [ShortestTree(space, [2], [25, 22]),
+                ShortestTree(space, [6], [24, 30])]
+        c1 = RouteNoEdgeOverlap(space, pths)
+        c2 = RouteNoVertOverlap(space, pths)
+        prob.add_constraints(c1, c2)
+        self.run_detailed(prob, {}, save='noOverlapVertTrees.png')
 
     def run_detailed(self, prob, obj_args, save):
         prob.solve(show=False,
                    verbose=True,
                    obj_args=obj_args,
                    const_args=const_args_formuls)
+        if save is not None:
+            save = './data/opt/' + self.__class__.__name__ + '_' + save
         prob.display(save=save)
 
     def test_gridlines(self):
@@ -331,4 +386,119 @@ class TestFrm(unittest.TestCase):
 
         prob.solve(show=False)
         prob.display(save='./data/opt/TestFrm_test_gridlines2.png')
+
+
+class TestPlan(unittest.TestCase):
+    def _make_prob(self):
+        cij, areas = generic(3)
+        inputs = [BTile(None, area=a) for a in areas]
+        return FloorPlan2(inputs), cij
+
+    def _make_prob_stage2(self, n=3, dense=False):
+        if dense is False:
+            cij, areas, pts, rpm, vor = from_voronoi(n)
+        else:
+            cij, areas, pts, rpm, vor = from_rand(n)
+        w = np.ceil(np.sqrt(areas.sum()))
+        print(areas, w, w**2)
+        assert w**2 >= areas.sum()
+        inputs = [BTile(None, area=a) for i, a in enumerate(areas)]
+        problem = FloorPlan2(inputs)
+        problem.meta['rpm'] = rpm
+        problem.meta['pts'] = pts
+        problem.meta['vor'] = vor
+        problem.meta['w'] = w # + 2
+        problem.meta['h'] = w # + 2
+        return problem, cij
+
+    def save_vor(self, vor: Voronoi, save=None):
+        fig = voronoi_plot_2d(vor)
+        ax = plt.gca()
+        for i, v in enumerate(vor.points):
+            draw_vertex(v, ax, index=i)
+        finalize(ax=None, save=self._save_loc(save), extents=None)
+
+    def testrun(self):
+        p, cij = self._make_prob()
+        a = np.sqrt(np.sum([x.area for x in p.placements]))
+        f = PlaceCirclesAR(p.domain, p.placements, cij=cij, width=a, height=a)
+        p.add_constraints(f)
+        self.run_detailed(p)
+
+    def _sdpN(self, n, dense=False):
+        p, cij = self._make_prob_stage2(n, dense=dense)
+        w, h, rpm = p.meta['w'], p.meta['h'], p.meta['rpm']
+        f = PlaceLayoutSDP(p.domain, p.placements, rpm, width=w, height=h)
+        p.add_constraints(f)
+        self.run_detailed(p)
+        desc = '_{}_{}'.format(n, 'strict' if dense is True else 'sparse')
+        self.save_vor(p.meta['vor'], save='sdp{}_vor.png'.format(n))
+        self.save_sdp(p, f, save='sdp{}.png'.format(desc))
+
+    def test_vor_setup(self):
+        p, cij = self._make_prob_stage2(10, dense=True)
+        w, h, rpm = p.meta['w'], p.meta['h'], p.meta['rpm']
+        f = PlaceLayoutSDP(p.domain, p.placements, rpm, width=w, height=h)
+        p.add_constraints(f)
+        print(f.rpm.describe(text=True))
+
+    def test_stage2_gm(self):
+        p, cij = self._make_prob_stage2(4)
+        f = PlaceLayoutGM(p.domain, p.placements,
+                           p.meta['rpm'],
+                           width=p.meta['w'],
+                           height=p.meta['h'])
+        p.add_constraints(f)
+        print(f.rpm.describe(text=True))
+        self.run_detailed(p)
+        self.save_sdp(p, f, save='sdp4.png')
+
+    def test_stage2_sdp4(self):
+        self._sdpN(4)
+
+    def test_stage2_sdp_dense(self):
+        self._sdpN(4, True)
+        self._sdpN(10, True)
+        self._sdpN(30, True)
+
+    def test_stage2_sdp_sparse(self):
+        self._sdpN(4, False)
+        self._sdpN(10, False)
+        self._sdpN(30, False)
+
+    def test_stage2_sdp10(self):
+        self._sdpN(10)
+
+    def test_stage2_sdp30(self):
+        self._sdpN(30)
+
+    def _save_loc(self, save=None):
+        if save is not None:
+            return './data/opt/' + self.__class__.__name__ + '/' + save
+
+    def run_detailed(self, prob, disp=[], sargs={}, obj_args={}, save=None):
+        prob.solve(show=False,
+                   verbose=True,
+                   solve_args=sargs,
+                   obj_args=obj_args,
+                   const_args=const_args_formuls)
+        if save is not None:
+            save = './data/opt/' + self.__class__.__name__ + '/' + save
+
+    def save_sdp(self, prob, f, save=None):
+        self.run_detailed(prob)
+        w, h = prob.meta['w'], prob.meta['h']
+        fig, ax = plt.subplots(1, figsize=(7, 7))
+        ax = draw_box((0, dict(x=0, y=0, w=w, h=h)), ax, label=False,
+                      facecolor='white', edgecolor='black')
+        ax = draw_formulation_cont(f, ax)
+        finalize(ax, save=self._save_loc(save), extents=[w, h])
+
+    def test_stat(self):
+        p, cij = self._make_prob()
+        a = np.sqrt(np.sum([x.area for x in p.placements]))
+        f = PlaceCirclesAR(p.domain, p.placements, cij=cij, width=a, height=a)
+        p.add_constraints(f)
+        p.make()
+        expr_tree_detail(p.problem)
 

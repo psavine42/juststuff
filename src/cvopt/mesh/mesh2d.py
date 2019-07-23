@@ -10,7 +10,11 @@ from src.cvopt.shape import BTile
 import itertools
 
 
-class Mesh2d(object):
+class MeshBase(object):
+    pass
+
+
+class Mesh2d(MeshBase):
     """
     *** IMMUTABLE ***
 
@@ -209,10 +213,10 @@ class Mesh2d(object):
         self._data = dict(he={}, edge={}, face={}, vert={})
 
         # Face <--> HE <--> Edge <--> point
-        self._d_faces = ddict(tuple)        # face_ix : {he1, he2 ... he_n}
-        self._d_hes = ddict(tuple)          # half_edge_ix : {n1_ix, n2_ix}
+        self._d_faces = ddict(tuple)        # face_ix : tuple(he1, he2 ... he_n)
+        self._d_hes = ddict(tuple)          # half_edge_ix : tuple(n1_ix, n2_ix)
         self._e2he = ddict(tuple)           #
-        self._d_edges = ddict(frozenset)    # edge_ix : {n1_ix, n2_ix}
+        self._d_edges = ddict(frozenset)    # edge_ix : set{n1_ix, n2_ix}
         self._ix2g_verts = dict()           # index : geom
         self._g2ix_verts = dict()           # geom : index
 
@@ -417,11 +421,28 @@ class Mesh2d(object):
     def __str__(self):
         return '{}'.format(self.__class__.__name__)
 
-    def info(self):
+    def detail(self, v=None, he=None, e=None, f=None):
         st = ''
         st += str(self.vertices)
         st += str(self.half_edges)
         st += str(self.edges)
         st += str(self.faces)
         return st
+
+    @property
+    def num_hes(self):
+        return len(self._d_hes)
+
+    @property
+    def num_verts(self):
+        return len(self._ix2g_verts)
+
+    @property
+    def num_edges(self):
+        return len(self._d_edges)
+
+    @property
+    def num_faces(self):
+        return len(self._d_faces)
+
 
