@@ -68,7 +68,7 @@ def or_constraint(xs, y):
         xs = cvx.hstack(xs)
     C = [
          -N + 1 <= cvx.sum(xs) - N * y,
-         cvx.sum(xs) - N * y <= 0
+         0      >= cvx.sum(xs) - N * y
     ]
     return C
 
@@ -86,8 +86,8 @@ def and_constraint(xs, y):
     if isinstance(xs, list):
         xs = cvx.hstack(xs)
     C = [
-         0 <= cvx.sum(xs) - N * y,
-         cvx.sum(xs) - N * y <= N - 1
+         0     <= cvx.sum(xs) - N * y,
+         N - 1 >= cvx.sum(xs) - N * y
     ]
     return C
 

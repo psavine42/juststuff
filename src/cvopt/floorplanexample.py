@@ -397,6 +397,10 @@ class SimplePlan(FPProbllem):
             C += x.constraints()
         return C
 
+    def add_formulations(self, *forms):
+        for formulation in forms:
+            self._formulations.append(formulation)
+
     def display(self, **kwargs):
         self.print(self._problem)
         matplotlib.rc('font', size=6)
@@ -415,12 +419,42 @@ class FloorPlan2(SimplePlan):
 
     def display(self, **kwargs):
         self.print(self._problem)
-        # matplotlib.rc('font', size=6)
-        # fig, ax = plt.subplots(1, figsize=(7, 7))
-        # # ax = draw_edges(self.space, ax, color='gray')
-        # for f in self.formulations:
-        #     ax = draw_formulation_cont(f, ax)
-        # finalize(ax, **kwargs)
+
+
+class FloorPlanProp(FPProbllem):
+    def __init__(self, inputs):
+        FPProbllem.__init__(self)
+        self._placements = inputs
+        self.G = R2()
+
+    def add_formulations(self, *forms):
+        for formulation in forms:
+            self._formulations.append(formulation)
+
+    def objective(self, add=True, **kwargs):
+        base = None
+        for x in self._formulations:
+            objective = x.objective()
+            if base is None:
+                base = objective
+                continue
+            if objective is None:
+                continue
+            if add is True:
+                base = base + objective
+            else:
+                base = base - objective
+        return base
+
+    def own_constraints(self, **kwargs):
+        C = []
+        for x in self._formulations:
+            C += x.constraints()
+        return C
+
+    def display(self, **kwargs):
+        self.print(self._problem)
+
 
 
 # ----------------------------------------------------------------

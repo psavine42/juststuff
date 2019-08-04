@@ -8,7 +8,7 @@ from example.cvopt.famoius import *
 from src.cvopt.formulate.fp_cont import *
 from src.cvopt.shape.base import R2
 from scipy.spatial import voronoi_plot_2d, Voronoi
-
+from .formul_test import TestContinuous, TestDiscrete
 
 def re(exp, got):
     return 'expected {}, got {}'.format(exp, got)
@@ -33,11 +33,6 @@ def dumb_problem(tiles, w=2, h=3):
     return form
 
 
-def env():
-    T = TestFrm()
-    return T.mini_problem()
-
-
 def save_vor(self, vor, save=None):
     from scipy.spatial import voronoi_plot_2d
     fig = voronoi_plot_2d(vor)
@@ -45,7 +40,7 @@ def save_vor(self, vor, save=None):
 
 
 # ---------------------------
-class TestMap(unittest.TestCase):
+class TestPlanDisc(unittest.TestCase):
     tgt = ((1, 4), (2, 4))
     def setup(self):
         M = Mesh2d.from_grid(5, 7)
@@ -182,35 +177,10 @@ class TestMap(unittest.TestCase):
         assert mapped.boundary.vertices == [()]
 
 
-class TestMap2(TestMap):
-    """
-    todo: test that mapping in all directions is ok
-    -
-    """
-    tgt = ((2, 4), (1, 4))
-
-
 # --------------------------------------------------------------------------
-class LineLayouts(unittest.TestCase):
-    def test_nf(self):
-        s = 5
-        M = Mesh2d(g=nx.grid_2d_graph(s, s))
-        problem = n_free(M, 5, [0])
-        problem.solve(qcp=True, verbose=True)
-        print(problem.solution)
-
-    def test_num_plc(self):
-        p = dumb_problem(parking_simple())
-        road_tile, lot_tile = p.placements
-        print(str(lot_tile.template))
-        # print(road_tile.template.boundary.ext_half_edges)
-        assert len(road_tile) == 24, re(24, len(road_tile))
-        assert len(lot_tile) == 14, re(14, len(lot_tile))
-
-
-class TestFrm(unittest.TestCase):
+class TestTileDisc(unittest.TestCase):
     """
-
+    Discrete coverings with Tile Patterns
     """
     def mini_problem(self):
         tiles = parking_simple()
@@ -289,6 +259,22 @@ class TestFrm(unittest.TestCase):
 
         prob.add_constraint(c1, c2, c3)
         self.run_detailed(prob, dict(edge=False), save='test_ovr4.png')
+
+
+class TestPathDisc(unittest.TestCase):
+    def mini_problem(self):
+        tiles = parking_simple()
+        M = Mesh2d.from_grid(6, 8)
+        print('m build')
+        form = FormPlan(tiles, M)
+        for t in tiles:
+            assert len(t.colors(half_edge=True)) > 0
+
+        x = {tuple(e.inv_map.keys()) for e in form._half_edges}
+        assert len(x) > 1
+
+        print('pre-checks passed')
+        return form
 
     def _setup_path_small(self):
         space = Mesh2d.from_grid(5, 7)
@@ -388,7 +374,9 @@ class TestFrm(unittest.TestCase):
         prob.display(save='./data/opt/TestFrm_test_gridlines2.png')
 
 
-class TestPlan(unittest.TestCase):
+class TestPlanCont(TestContinuous):
+    """ problems with a continuous Covering in R2 -> floor planning """
+    # setup/save -----------------------------------------------
     def _make_prob(self):
         cij, areas = generic(3)
         inputs = [BTile(None, area=a) for a in areas]
@@ -411,20 +399,7 @@ class TestPlan(unittest.TestCase):
         problem.meta['h'] = w # + 2
         return problem, cij
 
-    def save_vor(self, vor: Voronoi, save=None):
-        fig = voronoi_plot_2d(vor)
-        ax = plt.gca()
-        for i, v in enumerate(vor.points):
-            draw_vertex(v, ax, index=i)
-        finalize(ax=None, save=self._save_loc(save), extents=None)
-
-    def testrun(self):
-        p, cij = self._make_prob()
-        a = np.sqrt(np.sum([x.area for x in p.placements]))
-        f = PlaceCirclesAR(p.domain, p.placements, cij=cij, width=a, height=a)
-        p.add_constraints(f)
-        self.run_detailed(p)
-
+    # --------------------------------------------------------------------
     def _sdpN(self, n, dense=False):
         p, cij = self._make_prob_stage2(n, dense=dense)
         w, h, rpm = p.meta['w'], p.meta['h'], p.meta['rpm']
@@ -435,13 +410,115 @@ class TestPlan(unittest.TestCase):
         self.save_vor(p.meta['vor'], save='sdp{}_vor.png'.format(n))
         self.save_sdp(p, f, save='sdp{}.png'.format(desc))
 
-    def test_vor_setup(self):
-        p, cij = self._make_prob_stage2(10, dense=True)
+    def test_sdpF(self, n=10, dense=False):
+        p, cij = self._make_prob_stage2(n, dense=dense)
         w, h, rpm = p.meta['w'], p.meta['h'], p.meta['rpm']
-        f = PlaceLayoutSDP(p.domain, p.placements, rpm, width=w, height=h)
-        p.add_constraints(f)
-        print(f.rpm.describe(text=True))
+        input_list = BoxInputList(p.placements)
 
+        formulations = [
+            BoxAspect(inputs=input_list, high=4, is_objective=False),
+            MinFixedPerimeters(inputs=input_list, is_objective=True),
+            RPM(rpm, inputs=input_list),
+            BoundsXYWH(inputs=input_list, w=w, h=h),
+        ]
+        self._run_sdp(p, formulations, input_list, n, dense)
+
+    # ---------------------------------------------------------------------
+    def test_sdpS(self):
+        n = 10
+        dense = True
+        p, cij = self._make_prob_stage2(n, dense=dense)
+        w, h, rpm = p.meta['w'], p.meta['h'], p.meta['rpm']
+        input_list = BoxInputList(p.placements)
+
+        formuls = [
+            SRPM(rpm, inputs=input_list),
+            BoxAspect(inputs=input_list, high=4, is_objective=False),
+            MinFixedPerimeters(inputs=input_list, is_objective=True),
+            BoundsXYWH(inputs=input_list, w=w, h=h),
+        ]
+        self._run_sdp(p, formuls, input_list, n, dense)
+
+    def test_sdpU(self):
+        n = 10
+        dense = True
+        p, cij = self._make_prob_stage2(n, dense=dense)
+        w, h, rpm, pts = p.meta['w'], p.meta['h'], p.meta['rpm'], p.meta['pts']
+        input_list = BoxInputList(p.placements)
+
+        srpm = SRPM(rpm, inputs=input_list, points=pts)
+        formuls = [
+            srpm,
+            BoxAspect(inputs=input_list, high=4, is_objective=False),
+            MinFixedPerimeters(inputs=input_list, is_objective=True),
+            BoundsXYWH(inputs=input_list, w=w, h=h),
+            UnusableZone(input_list, rpm=srpm, x=0, y=0, w=1, h=1),
+
+        ]
+        self._run_sdp(p, formuls, input_list, 'uz10', dense)
+
+    # scenarios ---------------------------------------------------------------------
+    def test_apt(self):
+        """ apartment """
+        w, h = 100, 40
+        hall = BTile(min_aspect=1000, width_min=3)
+        elevator = BTile(min_aspect=1, width_min=12, width_height=12)
+        stair1 = BTile(min_aspect=5, min_dim=12)
+        stair2 = BTile(min_aspect=5, min_dim=12)
+        storage1 = BTile(min_aspect=2, min_dim=6)
+
+    def test_disputed_zone(self):
+        """
+        by some circumstance, a strange outline has been specified
+        the total area is achievable, but not under pure box constraints.
+        This is the base for the disputed zone.
+        """
+        w = 20
+        h = 14
+        pts = np.asarray([[4, 7], [15, 7]])
+        inputs = [BTile(None, area=80) for _ in range(2)]
+        problem = FloorPlan2(inputs)
+        problem.meta['w'] = w
+        problem.meta['h'] = h
+        input_list = BoxInputList(inputs)
+
+        rpm = RPM.from_points(pts, inputs=input_list)
+        zones = [
+            UnusableZone(input_list, pts=pts, x=6, y=1, w=12, h=2),
+            UnusableZone(input_list, pts=pts, x=4, y=3, w=8, h=2),
+            UnusableZone(input_list, pts=pts, x=14, y=13, w=12, h=2),
+            UnusableZone(input_list, pts=pts, x=16, y=11, w=8, h=2)
+        ]
+        formuls = [
+            BoxAspect(inputs=input_list, high=4, is_objective=False),
+            MinFixedPerimeters(inputs=input_list, is_objective=True),
+            BoundsXYWH(inputs=input_list, w=w, h=h),
+        ]
+        all_forms = zones + formuls + [rpm]
+        self._run_sdp(problem, all_forms, [input_list] + zones, 'dz10', True)
+        # --------------------------------------------------------------
+        inputs = [BTile(None, area=100) for _ in range(2)]
+        problem = FloorPlan2(inputs)
+        problem.meta['w'] = w
+        problem.meta['h'] = h
+        input_list = BoxInputList(inputs)
+
+        rpm = RPM.from_points(pts, inputs=input_list)
+        zones = [
+            UnusableZone(input_list, pts=pts, x=6, y=1, w=12, h=2),
+            UnusableZone(input_list, pts=pts, x=4, y=3, w=8, h=2),
+            UnusableZone(input_list, pts=pts, x=14, y=13, w=12, h=2),
+            UnusableZone(input_list, pts=pts, x=16, y=11, w=8, h=2)
+        ]
+        formuls = [
+            BoxAspect(inputs=input_list, high=4, is_objective=False),
+            MinFixedPerimeters(inputs=input_list, is_objective=True),
+            BoundsXYWH(inputs=input_list, w=w, h=h),
+        ]
+        all_forms = zones + formuls + [rpm]
+        # self._run_sdp(problem, all_forms, input_list, 'dz10', True)
+
+    # ----------------------------------------------
     def test_stage2_gm(self):
         p, cij = self._make_prob_stage2(4)
         f = PlaceLayoutGM(p.domain, p.placements,
@@ -467,32 +544,18 @@ class TestPlan(unittest.TestCase):
         self._sdpN(30, False)
 
     def test_stage2_sdp10(self):
-        self._sdpN(10)
+        self.test_sdpF(10, True)
 
     def test_stage2_sdp30(self):
         self._sdpN(30)
 
-    def _save_loc(self, save=None):
-        if save is not None:
-            return './data/opt/' + self.__class__.__name__ + '/' + save
-
-    def run_detailed(self, prob, disp=[], sargs={}, obj_args={}, save=None):
-        prob.solve(show=False,
-                   verbose=True,
-                   solve_args=sargs,
-                   obj_args=obj_args,
-                   const_args=const_args_formuls)
-        if save is not None:
-            save = './data/opt/' + self.__class__.__name__ + '/' + save
-
-    def save_sdp(self, prob, f, save=None):
-        self.run_detailed(prob)
-        w, h = prob.meta['w'], prob.meta['h']
-        fig, ax = plt.subplots(1, figsize=(7, 7))
-        ax = draw_box((0, dict(x=0, y=0, w=w, h=h)), ax, label=False,
-                      facecolor='white', edgecolor='black')
-        ax = draw_formulation_cont(f, ax)
-        finalize(ax, save=self._save_loc(save), extents=[w, h])
+    # MIsc small tests ----------------------------------------------
+    def testrun(self):
+        p, cij = self._make_prob()
+        a = np.sqrt(np.sum([x.area for x in p.placements]))
+        f = PlaceCirclesAR(p.domain, p.placements, cij=cij, width=a, height=a)
+        p.add_constraints(f)
+        self.run_detailed(p)
 
     def test_stat(self):
         p, cij = self._make_prob()
@@ -500,5 +563,144 @@ class TestPlan(unittest.TestCase):
         f = PlaceCirclesAR(p.domain, p.placements, cij=cij, width=a, height=a)
         p.add_constraints(f)
         p.make()
-        expr_tree_detail(p.problem)
+        form_utils.expr_tree_detail(p.problem)
+
+    def test_vor_setup(self):
+        p, cij = self._make_prob_stage2(10, dense=True)
+        w, h, rpm = p.meta['w'], p.meta['h'], p.meta['rpm']
+        f = PlaceLayoutSDP(p.domain, p.placements, rpm, width=w, height=h)
+        p.add_constraints(f)
+        print(f.rpm.describe(text=True))
+
+    def test_rpm(self):
+        n = 10
+        dense = True
+        p, cij = self._make_prob_stage2(n, dense=dense)
+        input_list = BoxInputList(p.placements)
+
+        brpm = RPM(p.meta['rpm'], inputs=input_list)
+        srpm = SRPM(p.meta['rpm'], inputs=input_list)
+        print('dense')
+        print(brpm.describe(text=True))
+        print('sparse')
+        print('----------------')
+        print(srpm.describe(text=True))
+
+
+class TestPathCont(TestContinuous):
+    """ problems with a continuous path in R_n """
+    def path1(self):
+        src = [1, 1]
+        tgt = [9, 5]
+        w, h = 10, 10
+        # points = PointList([None for _ in range(2)])
+        input_list = PathFormulationR2(2, tgt, src=src)
+
+        assert len(input_list) == 4
+        assert input_list.vars[0].shape == input_list.vars[1].shape
+        assert input_list.vars[0].shape == (4,), str(input_list.vars[0].shape)
+
+        problem = FloorPlan2(input_list)
+        problem.meta['w'] = w
+        problem.meta['h'] = h
+        formuls = [
+            SegmentsHV(inputs=input_list, N=np.max([w, h])),
+            ShortestPathCont(inputs=input_list, is_objective=True),
+        ]
+        self._run_sdp(problem, formuls, [input_list], 'dz10', True)
+
+    def path2dest(self):
+        src = [1, 1]
+        tgt = [9, 5]
+        tg2 = [8, 3]
+        w, h = 10, 10
+        points = PointList(2)
+        main = PathFormulationR2(points, tgt, src=src)
+        branch = PathFormulationR2(points, tg2, src=None)
+
+        problem = FloorPlan2(main)
+        problem.meta['w'] = w
+        problem.meta['h'] = h
+        formuls = [
+            SegmentsHV(inputs=main, N=np.max([w, h])),
+            ShortestPathCont(inputs=main, is_objective=True),
+            SegmentsHV(inputs=branch, N=np.max([w, h])),
+            ShortestPathCont(inputs=branch, is_objective=True),
+        ]
+        self._run_sdp(problem, formuls, [main, branch], '2pth', True)
+
+    def path2dest_obst(self):
+        src = [1, 1]
+        tgt = [9, 5]
+        tg2 = [8, 3]
+        w, h = 10, 10
+        points = PointList(2)
+        main = PathFormulationR2(points, tgt, src=src)
+
+        problem = FloorPlan2(main)
+        problem.meta['w'] = w
+        problem.meta['h'] = h
+        obstacle = UnusableZoneSeg(main, 5, 3, 7, 2)
+        formuls = [
+            obstacle,
+            SegmentsHV(inputs=main, N=np.max([w, h])),
+            ShortestPathCont(inputs=main, is_objective=True),
+        ]
+        self._run_sdp(problem, formuls,  [main, obstacle], '2pth_obs', True)
+
+        vxr, vxl, vyu, vyb = obstacle.bins
+        iseg = np.asarray([[i - 1, i] for i in range(1, len(obstacle.inputs))])
+        print(iseg)
+
+        ip1, ip2 = iseg[:, 0], iseg[:, 1]
+        s = cvx.vstack(obstacle.bins)
+        print(s.value.astype(int).T)
+        print()
+        s = cvx.vstack([
+            vxr[ip1] + vxr[ip2],
+            vxl[ip1] + vxl[ip2],
+            vyu[ip1] + vyu[ip2],
+            vyb[ip1] + vyb[ip2],
+        ])
+        print(s.value.astype(int))
+        print(cvx.max(s.T, axis=1).value.astype(int))
+
+    def path2dest_obst_obj(self):
+        src = [1, 1]
+        tgt = [9, 5]
+        tg2 = [8, 3]
+        w, h = 10, 10
+        points = PointList(2)
+        main = PathFormulationR2(points, tgt, src=src)
+
+        problem = FloorPlan2(main)
+        problem.meta['w'] = w
+        problem.meta['h'] = h
+        obstacle = UnusableZoneSeg(main, 5, 3, 7, 2)
+        formuls = [
+            obstacle,
+            SegmentsHV(inputs=main, N=np.max([w, h])),
+            ShortestPathCont(inputs=main, is_objective=True),
+        ]
+        self._run_sdp(problem, formuls,  [main, obstacle], '2pth_obs', True)
+
+        vxr, vxl, vyu, vyb = obstacle.bins
+        iseg = np.asarray([[i - 1, i] for i in range(1, len(obstacle.inputs))])
+        print(iseg)
+
+        ip1, ip2 = iseg[:, 0], iseg[:, 1]
+        s = cvx.vstack(obstacle.bins)
+        print(s.value.astype(int).T)
+        print()
+        s = cvx.vstack([
+            vxr[ip1] + vxr[ip2],
+            vxl[ip1] + vxl[ip2],
+            vyu[ip1] + vyu[ip2],
+            vyb[ip1] + vyb[ip2],
+        ])
+        print(s.value.astype(int))
+        print(cvx.max(s.T, axis=1).value.astype(int))
+
+
+
 

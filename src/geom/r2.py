@@ -4,6 +4,11 @@ import operator
 from functools import reduce
 
 
+def center(coords):
+    return tuple(map(operator.truediv,
+                     reduce(lambda x, y: map(operator.add, x, y), coords), [len(coords)] * 2))
+
+
 def sort_cw(coords):
     center = tuple(map(operator.truediv,
                        reduce(lambda x, y: map(operator.add, x, y), coords), [len(coords)] * 2))

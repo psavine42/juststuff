@@ -48,20 +48,12 @@ class FPProbllem(object):
             self.make(verbose=verbose,
                       const_args=const_args,
                       obj_args=obj_args)
-        # constraints = self.own_constraints(**const_args)
-        # if verbose is True:
-        #     for c in constraints:
-        #         print(c)
-        # objective = self.objective(**obj_args)
-        # self._problem = Problem(objective, constraints)
-        # print(self._problem.objective)
-        # print('problem ready')
-
         self._problem.solve(verbose=verbose, **solve_args)
         if self._problem.solution.status == 'infeasible':
             print(self._problem._solver_stats.__dict__)
             for x in self._problem.constraints:
                 print(x)
+
         print('solution created')
         print(self._problem.solution)
         if show:

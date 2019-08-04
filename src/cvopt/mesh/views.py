@@ -1,6 +1,7 @@
 from cvxpy.utilities.performance_utils import compute_once, lazyprop
 from collections import defaultdict as ddict
 import src.geom.r2 as r2
+from itertools import combinations
 
 
 class _View(object):
@@ -114,6 +115,7 @@ class HalfEdgeView(_View):
         """
         return [(self._p._ix2g_verts[v[0]], self._p._ix2g_verts[v[1]])
                 for i, v in self.base.items()]
+
 
     @lazyprop
     def to_vertices(self):
@@ -262,7 +264,6 @@ class EdgeView(_View):
         return
 
 
-
 class FaceView(_View):
     DAT_KEY = 'face'
 
@@ -279,6 +280,21 @@ class FaceView(_View):
     def geom(self):
         """returns list of vertex tuples """
         return [n for i, n in self.to_vertices.items()]
+
+    @lazyprop
+    def centroids(self):
+        """returns list of (x,y) for each face centroid """
+        return [r2.centroid(n) for i, n in self.to_vertices.items()]
+
+    @lazyprop
+    def to_faces(self):
+        """ returns the face adjacency matrix """
+        adj_list = ddict(set)
+        for edge_ixs, face_ixs in self._p.edges.to_faces.items():
+            for i, j in combinations(list(face_ixs), 2):
+                adj_list[i].add(j)
+                adj_list[j].add(i)
+        return adj_list
 
     @lazyprop  # CW - OK
     def to_vertices(self):

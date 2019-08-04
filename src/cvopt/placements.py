@@ -5,6 +5,7 @@ from cvxpy import Variable
 import numpy as np
 # from src.cvopt.utils import translate
 import src.geom.r2 as r2
+from src.cvopt.mesh.mapping import Facemap
 
 
 class ActionBase(object):
@@ -15,6 +16,10 @@ class ActionBase(object):
         self.P = parent
         self.index = index
 
+    @property
+    def space(self):
+        return self.P
+
     def __eq__(self, other):
         if isinstance(other, self.__class__):
             if other.index == self.index:
@@ -22,6 +27,59 @@ class ActionBase(object):
         return False
 
 
+class SetActionBase(ActionBase):
+    def __init__(self, parent, index, size, name=None):
+        ActionBase.__init__(self, parent, index)
+        self.X = Variable(shape=size, boolean=True, name=name)
+
+    def __len__(self):
+        return self.X.shape[0]
+
+    @property
+    def name(self):
+        return self.X.name()
+
+    @property
+    def vars(self):
+        return self.X
+
+    @property
+    def shape(self):
+        return self.X.shape
+
+
+class EdgeSet(SetActionBase):
+    def __init__(self, parent, index=None):
+        SetActionBase.__init__(self, parent, index, len(self.P.edges))
+
+
+class HalfEdgeSet(ActionBase, _VarGraphBase):
+    # todo change this
+    def __init__(self, parent, index=None):
+        ActionBase.__init__(self, parent, index)
+        self.X = Variable(shape=len(self.P.half_edges), boolean=True)
+
+
+class FaceSet(SetActionBase):
+    def __init__(self, parent, index=None):
+        n = len(parent.faces)
+        name = '{}.{}'.format(self.__class__.__name__, index)
+        SetActionBase.__init__(self, parent, index, n, name=name)
+        self.maps = [Facemap(i) for i in range(n)]
+
+    def display(self):
+        data = []
+        for mapping in self.maps:
+            index = mapping.value
+            if self.vars.value[index] > 0.7:
+                x, y = self.space.faces.geom[index][0]
+                data.append({'index':index, 'x': x, 'y': y, 'name': self.name})
+        return {'boxes': data}
+
+
+# -------------------------------
+# tiling placements
+# -------------------------------
 class Placement(ActionBase, _VarGraphBase):
     def __init__(self, parent, template, edge_placements=[], face_placements=[],
                  xforms=[]):
@@ -296,16 +354,3 @@ class R3Action(ActionBase):
         return self.X.shape[0]
 
 
-class EdgeSet(ActionBase):
-    def __init__(self, parent, index=None):
-        ActionBase.__init__(self, parent, index)
-        self.X = Variable(shape=len(self.P.edges), boolean=True)
-
-
-class HalfEdgeSet(ActionBase, _VarGraphBase):
-    def __init__(self, parent, index=None):
-        ActionBase.__init__(self, parent, index)
-        self.X = Variable(shape=len(self.P.half_edges), boolean=True)
-
-    def __len__(self):
-        return self.X.shape[0]

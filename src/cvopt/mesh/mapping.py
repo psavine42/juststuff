@@ -3,11 +3,33 @@ import networkx as nx
 import src.geom.r2 as r2
 from .mesh2d import *
 from collections import OrderedDict as odcit
-import src.cvopt.utils as u
+from src.cvopt import utils as u
 import matplotlib.pyplot as plt
 
 
-class MeshMapping(object):
+class Mapping(object):
+    @lazyprop
+    def faces(self):
+        """ list of [ transformed_face_index ... ] elements of self.space """
+        return
+
+    @lazyprop
+    def edges(self):
+        """ list of [ transformed_edge_index ... ] elements of self.space """
+        return
+
+    @lazyprop
+    def half_edges(self):
+        """ list of [ transformed_half_edge_index ... ] elements of self.space """
+        return
+
+    @lazyprop
+    def vertices(self):
+        """ [ transformed_vert_index ... ]"""
+        return
+
+
+class MeshMapping(Mapping):
     def __init__(self, space: Mesh2d, tile: Mesh2d, xform, tgt=None, ttype=None):
         """
         map tile mesh onto space mesh with affine transformation
@@ -197,4 +219,12 @@ class MeshMapping(object):
     def transformed(self):
         return self.tile
 
+
+class Facemap(Mapping):
+    def __init__(self, index):
+        self.value = index
+
+    @property
+    def faces(self):
+        return self.value
 

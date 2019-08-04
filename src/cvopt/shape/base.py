@@ -1,7 +1,7 @@
 
 
 class BTile(object):
-    def __init__(self, p1=None, aspect=None, p2=None, area=None):
+    def __init__(self, p1=None, aspect=None, p2=None, area=None, **kwargs):
         self.p1 = p1
         self._area = area
         self._aspect = aspect

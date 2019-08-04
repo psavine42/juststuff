@@ -133,13 +133,14 @@ def draw_edges(imesh:Mesh2d, ax, label=False, **kwargs):
     return ax
 
 
-def draw_box(d, ax, label=True, edgecolor='black', **kwargs):
+def draw_box(d, ax, label=True, edgecolor='black', facecolor='black', **kwargs):
     i, data = _parse_drawable(d)
     x, y = data.pop('x'), data.pop('y')
     w = data.pop('w') if 'w' in data else 1
     h = data.pop('h') if 'h' in data else 1
-
+    c = data['color'] if 'color' in data else facecolor
     ax.add_patch(Rectangle((x, y), w, h, edgecolor=edgecolor,
+                           facecolor=c,
                            **kwargs))
     if label is True:
         name = data.get('name', None)
@@ -151,17 +152,21 @@ def draw_box(d, ax, label=True, edgecolor='black', **kwargs):
 # formulation -----------------------------------------------------
 def draw_formulation_he(form, ax):
     he = form.space.half_edges.geom
-    for i in form.display()['half_edges']:
+    for i in form.display().get('half_edges', []):
         ax = draw_edge(ax, he[i], index=i, color='black')
     return ax
 
 
 def draw_formulation_discrete(form, ax, **kwargs):
     vg = form.space.vertices.geom
-    for x in form.display()['vertices']:
+    disp_dict = form.display()
+    for x in disp_dict.get('vertices', []):
         i, data = _parse_drawable(x)
         draw_vertex(vg[i], ax, index=i, **data)
     ax = draw_formulation_he(form, ax)
+
+    for i, d in enumerate(disp_dict.get('boxes', [])):
+        draw_box(d, ax, **kwargs)
     return ax
 
 
@@ -170,7 +175,18 @@ def draw_formulation_cont(form, ax, **kwargs):
     colors = cm.viridis(np.linspace(0, 1, len(disp_dict['boxes'])))
     for i, d in enumerate(disp_dict['boxes']):
         draw_box(d, ax, facecolor=colors[i], **kwargs)
-    # ax = draw_formulation_he(form, ax)
+
+    colors = cm.viridis(np.linspace(0, 1, len(disp_dict['segments'])))
+    for i, d in enumerate(disp_dict['segments']):
+        i, data = _parse_drawable(d)
+        x0, x1, x2, x4 = data['x0'], data['y0'], data['x1'], data['y1']
+        g = [(x0, x1), (x2, x4)]
+        draw_edge(ax, g, index=i, color=colors[i], **kwargs)
+
+    for i, d in enumerate(disp_dict['points']):
+        i, data = _parse_drawable(d)
+        x, y = data['x0'], data['y0']
+        draw_vertex([x, y], ax, index=i, **kwargs)
     return ax
 
 

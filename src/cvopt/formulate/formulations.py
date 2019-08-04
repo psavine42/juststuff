@@ -1,6 +1,7 @@
 import numpy as np
 from cvxpy import Variable
 import cvxpy as cvx
+from collections import defaultdict as ddict
 """
 
 """
@@ -23,7 +24,11 @@ def sum_objectives(objs):
     return base
 
 
-class Formulation(object):
+class _FormRecursive(object):
+    pass
+
+
+class Formulation(_FormRecursive):
     creates_var = False
     DOMAIN = {}
     META = {'constraint': True, 'objective': True}
@@ -46,14 +51,20 @@ class Formulation(object):
         """
         self._space = space
         self._inputs = []   #
+        self._in_dict = ddict(list)  # key valued
         self._actions = []  # outputs lol
 
-        self.name = name
+        self._name = name
         self.is_constraint = is_constraint
         self.is_objective = is_objective
 
         self._generated_constraints = False
         self._generated_objectives = False
+
+    @property
+    def name(self):
+        if self._name is None:
+            return self.__class__.__name__
 
     def register_action(self, a):
         """ register an Action/Placement object
@@ -80,8 +91,18 @@ class Formulation(object):
     def stacked(self):
         """ returns the vars for all actions concatted to a single row"""
         if len(self._actions) == 1:
-            return self._actions[0].X
-        return cvx.hstack([x.X for x in self._actions])
+            if isinstance(self._actions[0], Variable):
+                return self._actions[0]
+            else:
+                return self._actions[0].X
+
+        alist = []
+        for x in self._actions:
+            if isinstance(x, Variable):
+                alist.append(x)
+            else:
+                alist.append(x.X)
+        return cvx.hstack(alist)
 
     @property
     def action(self):
@@ -91,9 +112,17 @@ class Formulation(object):
     def inputs(self):
         return self._actions
 
+    @inputs.setter
+    def inputs(self, args):
+        self._actions = args
+
     @property
     def outputs(self):
         return None
+
+    @property
+    def vars(self):
+        return list(self._in_dict.values())
 
     @property
     def space(self):
@@ -102,7 +131,13 @@ class Formulation(object):
 
     @property
     def num_actions(self):
-        return sum([len(a) for a in self._actions])
+        l = 0
+        for a in self._actions:
+            if isinstance(a, Variable):
+                l += a.shape[0]
+            else:
+                l += len(a)
+        return l
 
     # display -----------------------
     def __str__(self):
@@ -138,6 +173,14 @@ class Formulation(object):
         self._generated_objectives = False
         for c in self._inputs:
             c.reset()
+        for cs in self._in_dict.values():
+            for c in cs:
+                c.reset()
+
+    def register_inputs(self, *others):
+        """ """
+        for other in others:
+            self._in_dict[other.name].append(other)
 
     def as_objective(self, **kwargs):
         """ objective Expression """
@@ -146,6 +189,13 @@ class Formulation(object):
     def as_constraint(self, *args):
         """ list of Constraint Expressions """
         raise NotImplemented()
+
+    def gather_input_constraints(self):
+        C = []
+        for k, formulations in self._in_dict.items():
+            for formulation in formulations:
+                C += formulation.as_constraint()
+        return C
 
     def constraints(self):
         if self._generated_constraints is True \
@@ -160,6 +210,14 @@ class Formulation(object):
             return None
         self._generated_objectives = True
         return self.as_objective()
+
+
+class Noop(Formulation):
+    def as_constraint(self, *args):
+        return []
+
+    def as_objective(self, **kwargs):
+        return None
 
 
 class ConstaintFormulation(Formulation):
@@ -180,20 +238,6 @@ class TestingFormulation(Formulation):
 
 
 # ------------------------------------------------
-class NoOverlappingFaces(Formulation):
-    DOMAIN = {'discrete'}
-
-    def as_constraint(self, *args):
-        M = np.zeros((len(self.space.faces), self.num_actions), dtype=int)
-        cnt = 0
-        for p in self._actions:
-            for i, mapping in enumerate(p.maps):
-                ixs = list(mapping.face_map().values())
-                M[ixs, cnt] = 1
-                cnt += 1
-        actions = self.stacked # cvx.hstack([x.X for x in self._actions])
-        return [M @ actions <= 1]
-
 
 class VerticesNotOnInterior(Formulation):
     DOMAIN = {'discrete'}
@@ -273,26 +317,6 @@ class VerticesNotOnInterior(Formulation):
         return objective
 
 
-class TileLimit(Formulation):
-    def __init__(self, space, tile, upper=None, lower=None, **kwargs):
-        """
-
-        """
-        Formulation.__init__(self, space, **kwargs)
-        self._tile_index = tile
-        self._upper = upper
-        self._lower = lower
-        self.is_constraint = True
-
-    def as_constraint(self, *args):
-        C = []
-        if self._upper:
-            C += [cvx.sum(self._actions[self._tile_index].X) <= self._upper]
-        if self._lower:
-            C += [cvx.sum(self._actions[self._tile_index].X) >= self._lower]
-        return C
-
-
 class IncludeNodes(Formulation):
     def __init__(self, space, nodes=[], **kwargs):
         """ nodes must be included in the tree
@@ -318,14 +342,6 @@ class IncludeNodes(Formulation):
                 active.append(self.space.index_of_edge(edge))
             C += [cvx.sum(cvx.hstack(X_edges[active])) >= 1]
         return C
-
-
-class DeadZone(Formulation):
-    def __init__(self, space, edges=None, ):
-        Formulation.__init__(self, space)
-
-    def as_constraint(self, *args):
-        pass
 
 
 class TileAt(Formulation):

@@ -5,6 +5,9 @@ import numpy as np
 import dccp
 from . import form_utils as fu
 from .cont_base import FormulationR2, NumericBound
+from src.cvopt.shape.base import R2
+from .positioning import *
+from .input_structs import BoxInputList
 
 """
 Generally, the inputs for a floorplanning problem are given as follows:
@@ -48,118 +51,23 @@ def tris(n):
     return zip(tri_i.tolist(), tri_j.tolist())
 
 
-# Utilities ----------------------------------------------------------------
-class RPM(FormulationR2):
+# usable/unusable space ------------------------------------------------------------
+class BoundsXYWH(FormulationR2):
     META = {'constraint': True, 'objective': False}
 
-    def __init__(self, domain, layout, mat):
-        """
-        todo - add overlap term
-        todo - minimize overlap as objective
+    def __init__(self, inputs=None, w=None, h=None, wmin=0, hmin=0, **kwargs):
+        """ the bounding box for a fixed outline floor plan """
+        FormulationR2.__init__(self, inputs, **kwargs)
+        self.w_max = w
+        self.h_max = h
+        self.w_min = wmin
+        self.h_min = hmin
 
-        Relative Position Matrix
-        for children
-
-        upper triangular matrix
-            M[i, j, 0] = 0  -> no constraint
-            M[i, j, 0] = 1  -> i to left of j
-            M[i, j, 0] = 2  -> i to right of j
-
-            M[i, j, 1] = 0  ->  no constraint
-            M[i, j, 1] = 1  ->  i above j
-            M[i, j, 1] = 2  ->  i below j
-
-        2 -> to above of ...
-        """
-        FormulationR2.__init__(self, domain, [layout])
-        self.mat = mat
-
-    @property
-    def num_actions(self):
-        return self.mat.shape[0]
-
-    def as_constraint(self):
-        C = []
-        fp = self._inputs[0]
-        x, y, w, h = fp.X, fp.Y, fp.W, fp.H
-        for i, j in tris(self.mat.shape[0]):
-            lr, ud = self.mat[i, j]
-            if lr == 1:     # i left of j
-                C += [x[j] - x[i] >= 0.5 * (w[i] + w[j])]
-            elif lr == 2:   # i right of j
-                C += [x[i] - x[j] >= 0.5 * (w[i] + w[j])]
-
-            if ud == 1:     # i above j
-                C += [y[i] - y[j] >= 0.5 * (h[i] + h[j])]
-            elif ud == 2:   # i below j
-                C += [y[j] - y[i] >= 0.5 * (h[i] + h[j])]
-        return C
-
-    def as_objective(self, **kwargs):
-        return None
-
-    def describe(self, arr=None, text=None):
-        """ text of relations between RPM entries """
-        txt = ''
-        num = self.num_actions
-        arr = [[''] * num for i in range(num)]
-        for i, j in tris(num):
-            lr, ud = self.mat[i, j]
-            s = ''
-            if lr == 1:
-                txt += '\n{} left of {}'.format(i, j)
-                s += '1'
-            elif lr == 2:
-                txt += '\n{} rght of {}'.format(i, j)
-                s += '2'
-            else:
-                s += '0'
-
-            if ud == 1:
-                txt += '\n{} above   {}'.format(i, j)
-                s += '1'
-            elif ud == 2:
-                txt += '\n{} below   {}'.format(i, j)
-                s += '2'
-            else:
-                s += '0'
-            arr[i][j] = s
-        if text:
-            return txt
-        return [' '.join(x) for x in arr]
-
-
-class SRPM(RPM):
-    def __init__(self, domain, layout, mat):
-        """
-        Sparse Relative Position Matrix
-        before calling self.as_constraint(), removes redundant entries
-        """
-        FormulationR2.__init__(self, domain, [layout])
-        self.base = mat     # keep a copy of the base matrix
-
-    def _sparsify(self, mat):
-        # todo implement
-        return mat
-
-    def as_constraint(self):
-        self.mat = self._sparsify(self.mat)
-        return RPM.as_constraint(self)
-
-
-class BoundsXYWH(FormulationR2):
-    META = {'constraint': True}
-
-    def __init__(self, space, layout, w, h, **kwargs):
-        FormulationR2.__init__(self, space, [layout], **kwargs)
-        self.w = w
-        self.h = h
-
-    def as_constraint(self):
-        fp = self._inputs[0]
+    def as_constraint(self, **kwargs):
+        fp = self.inputs
         C = [
-            fp.X + 0.5 * fp.W <= self.w,   # 0.5 * self.w,
-            fp.Y + 0.5 * fp.H <= self.h,   # 0.5 * self.h,
+            fp.X + 0.5 * fp.W <= self.w_max,   # 0.5 * self.w,
+            fp.Y + 0.5 * fp.H <= self.h_max,   # 0.5 * self.h,
             fp.X - 0.5 * fp.W >= 0.,        # 0.5 * self.w,
             fp.Y - 0.5 * fp.H >= 0.,        # 0.5 * self.h,
         ]
@@ -172,25 +80,110 @@ class BoundsXYWH(FormulationR2):
         return
 
 
-class BoxAspect(FormulationR2):
-    def __init__(self, space, inputs=[], aspect=4):
+class UnusableZone(FormulationR2):
+    def __init__(self, inputs, x=None, y=None, w=None, h=None,
+                 rpm=None,
+                 pts=None,
+                 **kwargs):
         """
-        """
-        FormulationR2.__init__(self, space, inputs)
-        self.B = Variable(shape=len(inputs), pos=True, name='aspect')
+        unusable zones within the fixed outline floor plan bounding box
 
-    def as_constraint(self, *args):
-        fp = self._inputs[0]
-        num_in = len(self._inputs)
-        A_i = np.asarray([x.area for x in self._inputs])
+        represented as entries in an RPM which is built on the fly.
+        """
+        FormulationR2.__init__(self, inputs=inputs, **kwargs)
+        self.x = x
+        self.y = y
+        self.w = w
+        self.h = h
+        self.rpm = rpm
+        self._points = pts.tolist()
+        if rpm is not None:
+            self._points = rpm.points
+
+    def _as_mip_constraint(self, **kwargs):
+        X, Y, W, H = self.inputs.vars
+        C = []
+
+        g = [x is None for x in [self.w_max, self.h_max, self.w_min, self.h_min]]
+        if sum(g) > 2:
+            raise Exception('invalid deadzone constraints ')
+
+        if sum(g) == 2:
+            vx = Variable(shape=X.shape, boolean=True)
+            vy = Variable(shape=X.shape, boolean=True)
+            C += [vx + vy >= 1]
+
+            if self.w_min is not None:
+                C += [X + W / 2 <= self.w_min * vx]
+            elif self.w_max is not None:
+                C += [X - W / 2 >= self.w_max * vx]
+
+            if self.h_min is not None:
+                C += [Y + H / 2 <= self.h_min * vy]
+            elif self.h_max is not None:
+                C += [Y - H / 2 >= self.h_max * vy]
+        return C
+
+    def as_constraint(self, **kwargs):
+        """
+        SDP
+            create a fake RPM with an entry for the box defined by self.x,y,w,h
+            the last entry of rpm' is self.bounds
+            for each of these entries, make a new RPM constraint
+
+        MLP (no RPM available and problem is not SDP)
+            boolean decision variables
+
+        """
+        C = []
+        X, Y, W, H = self.inputs.vars
+
+        #
+        base = self._points
+        base.append([self.x, self.y])
+        new_rpm = RPM.points_to_mat(base)
+        #
+        for i in range(new_rpm.shape[0]-1):
+            C += RPM.expr(0, new_rpm[i, -1, 0], X[i], self.x, W[i], self.w)
+            C += RPM.expr(1, new_rpm[i, -1, 1], Y[i], self.y, H[i], self.h)
+        return C
+
+    def display(self):
+        display = FormulationR2.display(self)
+        datum = dict(x=self.x - 0.5 * self.w,
+                     y=self.y - 0.5 * self.h,
+                     w=self.w, h=self.h,
+                     color='black', index=0)
+        display['boxes'].append(datum)
+        return display
+
+
+# ------------------------------------------------------------
+class BoxAspect(FormulationR2):
+    def __init__(self, inputs=None, high=None, low=None, **kwargs):
+        """
+        """
+        FormulationR2.__init__(self, inputs, **kwargs)
+        self.B = Variable(shape=len(inputs), pos=True, name=self.name)
+        self._bnd = NumericBound(self.B, high=high, low=low)
+
+    def vars(self):
+        return self.B
+
+    def as_constraint(self, **kwargs):
+        """ Generates """
+        in_size = len(self.inputs)
+        A_i = np.asarray([x.area for x in self.inputs.inputs])
 
         # SDP to enforce aspect constraints
-        W, H = fp.W, fp.H
+        _, _, W, H = self.inputs.vars
         C = [cvx.PSD(cvx.bmat([[self.B[i], W[i]],
-                               [W[i], A_i[i]]])) for i in range(num_in)]
+                               [W[i], A_i[i]]])) for i in range(in_size)]
 
         C += [cvx.PSD(cvx.bmat([[self.B[i], H[i]],
-                                [H[i], A_i[i]]])) for i in range(num_in)]
+                                [H[i], A_i[i]]])) for i in range(in_size)]
+
+        C += self._bnd.as_constraint(self)
         return C
 
     def as_objective(self, **kwargs):
@@ -198,225 +191,190 @@ class BoxAspect(FormulationR2):
         return cvx.Minimize(cvx.sum(self.B))
 
 
-# Stage 1 ----------------------------------------------------------------
-class PlaceCirclesAR(FormulationR2):
-    creates_var = True
+# todo ---------------------
+class MustTouchEdge(FormulationR2):
+    pass
 
-    def __init__(self, domain, children,
-                 cij=None,
-                 epsilon=1,
-                 width=None,
-                 height=None,
-                 min_edge=None):
+
+class MaximizeDistance(FormulationR2):
+    def __init__(self, inputs, max_dists=None, **kwargs):
         """
-        todo - this is returning non-dcp - since this is its own step - maybe implement in str8 CVX
-        statement
-        ''
+        Sometimes there are two program elements that want to be as far away
+        from each other as possible (on center)
 
-        Attractor-Repellor placement Stage 1.
+        'motivation'
+            for example - a building with egress requirements would want
+            to have staircases adjacent to a hallway. But they should be on opposite
+            sides of that hallway!
+            Formulated as a constraint, this could say the dist(I[i], I[j]) >= 100ft
 
-        reference:
-            Large-Scale Fixed-Outline Floorplanning Design Using Convex Optimization Techniques
+            Formulated as an objective (Ie - them as far away as possible from each other)
 
-        children list of objects with interfaces to
-            - Parameter: Area
-            - Variables: x, y, w, h
+
+        Note - if there is as an RPM associated with the problem,
+        todo maximization of this will cause a Concave-Convex objective ...
+        :param inputs:
+        :param kwargs:
         """
-        FormulationR2.__init__(self, domain, children)
-        self._epsilon = epsilon
-        self._sigma = 1e6
-        self._k = 1
-        num_in = len(self._inputs)
-        print('num_in', num_in)
-        self.Cij = cij if cij is not None else np.ones((num_in, num_in))
-        print(self.Cij)
-        self.WF = width if width else Variable(pos=True, name='Stage1.W')
-        self.HF = height if height else Variable(pos=True, name='Stage1.H')
-        self.X = Variable(shape=num_in, pos=True, name='Stage1.X')
-        self.Y = Variable(shape=num_in, pos=True, name='Stage1.Y')
+        FormulationR2.__init__(self, inputs, **kwargs)
 
-        # additional
-        self._smallest_edge = min_edge if min_edge else 2
-        self.Dij = None
-        self.Tij = None
-        self.obj = None
+    def as_constraint(self, **kwargs):
 
-    @property
-    def num_actions(self):
-        return self.X.shape[0]
-
-    def _area_to_rad(self, area, min_a):
-        """"""
-        phi = self._smallest_edge
-        return np.sqrt(area / np.pi) * np.log(1 + area / (min_a - phi ** 2))
-
-    def _target_dist_i(self, ):
         return
 
-    def as_constraint(self, *args):
+    def as_objective(self, **kwargs):
+        return
+
+    def display(self):
+        return []
+
+
+class SplitTree(FormulationR2):
+    def __init__(self, inputs, adj=None, **kwargs):
+        FormulationR2.__init__(self, inputs, **kwargs)
+        self.adj_matrix = adj
+
+    def as_constraint(self, **kwargs):
         """
+        given an adjacency matrix,
+
+
+        WH = max{wA + wB , wC + wD }(max{hA , hB } + max{hC , hD }).
+
+        Take max of all possible chains left-right
+        * max of all possible chains up-down
+
+        number of chains in any direction is (box_dim /min_unit_dim)!
+        """
+        X, Y, W, H = self.inputs.vars
+        num_children = len(self.inputs)
+        A = Variable(shape=num_children, boolean=True)
+        C = []
+
+        def constraint_node(wi, wj, hi, hj):
+            wa = Variable(pos=True)
+            ha = Variable(pos=True)
+            ha = Variable(pos=True)
+            c = [
+                wa <= wi + wj,
+                ha <= cvx.max(hi + hj),
+            ]
+
+            return
+        return
+
+
+class DisputedZone(FormulationR2):
+    def __init__(self, inputs, offset, adj, **kwargs):
+        FormulationR2.__init__(self, inputs, **kwargs)
+        self.offset = offset
+        self.adj = adj
+
+    def as_constraint(self, **kwargs):
+        X, Y, W, H = self.inputs.vars
+        for (i, j) in self.adj:
+            b1 = [Variable(boolean=True) for i in range(4)]
+            cutvar = Variable()
+            # vert
+            # if x and
+            vert_ij = cutvar * self.offset * X[i]
+            vert_ji = X[j] - vert_ij
+            # horizantal
+            # horz_ij = cutvar *
+            # horz_ji = cutvar *
+
+
+class StructuralConstraint(FormulationR2):
+    def __init__(self, inputs):
+        FormulationR2.__init__(self, inputs)
+
+
+# Area --------------------------------------------------------------
+class MinFixedPerimeters(FormulationR2):
+    def __init__(self, inputs, **kwargs):
+        """
+        based on Novel Convex Optimization Approaches for VLSI Floorplanning  2008 SDP
+
+        Arguments:
+            inputs: Input Data Structure
 
         """
-        areas = np.asarray([x.area for x in self._inputs])
-        R_i = self._area_to_rad(areas, areas.min())
+        FormulationR2.__init__(self, inputs, **kwargs)
+        num_in = len(inputs)
+        tris = np.triu(np.ones((num_in, num_in), dtype=int), 1).sum()
+        self.U = Variable(shape=tris, pos=True, name='U.{}'.format(self.name))
+        self.V = Variable(shape=tris, pos=True, name='V.{}'.format(self.name))
 
-        Dij = []    # actual distance
-        Tij = []    # target distance
-        Cij = []
-        ij = 0
-        for i in range(self.num_actions):
-            for j in range(i + 1, self.num_actions):
-                tij = (R_i[i] + R_i[j]) ** 2
-                tgt_sq = np.sqrt(tij / (self.Cij[i, j] + self._epsilon))
-                # print(tij, tgt_sq)
-                if tij >= tgt_sq:
-                    Tij.append(tij)
-                else:
-                    Tij.append(tgt_sq)
-                Cij.append(self.Cij[i, j])
-                dij = cvx.square(self.X[i] - self.X[j]) + cvx.square(self.Y[i] - self.Y[j])
-                Dij.append(dij)
-                ij += 1
-        # t_ij = sigma ( a_i^0.5 + a_j ^ 0.5 )
-        # c_ij = connectivity   (input)
-        C = [
-            self.X + R_i <= 0.5 * self.WF,
-            self.X + R_i <= 0.5 * self.WF,
+    def as_constraint(self):
+        """
+        1) generate SDP constraints for
 
-            R_i - self.Y <= 0.5 * self.HF,
-            R_i - self.Y <= 0.5 * self.HF,
-        ]
-        # T_ij = sqrt( t_ij / (c_ij + eps))
-        # D_ij = (x i − x j ) 2 + (y i − y j ) 2
-        Dij = cvx.hstack(Dij)
-        Tij = np.asarray(Tij)
-        Cij = np.asarray(Cij)
+        Area and Aspect.
+            w * h >= a      (min w, h)
 
-        # print(Tij)
-        # F(xi, xj, yi, yj)
-        f1 = Cij * Dij + Tij / Dij - 1 # Tij / Dij is not convex ?
-        f2 = 2 * np.sqrt(Cij * Tij) - 1
-        # print('\nf2\n', f2, '\n--')
-        # Kln(Dij / t_ij)
-        f3 = self._k * cvx.log(Dij / Tij)
-        # f3 = self._k * Dij / Tij
+        Aspect
+            a * B >= h^2
+            => a * B >= h * h
+            => [ B, h ]
+               [ h, a ]
+        2) transform absolute value distance of X,Y to Variables
+        """
+        X, Y, W, H = self.inputs.vars
+        num_in = len(self.inputs)
+        A_i = np.asarray([x.area for x in self.inputs.inputs])
+        a2s = np.sqrt(A_i)
+        C = [cvx.PSD(cvx.bmat([[W[i], a2s[i]],
+                               [a2s[i], H[i]]])) for i in range(num_in)]
 
-        z1 = Variable(shape=self.num_actions, boolean=True)
-        z2 = Variable(shape=self.num_actions, boolean=True)
-        # e = self.WF
-        # F = z1 * f1 + z2 * f2
-        print('-----------------------------')
-        print(Dij.is_convex())
-        print(cvx.inv_pos(Dij).is_atom_convex())
-        print(cvx.inv_pos(Dij).is_convex())
-        print(cvx.inv_pos(Dij).is_concave())
-        print(f1.is_convex())
-        print(f1.is_concave())
-        print('-----------------------------')
-        C += [
-            z1 + z2 <= 1,
-            z1 + z2 >= 0,
-            # Dij >=  Tij then z1 goes to 1
-            # if Dij - Tij >= 0  then z1 = 1
-            # if Dij - Tij  < 0  then z1 = 0
-            # 0 <= Dij - Tij + 1e4 * (1 - z1),
-            # F <= Dij - Tij + 1e4 * (1 - z1)
-            # f3 <= f2
-        ]
-        from cvxpy import linearize
-
-        self.obj = Minimize(cvx.sum(f1))
-        # self.obj = Minimize(cvx.sum(f2 -  linearize(f3)))
-        # print(self.obj)
-        # self.obj = Minimize(cvx.sum(F - f3))
-        self.Dij = Dij
-        self.Tij = Tij
+        if self.is_objective is True:
+            tri_i, tri_j = np.triu_indices(num_in, 1)
+            tri_i, tri_j = tri_i.tolist(), tri_j.tolist()
+            C += [
+                # linearized absolute value constraints
+                self.U >= X[tri_i] - X[tri_j],
+                self.U >= X[tri_j] - X[tri_i],
+                self.V >= Y[tri_i] - Y[tri_j],
+                self.V >= Y[tri_j] - Y[tri_i]
+            ]
         return C
 
     def as_objective(self, **kwargs):
-        """
-        b_0 + f_0(x)                    for 0 <= x < 10,
-        g(x) = b_0 + f_0(10) + f_1(x)   for 10 <= x <= 100
+        o1 = Minimize(cvx.sum(self.U + self.V))
+        return o1
 
-        ----------------
-        minimize     b_0 + f_0(z_0) + f_1(z_1)
-
-        subject to   10y_1  <= z_0
-                     z_0    <= 10y_0
-
-                     0     <= z_1 <= 90y_1
-                     x      = z_0 + z_1
-
-                     y_0, y_1 in {0,1}
-        """
-        return self.obj
-
-    def compute_rpm(self):
+    def describe(self):
         return
 
-    def display(self):
-        data = FormulationR2.display(self)
-        return
 
-    @property
-    def action(self):
-        """ output is RPM """
-        return cvx.hstack([self.X, self.Y])
+class MinAreaGP(FormulationR2):
+    pass
+
+
+# Stage 1 ----------------------------------------------------------------
 
 
 # stage2 --------------------------------------------------------------
-class FPStage2(FormulationR2):
-    def __init__(self, domain, children, **kwargs):
-        """
-        second stage optimization of - Fixed Outline or classical FP problem
-        incorporate the RPM, aspect ratio, and bounds
+class Stage(FormulationR2):
+    def __init__(self, inputs, **kwargs):
+        FormulationR2.__init__(self, R2(), inputs, **kwargs)
 
-        implementations are:
-        1)
-            Large-Scale Fixed-Outline Floorplanning Design
-            Using Convex Optimization Techniques            2008    SOC
-        2)  Novel Convex Optimization Approaches
-                for VLSI Floorplanning                      2008    SDP
-        3)
-            An Efficient Multiple-stage Mathematical
-            Programming Method for Advanced Single and
-            Multi-Floor Facility Layout Problems                    LP
+    def _pull_pred_vars(self):
+        for v in self.vars:
+            yield v
+        for input in self.inputs:
+            for vars_i in input._gather_vars():
+                yield vars_i
 
-        todo - test which is better with this solver ?? cvx calls an SDP solver irregarless so...
-
-        X: x center locations of boxes
-        Y: y center locations of boxes
-        W:
-        H:
-
-        """
-        FormulationR2.__init__(self, domain, children)
-        num_in = len(children)
-        self.X = Variable(shape=num_in, pos=True, name='Stage2.x')
-        self.Y = Variable(shape=num_in, pos=True, name='Stage2.y')
-        self.W = Variable(shape=num_in, pos=True, name='Stage2.w')
-        self.H = Variable(shape=num_in, pos=True, name='Stage2.h')
-
-    @property
-    def num_actions(self):
-        return self.X.shape[0]
-
-    @property
-    def outputs(self):
-        return self.X, self.Y, self.W, self.H
-
-    def display(self):
-        display = FormulationR2.display(self)
-        X, Y, W, H = self.X.value, self.Y.value, self.W.value, self.H.value
-        for i in range(self.num_actions):
-            datum = dict(x=X[i] - 0.5 * W[i], y=Y[i] - 0.5 * H[i], w=W[i], h=H[i], index=i)
-            display['boxes'].append(datum)
-        return display
+    def _gather_dict(self):
+        for v in self._pull_pred_vars():
+            if v.name in self._in_dict and self._in_dict[v.name] is None:
+                self._in_dict[v.name] = v
 
 
-class PlaceLayoutSDP(FPStage2):
-    def __init__(self, space, children, rpm,
-                 adj_mat=None,
+# stage2 --------------------------------------------------------------
+class PlaceLayoutSDP(BoxInputList):
+    def __init__(self, children,
+                 rpm=None,
                  aspect=4,
                  width=None,
                  height=None,
@@ -436,7 +394,7 @@ class PlaceLayoutSDP(FPStage2):
             B: Aspect: min/max aspect ratio of boxes
 
         """
-        FPStage2.__init__(self, space, children)
+        BoxInputList.__init__(self, children)
         num_in = self.X.shape[0]
         tris = np.triu(np.ones((num_in, num_in), dtype=int), 1).sum()
         self.B = Variable(shape=self.X.shape[0], pos=True, name='aspect')
@@ -445,8 +403,8 @@ class PlaceLayoutSDP(FPStage2):
 
         # children
         self.aspect = NumericBound(self.B, high=aspect)
-        self.rpm = RPM(self.space, self, rpm)
-        self.bnds = BoundsXYWH(self.space, self, width, height)
+        self.rpm = RPM(self, rpm)
+        self.bnds = BoundsXYWH(self, width, height)
 
     def as_constraint(self):
         """
@@ -541,6 +499,11 @@ class HallwayEntity(FormulationR2):
     pass
 
 
+class Motion(FormulationR2):
+    pass
+
+
+
 # deprecated / not needed ----------------------------------------
 class _BoundsXYWH(FormulationR2):
     META = {'constraint': True}
@@ -568,7 +531,7 @@ class _BoundsXYWH(FormulationR2):
         return None
 
 
-class PlaceLayout(FPStage2):
+class PlaceLayout(BoxInputList):
     def __init__(self, space, children,
                  adj_mat,
                  rpm,
@@ -659,7 +622,7 @@ class PlaceLayout(FPStage2):
         return geom
 
 
-class PlaceLayoutSOC(FPStage2):
+class PlaceLayoutSOC(BoxInputList):
     def __init__(self, space, children,
                  adj_mat,
                  rpm,
@@ -710,7 +673,7 @@ class PlaceLayoutSOC(FPStage2):
         return Minimize(cvx.sum(self.U + self.V))
 
 
-class PlaceLayoutGM(FPStage2):
+class PlaceLayoutGM(BoxInputList):
     def __init__(self, space, children, rpm,
                  adj_mat=None,
                  aspect=4,

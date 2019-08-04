@@ -2,17 +2,28 @@ from .formulations import Formulation
 from src.cvopt.shape import R2
 from cvxpy import Variable
 
+
 class FormulationR2(Formulation):
     DOMAIN = {'R2'}
 
-    def __init__(self, domain, children, **kwargs):
+    def __init__(self, inputs, domain=None, **kwargs):
         """
         Formulations in rn do not require an explicit domain per-say,
         as they do not need to reference the discretizations of it
 
         """
-        Formulation.__init__(self, domain, **kwargs)
-        self._inputs = children if children else []
+        if domain is None:
+            domain=R2()
+        Formulation.__init__(self, domain,  **kwargs)
+        self._inputs = inputs
+
+    @property
+    def inputs(self):
+        """ todo rename this -need a distinction between lists of stuff and formulations
+            todo also, need to return some datastrucre,
+
+        """
+        return self._inputs
 
     def display(self):
         """ returns geometry in r2 """
@@ -24,22 +35,23 @@ class FormulationR2(Formulation):
             'spheres':  []
         }
 
+    def as_constraint(self, **kwargs):
+        return []
+
     def as_objective(self, **kwargs):
         return None
 
-    def as_constraint(self, *args):
-        return None
 
 
 class NumericBound(FormulationR2):
     META = {'constraint': True, 'objective': False}
 
-    def __init__(self, child_vars, low=None, high=None, domain=None, **kwargs):
+    def __init__(self, child_var, low=None, high=None, domain=None, **kwargs):
         if domain is None:
             domain = R2()
-        assert isinstance(child_vars, Variable)
+        assert isinstance(child_var, Variable)
         FormulationR2.__init__(self, domain, [], **kwargs)
-        self._inputs = child_vars if child_vars else []
+        self._inputs = child_var if child_var else []
         self._high = high
         self._low = low
 

@@ -2,6 +2,8 @@ import argparse
 
 from src.cvopt.tilings import TemplateTile
 from src.cvopt.floorplanexample import AdjPlanOO
+import cvxpy as cvx
+from src.cvopt.formulate.fp_disc import *
 
 
 def generate_units(verbose=False):
@@ -23,16 +25,21 @@ def generate_units(verbose=False):
     return [hall_tile, unit_studio, unit_1bed, unit_2bed, unit_3bed, common_area]
 
 
-def generate_space(levels=2):
-    return
+def covering_no_templates(num_partitions, space):
+    """ covering of a graph with N partitions """
+    N = len(space.faces)
+    X = [cvx.Variable(shape=N, boolean=True) for i in range(num_partitions)]
+    f1 = NoOverlappingFaces(space, actions=X)
+    f2 = FacesContinuity(space, actions=X)
+
+    C = f1.as_constraint() + f2.as_constraint()
+    return cvx.Problem(cvx.Maximize(cvx.sum(X)), C).solve()
 
 
 if __name__ == '__main__':
     units = generate_units()
-    space = generate_space()
-    problem = AdjPlanOO(units, space)
-
-
-    solution = problem.run()
+    # space = generate_space()
+    # problem = AdjPlanOO(units, space)
+    # solution = problem.run()
 
 

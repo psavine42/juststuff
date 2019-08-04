@@ -84,7 +84,7 @@ def is_adjacent(box1, box2, margin=0, h=1e3, w=1e3):
     """
     or_vars = [Variable(boolean=True, name='adj({},{},{})'.format(box1.name, box2.name, k))
                for k in range(4)]
-    lft_rgt = box1.left + margin <= box2.right + w * or_vars[0]
+    expr1 = box1.left + margin <= box2.right + w * or_vars[0]
     expr2 = box1.top + margin <= box2.bottom + h * or_vars[1]
 
     expr3 = box1.right + margin <= box2.left + w * or_vars[2]
@@ -92,7 +92,7 @@ def is_adjacent(box1, box2, margin=0, h=1e3, w=1e3):
 
     v1, v2, v3, v4 = or_vars
     exprs = v1 + v2 + v3 + v4 >= 2
-    constraints = [lft_rgt, expr2, expr3, expr4, exprs]
+    constraints = [expr1, expr2, expr3, expr4, exprs]
     return constraints
 
 

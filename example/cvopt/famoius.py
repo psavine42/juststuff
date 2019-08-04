@@ -206,22 +206,24 @@ def from_voronoi(n=3, verbose=False):
 
 def from_rand(n=3, verbose=False):
     from src.cvopt.formulate.form_utils import triu_indices
+    from src.cvopt.formulate.fp_cont import RPM
     _, areas = generic(n=n)
     points = np.random.rand(n, 2)
-    rpm = np.zeros((n, n, 2), dtype=int)
-    for r, (i, j) in enumerate(triu_indices(n)):
-        i, j = sorted([i, j])
-        dx, dy = np.abs(points[i] - points[j])
-        if dx >= dy:
-            # Left/right
-            if points[i, 0] >= points[j, 0]:
-                rpm[i, j, 0] = 2
-            else: # i
-                rpm[i, j, 0] = 1
-        else:
-            # Up/down
-            if points[i, 1] >= points[j, 1]:
-                rpm[i, j, 1] = 1
-            else:
-                rpm[i, j, 1] = 2
+    rpm = RPM.points_to_mat(points)
     return None, areas, points, rpm, Voronoi(points)
+
+
+def apartment_level():
+    pass
+
+
+def offset_block():
+    return None
+
+
+def path_continuous():
+    return
+
+def maculet():
+    """http://www.emn.fr/x-info/sdemasse/gccat/Kfloor_planning_problem.html """
+    return
