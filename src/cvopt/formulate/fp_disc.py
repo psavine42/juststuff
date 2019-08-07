@@ -2,6 +2,7 @@ from .formulations import Formulation
 import numpy as np
 from cvxpy import Parameter, Constant, Variable, Minimize, Maximize
 import cvxpy as cvx
+import scipy.spatial
 
 
 """
@@ -30,6 +31,13 @@ class FormulationDisc(Formulation):
                 self._actions = actions
             else:
                 self._actions = [actions]
+
+    def as_constraint(self, *args):
+        return []
+
+    def as_objective(self, **kwargs):
+        return None
+
     def display(self):
         data = Formulation.display(self)
         return data
@@ -73,6 +81,7 @@ class NoOverlappingActions(FormulationDisc):
 
 
 class LocallyConnectedSet(FormulationDisc):
+    """ todo extend this to N steps """
     def __init__(self, space, limit=2, **kwargs):
         FormulationDisc.__init__(self, space, **kwargs)
         self._c = Parameter(value=limit)
@@ -117,6 +126,120 @@ class LocallyConnectedSet(FormulationDisc):
         return C
 
 
+class RadiallyConnectedSet(FormulationDisc):
+    META = {'constraint': True, 'objective': False}
+
+    def __init__(self, space, action, r, **kwargs):
+        FormulationDisc.__init__(self, space, actions=action, **kwargs)
+        self._bubble = Variable(shape=2, pos=True, name=self.name)
+        self._bx = Variable(shape=1, pos=True, name=self.name )
+        self._by = Variable(shape=1, pos=True, name=self.name)
+        self._r = r #  Variable(shape=1, pos=True)
+
+    def as_constraint(self, *args):
+        """
+        Imagine there are bubbles of a fixed size floating about constraining
+        the discrete space
+
+        each face is given a coordinate
+
+         X = 1, Xg is coordinate      dist_real <= r
+         X = 1, Xg is (0, 0)          dist_fake <= r + 1000
+
+        note -
+        2-norm is SIGNIFICANTLY Faster than 1norm.
+        """
+        N = len(self.space.faces)
+        X = self.stacked            # selected faces
+        M = 100                     # upper bound
+
+        # centroids.shape[N, 2]
+        centroids = np.asarray(self.space.faces.centroids)
+        centroids = Parameter(shape=centroids.shape, value=centroids)
+        cx = cvx.multiply(centroids[:, 0], X)
+        cy = cvx.multiply(centroids[:, 1], X)
+        Xg = cvx.vstack([cx, cy]).T
+
+        # C = [] todo [speedups]- is one of these faster ?
+        # for i in range(N):
+        #     C.append(cvx.norm(cvx.vec(self._bubble - Xg[i, :]), 2) <= r + M * (1 - X[i]))
+        v = cvx.vstack([cvx.promote(self._bx, (N,)), cvx.promote(self._by, (N,))]).T
+        C = [cvx.norm(v - Xg, 2, axis=1) <= self._r + M * (1 - X)]
+        return C
+
+    def as_objective(self, **kwargs):
+        """ minimize the x and y domain projections """
+        return None # Minimize(self._r)
+
+    def display(self):
+        # v = self._bubble.value
+        v = [self._bx.value, self._by.value]
+        data = [{'x': v[0], 'y': v[1], 'r':self._r, 'index':self.name, 'name':self.name }]
+        return {'circles': data}
+
+
+class Dissallowed(FormulationDisc):
+    def as_constraint(self, *args):
+        """
+         - covers cannot be seperated
+
+        this is somehow vertex covers
+        """
+        # dual_space = self.space.dual()
+        pass
+
+
+# --------------------------------------------------------------
+# FAILS
+# --------------------------------------------------------------
+class BoxBoundedSet(FormulationDisc):
+    def __init__(self, space, action, area, box=None, **kwargs):
+        """ """
+        FormulationDisc.__init__(self, space, actions=action, **kwargs)
+        # assert box is not None or area is not None, 'need a '
+        from .fp_cont import MinArea, BoxInputList
+        self._box = Variable(shape=4, name='Box_%s' % self.name, pos=True)
+        self._area = area # MinArea(self._box, area, method='log')
+
+    def as_constraint(self, *args):
+        """
+
+        """
+        from .fp_cont import MinArea, BoxInputList
+        X = self.stacked            # selected faces
+        M = 100                     # upper bound
+
+        # centroids.shape[N, 2]
+        centroids = np.asarray(self.space.faces.centroids)
+        centrx = Parameter(shape=centroids[:, 0].shape, value=centroids[:, 0])
+        centry = Parameter(shape=centroids[:, 1].shape, value=centroids[:, 1])
+        cx = cvx.multiply(centrx, X)
+        cy = cvx.multiply(centry, X)
+
+        C = [self._box[0] - self._box[2] / 2 <= cx + M * (1 - X),
+             self._box[0] + self._box[2] / 2 >= cx,
+             self._box[1] - self._box[3] / 2 <= cy + M * (1 - X),
+             self._box[1] + self._box[3] / 2 >= cy,
+             # MinArea.mean_area()
+             self._box[2] >= 1,
+             self._box[3] >= 1,
+             self._box[3] * self._box[2] <= self._area
+             # cvx.geo_mean(cvx.vstack([self._box[3], self._box[2]])) <= np.sqrt(self._area)
+             # cvx.log(self._box[3]) + cvx.log(self._box[2]) <= np.log(self._area)
+             ]
+        return C
+
+    def as_objective(self, **kwargs):
+        """ minimize the x and y domain projections """
+        return self._obj
+
+    def display(self):
+        x, y, w, h = self._box.value
+        print('area', w* h)
+        data = {'x': x, 'y': y, 'w': w, 'h': w, 'index': self.name, 'name': self.name}
+        return {'boxes': [data]}
+
+
 class GloballyConnectedSet(FormulationDisc):
     def __init__(self, space, action, area, upper=None, **kwargs):
         FormulationDisc.__init__(self, space, actions=action, **kwargs)
@@ -155,7 +278,9 @@ class GloballyConnectedSet(FormulationDisc):
         return []
 
     def as_objective(self, **kwargs):
-        """ minimize the x and y domain projections """
+        """ minimize the x and y domain projections
+            todo I am STUCK HERE
+        """
         centroids = np.asarray(self.space.faces.centroids)
         n = self._area
         mx = cvx.multiply(centroids[:, 0], self.stacked)
@@ -167,22 +292,6 @@ class GloballyConnectedSet(FormulationDisc):
         ex = cvx.max(mx - cvx.sum(mx) / n)
         ey = cvx.max(my - cvx.sum(my) / n)
         return Minimize(ex + ey)
-
-
-
-
-class Dissallowed(FormulationDisc):
-    def as_constraint(self, *args):
-        """
-         - covers cannot be seperated
-
-        this is somehow vertex covers
-        """
-        # dual_space = self.space.dual()
-        pass
-
-
-
 
 
 

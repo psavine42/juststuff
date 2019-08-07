@@ -60,6 +60,9 @@ class Formulation(_FormRecursive):
 
         self._generated_constraints = False
         self._generated_objectives = False
+        self._obj = None
+        self._constr = []
+        self._solve_args = {}
 
     @property
     def name(self):

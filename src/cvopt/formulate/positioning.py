@@ -1,5 +1,5 @@
 from .fp_cont import FormulationR2
-from cvxpy import Variable, Minimize
+from cvxpy import Variable, Minimize, Parameter
 import numpy as np
 import networkx as nx
 import cvxpy as cvx
@@ -205,9 +205,6 @@ class RPM(FormulationR2):
         return [' '.join(x) for x in arr]
 
 
-
-
-
 class ShiftMatrix(FormulationR2):
     META = {'constraint': True, 'objective': False}
 
@@ -387,6 +384,111 @@ class SRPM(RPM):
         return mat
 
 
+class PackCircles(FormulationR2):
+    def __init__(self, circle_list,
+                 cij=None,
+                 obj='ar0',
+                 overlap=False,
+                 min_edge=2,
+                 verbose=False, **kwargs):
+        """
+        Weighted Circle Packing Problem
+            k -
+            eps -
+            min_edge -
+        """
+        FormulationR2.__init__(self, circle_list, **kwargs)
+
+        # solver and record args
+        self._solve_args = {'method': 'dccp'}
+        self._in_dict = {'k': 1, 'min_edge': min_edge, 'eps': 1e-2}
+
+        # gather inputs
+        X = circle_list.X
+        n = len(circle_list)
+        cij = cij if cij is not None else np.ones((n, n))
+
+        # compute radii
+        areas = np.asarray([x.area for x in circle_list.inputs])
+        r = np.sqrt(areas / np.pi) # * np.log(1 + areas / (min_area - min_edge ** 2))
+        self.r = r
+
+        # indices of upper tris
+        inds = np.triu_indices(n, 1)
+        xi, xj = [x.tolist() for x in inds]
+
+        # gather inputs
+        weights = Parameter(shape=len(xi), value=cij[inds], name='cij', nonneg=True)
+        radii = Parameter(shape=len(xi), value=r[xi] + r[xj], name='radii', nonneg=True)
+        dists = cvx.norm(X[xi, :] - X[xj, :], 2, axis=1)
+
+        # constraints
+        self._constr.append(dists >= radii)
+
+        # objective
+        self._obj = Minimize(cvx.sum(cvx.multiply(weights, dists)))
+
+    def _xxx(self, obj):
+        if obj == 'rect':
+            self._obj = Minimize(
+                    cvx.max(cvx.abs(X[:, 0]) + r) +
+                    cvx.max(cvx.abs(X[:, 1]) + r)
+                )
+        elif obj == 'sqr':
+            self._obj = Minimize(cvx.max(cvx.max(cvx.abs(X), axis=1) + r))
+        else:
+            # f0 =
+            # f1 = Tij / Dij #  - 1 # Tij / Dij is not convex ?
+            # f1 = 1 / Dij     # , -1)  # - 1
+            # vbar = Variable(n, boolean=True)
+            # f2 = 2 * cvx.sqrt(Cij * Tij) - 1
+            # f3 = Dij / Tij  # * self._k
+            # if verbose is True:
+            #     print('dij', Dij.curvature)
+            #     print('f0', f0.curvature)
+            #     print('f1', f1.curvature)
+            #     print('f3', f3.curvature)
+
+            if obj == 'ar0':
+                print('ar0', f0.shape, cvx.sum(f0).curvature)
+
+
+            # elif obj == 'ar1':
+            #     self._obj = Minimize(cvx.sum(f1))
+            #
+            # elif obj == 'ar3':
+            #     self._obj = Minimize(cvx.sum(f3))
+            #
+            # elif obj == 'ar01':
+            #
+            #     self._obj = Minimize(cvx.sum(f0)) + Minimize(cvx.sum(f1))
+            # elif obj == 'ar03':
+            #     self._obj = Minimize(cvx.sum(f0 - f3))
+            # elif obj == 'arf':
+            #     self._obj = Minimize(cvx.sum(f0 + f1 + f2 - f3))
+            # else:
+            #     raise Exception('unknown objective ! ')
+
+    @property
+    def vars(self):
+        cx, _ = self.inputs.vars
+        return cx
+
+    @property
+    def outputs(self):
+        from .input_structs import CircleList
+        cx, _ = self.inputs.vars
+        inputs = self.inputs.inputs
+        return CircleList(inputs, x=cx, r=self.r)
+
+    def as_constraint(self, **kwargs):
+        return self._constr
+
+    def as_objective(self, **kwargs):
+        return self._obj
+
+
+# NOT USED ------------------------------------------------------
 class PlaceCirclesAR(FormulationR2):
     creates_var = True
 
@@ -482,9 +584,9 @@ class PlaceCirclesAR(FormulationR2):
 
         # print(Tij)
         # F(xi, xj, yi, yj)
-        f1 = Cij * Dij + Tij / Dij - 1 # Tij / Dij is not convex ?
+        f1 = Cij * Dij + Tij / Dij - 1      # Tij / Dij is not convex ?
         f2 = 2 * np.sqrt(Cij * Tij) - 1
-        # print('\nf2\n', f2, '\n--')
+
         # Kln(Dij / t_ij)
         f3 = self._k * cvx.log(Dij / Tij)
         # f3 = self._k * Dij / Tij
@@ -538,9 +640,6 @@ class PlaceCirclesAR(FormulationR2):
                      y_0, y_1 in {0,1}
         """
         return self.obj
-
-    def compute_rpm(self):
-        return
 
     def display(self):
         data = FormulationR2.display(self)

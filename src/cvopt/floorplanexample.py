@@ -427,6 +427,18 @@ class FloorPlanProp(FPProbllem):
         self._placements = inputs
         self.G = R2()
 
+    def __iadd__(self, forms):
+        if isinstance(forms, list):
+            for formulation in forms:
+                self._formulations.append(formulation)
+        elif isinstance(forms, Formulation):
+            self._formulations.append(forms)
+        return self
+
+    def __getitem__(self, item):
+        if isinstance(item, int):
+            return self._formulations[item]
+
     def add_formulations(self, *forms):
         for formulation in forms:
             self._formulations.append(formulation)

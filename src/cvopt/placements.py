@@ -73,7 +73,8 @@ class FaceSet(SetActionBase):
             index = mapping.value
             if self.vars.value[index] > 0.7:
                 x, y = self.space.faces.geom[index][0]
-                data.append({'index':index, 'x': x, 'y': y, 'name': self.name})
+                data.append({'index':index, 'x': x, 'y': y, 'name': self.name,
+                             'label': False})
         return {'boxes': data}
 
 

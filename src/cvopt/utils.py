@@ -2,7 +2,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 import matplotlib.patches as patches
-from matplotlib.patches import Rectangle
+from matplotlib.patches import Rectangle, Circle
 import numpy as np
 from src.cvopt.mesh import Mesh2d
 import src.geom.r2 as r2
@@ -149,6 +149,17 @@ def draw_box(d, ax, label=True, edgecolor='black', facecolor='black', **kwargs):
     return ax
 
 
+def draw_circle(d, ax, label=True, edgecolor=None, facecolor=None, **kwargs):
+    i, data = _parse_drawable(d)
+    x, y, r = data.pop('x'), data.pop('y'), data.pop('r')
+    ax.add_patch(Circle((x, y), r, ec=edgecolor, fc=facecolor, **kwargs))
+    if label is True:
+        name = data.get('name', None)
+        txt = name if name is not None else str(i)
+        ax.text(x, y, "c.{}".format(txt))
+    return ax
+
+
 # formulation -----------------------------------------------------
 def draw_formulation_he(form, ax):
     he = form.space.half_edges.geom
@@ -166,7 +177,10 @@ def draw_formulation_discrete(form, ax, **kwargs):
     ax = draw_formulation_he(form, ax)
 
     for i, d in enumerate(disp_dict.get('boxes', [])):
-        draw_box(d, ax, **kwargs)
+        ax = draw_box(d, ax, **kwargs)
+
+    for i, d in enumerate(disp_dict.get('circles', [])):
+        ax = draw_circle(d, ax, **kwargs)
     return ax
 
 

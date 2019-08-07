@@ -13,8 +13,8 @@ class FormulationR2(Formulation):
 
         """
         if domain is None:
-            domain=R2()
-        Formulation.__init__(self, domain,  **kwargs)
+            domain = R2()
+        Formulation.__init__(self, domain, **kwargs)
         self._inputs = inputs
 
     @property
@@ -40,7 +40,6 @@ class FormulationR2(Formulation):
 
     def as_objective(self, **kwargs):
         return None
-
 
 
 class NumericBound(FormulationR2):

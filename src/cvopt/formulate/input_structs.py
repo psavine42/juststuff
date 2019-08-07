@@ -4,7 +4,6 @@ import cvxpy as cvx
 import numpy as np
 
 
-
 class BoxInputList(FormulationR2):
     def __init__(self, children, **kwargs):
         """
@@ -56,13 +55,7 @@ class BoxInputList(FormulationR2):
         """ NOT canonical expressions for an arbitrary point within each box"""
         u = Variable(shape=len(self), pos=True, name='U.x')
         v = Variable(shape=len(self), pos=True, name='V.x')
-        c = [
-            self.X - self.W / 2 <= u,
-            self.X + self.W / 2 >= u,
-            self.Y - self.H / 2 <= v,
-            self.Y + self.H / 2 >= v,
-        ]
-        return [u, v], c
+        return [u, v], self.within(u, v)
 
     @property
     def top(self):
@@ -79,6 +72,12 @@ class BoxInputList(FormulationR2):
     @property
     def right(self):
         return self.X + self.W / 2
+
+    def within(self, u, v):
+        return [self.X - self.W / 2 <= u,
+                self.X + self.W / 2 >= u,
+                self.Y - self.H / 2 <= v,
+                self.Y + self.H / 2 >= v]
 
     def __len__(self):
         return self.X.shape[0]
@@ -124,6 +123,9 @@ class PointList(FormulationR2):
         FormulationR2.__init__(self, children, **kwargs)
         self.X = []
         self.Y = []
+
+    # def __getitem__(self, item):
+    #     return self.mat[item]
 
     @property
     def inputs(self):
@@ -179,6 +181,10 @@ class PointList(FormulationR2):
             display['segments'].append(datum)
         return display
 
+    @classmethod
+    def _var_list(cls, n, name):
+        return [Variable(pos=True, name='{}.{}.{}'.format(cls.__name__, name, i)) for i in range(n)]
+
 
 class PointList2d(PointList):
     def __init__(self, children, **kwargs):
@@ -212,7 +218,7 @@ class PointList2d(PointList):
     # ---------------------------------------
     @property
     def vars(self):
-        """ Variable(shape=len(self)) """
+        """ Variable(shape=len(self, 2)) """
         return cvx.hstack(self.X), cvx.hstack(self.Y)
 
     @property
@@ -222,29 +228,6 @@ class PointList2d(PointList):
 
 class PointList3d(PointList):
     def __init__(self, children, **kwargs):
-        """
-        second stage optimization of - Fixed Outline or classical FP problem
-        incorporate the RPM, aspect ratio, and bounds
-
-        implementations are:
-        1)
-            Large-Scale Fixed-Outline Floorplanning Design
-            Using Convex Optimization Techniques            2008    SOC
-        2)  Novel Convex Optimization Approaches
-                for VLSI Floorplanning                      2008    SDP
-        3)
-            An Efficient Multiple-stage Mathematical
-            Programming Method for Advanced Single and
-            Multi-Floor Facility Layout Problems                    LP
-
-        todo - test which is better with this solver ?? cvx calls an SDP solver irregarless so...
-
-        X: x center locations of boxes
-        Y: y center locations of boxes
-        W:
-        H:
-
-        """
         PointList.__init__(self, children, **kwargs)
         self.X = [Variable(pos=True, name='Stage2.x{}'.format(i)) for i in range(self._shape)]
         self.Y = [Variable(pos=True, name='Stage2.y{}'.format(i)) for i in range(self._shape)]
@@ -263,4 +246,36 @@ class PointList3d(PointList):
     @property
     def outputs(self):
         return self.X, self.Y, self.Z
+
+
+class CircleList(PointList):
+    def __init__(self, n, x=None, y=None, r=None, dim=2, **kwargs):
+        PointList.__init__(self, n, **kwargs)
+        # self.X = self._var_list(self._shape, 'x') if x is None else x
+        # self.Y = self._var_list(self._shape, 'y') if y is None else y
+        self.X = Variable(shape=(self._shape, dim), name=self.name) if x is None else x
+        self.R = self._var_list(self._shape, 'r') if r is None else r
+
+    @property
+    def vars(self):
+        """ Variable(shape=len(self)) """
+        return self.X, cvx.hstack(self.R)
+
+    @property
+    def areas(self):
+        return np.pi * self.R
+
+    @property
+    def radii(self):
+        return self.R
+
+    def _min_dist(self):
+        # todo
+        return Minimize( cvx.max(cvx.max(cvx.abs(c), axis=1) + self.R))
+
+
+
+
+class Group(object):
+    pass
 

@@ -31,6 +31,9 @@ class BTile(object):
         (x1, y1), (x2, y2) = self.p1, self.p2
         return x2 - x1
 
+    def __getitem__(self, item):
+        return getattr(self, item, None)
+
     @property
     def aspect(self):
         if self._aspect is not None:
