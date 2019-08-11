@@ -4,10 +4,10 @@ from .cont_base import FormulationR2
 from cvxpy import Variable, Minimize\
     , Constant, Parameter
 import numpy as np
+from .input_structs import PointList2d
 
 
 def segment_index(n):
-    # res = np.asarray([[i, i - 1] for i in range(1, n)])
     res = np.asarray([[i - 1, i] for i in range(1, n)])
     return res
 
@@ -79,6 +79,21 @@ class PathFormulationR2(FormulationR2):
             display['points'].append(datum)
             cnt += 1
         return display
+
+
+class Path(PointList2d):
+    def __init__(self, n, **kwargs):
+        """ n-1 segments constrained by N points """
+        PointList2d.__init__(self, n, **kwargs)
+
+    def constraints(self):
+        return
+
+    def on_path(self, point_set):
+        return
+
+    def within(self, convex_set):
+        return
 
 
 class ShortestPathCont(FormulationR2):
@@ -201,6 +216,20 @@ class SegmentsHV(FormulationR2):
             mag_y <= self.N * (1 - vars1)
         ]
         return C
+
+
+class PointOnPath(FormulationR2):
+    def __init__(self, inputs, convex_set, **kwargs):
+        """ given a path or segment, constrain a point to that
+            that set
+        """
+        FormulationR2.__init__(self, [inputs, convex_set], **kwargs)
+
+    def as_constraint(self, **kwargs):
+        """ objects in input must be within convex set """
+        point_set, convex_set = self._inputs
+        theta = Variable()
+        C = []
 
 
 class FixedVertex(FormulationR2):

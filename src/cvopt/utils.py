@@ -186,22 +186,39 @@ def draw_formulation_discrete(form, ax, **kwargs):
 
 def draw_formulation_cont(form, ax, **kwargs):
     disp_dict = form.display()
-    colors = cm.viridis(np.linspace(0, 1, len(disp_dict['boxes'])))
-    for i, d in enumerate(disp_dict['boxes']):
-        draw_box(d, ax, facecolor=colors[i], **kwargs)
+    bxs = disp_dict.get('boxes', [])
+    if bxs is not None and len(bxs) > 0:
+        colors = cm.viridis(np.linspace(0, 1, len(bxs)))
+        for i, d in enumerate(bxs):
+            fc = d['facecolor'] if 'facecolor' in d else colors[i]
+            draw_box(d, ax, facecolor=fc, **kwargs)
 
-    colors = cm.viridis(np.linspace(0, 1, len(disp_dict['segments'])))
-    for i, d in enumerate(disp_dict['segments']):
-        i, data = _parse_drawable(d)
-        x0, x1, x2, x4 = data['x0'], data['y0'], data['x1'], data['y1']
-        g = [(x0, x1), (x2, x4)]
-        draw_edge(ax, g, index=i, color=colors[i], **kwargs)
+    segs = disp_dict.get('segments', [])
+    if segs is not None and len(segs) > 0:
+        colors = cm.viridis(np.linspace(0, 1, len(segs)))
+        for i, d in enumerate(segs):
+            i, data = _parse_drawable(d)
+            x0, x1, x2, x4 = data['x0'], data['y0'], data['x1'], data['y1']
+            g = [(x0, x1), (x2, x4)]
+            draw_edge(ax, g, index=i, color=colors[i], **kwargs)
 
-    for i, d in enumerate(disp_dict['points']):
-        i, data = _parse_drawable(d)
-        x, y = data['x0'], data['y0']
-        draw_vertex([x, y], ax, index=i, **kwargs)
+    pts = disp_dict.get('points', [])
+    if pts is not None and len(pts) > 0:
+        for i, d in enumerate(disp_dict['points']):
+            i, data = _parse_drawable(d)
+            x, y = data['x0'], data['y0']
+            draw_vertex([x, y], ax, index=i, **kwargs)
     return ax
+
+
+def draw_form(f, ax, **kwargs):
+    from src.cvopt.formulate.cont_base import FormulationR2
+    from src.cvopt.formulate.fp_disc import FormulationDisc
+    if isinstance(f, FormulationDisc):
+        draw_formulation_discrete(f, ax, **kwargs)
+    elif isinstance(f, FormulationR2):
+        draw_formulation_cont(f, ax, **kwargs)
+
 
 
 # --------------------------------------------------

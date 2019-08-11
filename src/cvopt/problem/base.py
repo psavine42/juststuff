@@ -8,13 +8,17 @@ def describe_problem(problem: Problem):
     DMCP https://github.com/cvxgrp/dmcp
     dccp
     """
-    st = ''
-    st += 'is disciplined quasiconvex    {}'.format(problem.is_dqcp())
+    st = 'Curvature {}'.format(problem.objective.expr.curvature)
+    st += '\nis disciplined quasiconvex    {}'.format(problem.is_dqcp())
     st += '\nis disciplined geometric      {}'.format(problem.is_dgp())
     st += '\nis disciplined quadratic      {}'.format(problem.is_qp())
     st += '\nis disciplined convex         {}'.format(problem.is_dcp())
     st += '\nis disciplined concave-convex {}'.format(dccp.is_dccp(problem))
     st += '\nis disciplined multi-convex   {}'.format(dmcp.is_dmcp(problem))
+    # todo
+    # SQP sequential quadratic program
+    # SCP seperable convex program
+    #
     return st
 
 
@@ -54,6 +58,7 @@ class FPProbllem(object):
             print('---------------------------')
             print(self._problem.objective)
             print('problem ready')
+        return self._problem
 
     def run(self, obj_args={},
             const_args={},
@@ -73,8 +78,8 @@ class FPProbllem(object):
 
         print('solution created')
         print(self._problem.solution)
-        if show:
-            self.display(self._problem, save=save)
+        #if show:
+        #    self.display(self._problem, save=save)
         return self.solution
 
     def solve(self, **kwargs):

@@ -385,6 +385,8 @@ class SRPM(RPM):
 
 
 class PackCircles(FormulationR2):
+    META = {'constraint': True, 'objective': True}
+
     def __init__(self, circle_list,
                  cij=None,
                  obj='ar0',
@@ -404,7 +406,7 @@ class PackCircles(FormulationR2):
         self._in_dict = {'k': 1, 'min_edge': min_edge, 'eps': 1e-2}
 
         # gather inputs
-        X = circle_list.X
+        X = circle_list.point_vars
         n = len(circle_list)
         cij = cij if cij is not None else np.ones((n, n))
 
@@ -488,7 +490,117 @@ class PackCircles(FormulationR2):
         return self._obj
 
 
-# NOT USED ------------------------------------------------------
+class EuclideanDistanceMatrix(FormulationR2):
+    META = {'constraint': True, 'objective': True}
+
+    def __init__(self, point_list, norm=2, **kwargs):
+        FormulationR2.__init__(self, point_list, **kwargs)
+        n = len(point_list)
+        X = point_list.point_vars
+        print(X.shape )
+        ti, tj = [x.tolist() for x in np.triu_indices(n, 1)]
+        self._expr = cvx.norm(X[ti] - X[tj], norm, axis=1)
+
+    def as_constraint(self, **kwargs):
+        pl = self._inputs
+        return [pl.point_vars >= 0, pl.point_vars <= 100]
+
+    def as_objective(self):
+        if self._obj_type is not None:
+            if self._obj_type == cvx.Maximize:
+                return self._obj_type(cvx.sum(self._expr))
+            else:
+                return self._obj_type(cvx.sum(self._expr))
+        else:
+            Exception('no objective type specified')
+
+
+class NoOvelapMIP(FormulationR2):
+    META = {'constraint': True, 'objective': False}
+
+    def __init__(self, box_list, others=None, m=100, **kwargs):
+        """
+
+        if others is specified then, items in box_list will not overlap items in others list
+        """
+        FormulationR2.__init__(self, box_list, **kwargs)
+        self._m = m
+        self._others = others
+
+    def from_2lists(self):
+        # to do
+        in1 = self.inputs
+        in2 = self._others
+
+        xi, xj = len(in1), len(in2)
+        ntril = len(xi)
+        trili = list(range(ntril))
+        or_vars = Variable(shape=(ntril, 4), boolean=True, name='overlap_or({},{})')
+        C = [
+            in1.right <= in2.left[xj] + self._m * or_vars[trili, 0],
+            in2.right[xj] <= in1.left + self._m * or_vars[trili, 1],
+            X.top[xi] <= X.bottom[xj] + self._m * or_vars[trili, 2],
+            X.top[xj] <= X.bottom[xi] + self._m * or_vars[trili, 3],
+            cvx.sum(or_vars, axis=1) <= 3
+        ]
+        return
+
+    def as_constraint(self, **kwargs):
+        """
+           http://yetanothermathprogrammingconsultant.blogspot.com/2017/07/rectangles-no-overlap-constraints.html
+           xi+wi ≤ xj or
+           xj+wj ≤ xi or
+           yi+hi ≤ yj or
+           yj+hj ≤ yi
+
+           is transfromed to linear inequalities
+        """
+        X = self.inputs
+        N = len(X)
+
+        xi, xj = [x.tolist() for x in np.triu_indices(N, 1)]
+        ntril = len(xi)
+        trili = list(range(ntril))
+        or_vars = Variable(shape=(ntril, 4), boolean=True, name='overlap_or({},{})')
+        C = [
+            X.right[xi] <= X.left[xj]   + self._m * or_vars[trili, 0],
+            X.right[xj] <= X.left[xi]   + self._m * or_vars[trili, 1],
+            X.top[xi]   <= X.bottom[xj] + self._m * or_vars[trili, 2],
+            X.top[xj]   <= X.bottom[xi] + self._m * or_vars[trili, 3],
+            cvx.sum(or_vars, axis=1) <= 3
+        ]
+        return C
+
+
+# ------------------------------------------------------------------------
+# NOT USED / FAIL
+# ------------------------------------------------------------------------
+class GramMatrix(FormulationR2):
+    def __init__(self, point_list, **kwargs):
+        """
+        pg 419 8.3.1 Gram matrix and realizability
+        d ij =
+
+        = ka i − a j k 2
+        = (l i 2 + l j 2 − 2a Ti a j ) 1/2
+        = (l i 2 + l j 2 − 2G ij ) 1/2 .
+        :param point_list:
+        :param kwargs:
+        """
+        FormulationR2.__init__(self, point_list, **kwargs)
+        n = len(point_list)
+        X = point_list.X
+        z = np.asarray([x.area for x in point_list.inputs])
+        xi, xj = [x.tolist() for x in np.triu_indices(n, 1)]
+        # print(X.shape)
+        # print(xi, xj)
+        # dij = cvx.norm(X[xi] - X[xj], 2, axis=1)
+        G = Variable(shape=(n, n), PSD=True)
+        C = [  ]
+
+
+
+
 class PlaceCirclesAR(FormulationR2):
     creates_var = True
 

@@ -61,8 +61,8 @@ class TestContinuous(_TestBase):
         self.run_detailed(p)
         desc = '_{}_{}'.format(n, 'strict' if dense is True else 'sparse')
         if 'vor' in p.meta:
-            self.save_vor(p.meta['vor'], save='sdp_f{}_vor.png'.format(n))
+            self.save_vor(p.meta['vor'], save='sdp_f%s_vor.png' % n)
         try:
-            self.save_sdp(p, ilist, save='sdp_f{}.png'.format(desc))
+            self.save_sdp(p, ilist, save='sdp_f%s.png' % desc)
         except:
             print('no silution')

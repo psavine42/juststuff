@@ -6,7 +6,9 @@ Continuous Domain
 
     - Routing - path from start to N locations 
     - floorplanning - N programmatic elements X repeated once | X is rectagular 
-    - facility layout - N programmatic elements X repeated once | X is convex
+    - facility layout - N programmatic elements X repeated once | X is convex_set
+        - Maximize Distances X_ij -> todo
+        - Minimize Distances X_ij -> YES
     - Hybrids 
     
  Discrete Domain 

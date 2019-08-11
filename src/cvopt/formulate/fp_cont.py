@@ -1,8 +1,6 @@
 from .formulations import Formulation
 import cvxpy as cvx
 from cvxpy import Variable, Minimize
-import numpy as np
-import dccp
 from . import form_utils as fu
 from .cont_base import FormulationR2, NumericBound
 from src.cvopt.shape.base import R2
@@ -51,12 +49,69 @@ def tris(n):
     return zip(tri_i.tolist(), tri_j.tolist())
 
 
+class GeomContains(FormulationR2):
+    META = {'constraint': True, 'objective': False}
+
+    def __init__(self, outer, inner, index_map=None, **kwargs):
+        """
+        this contains other
+        aka inner[i].exteme[j] is within outer[i].exteme[j]
+
+        optionally index_map is a mapping of {outer_index: inner_index}
+        to specify groups that  contain each other
+
+        example:
+            # simple usage
+            b1 = BoxInputList(5)
+            b2 = BoxInputList(5)
+            container = GeomContains(b1, b2)
+
+            #
+            s1 = BoxInputList(2)
+            s2 = BoxInputList(5)
+            container = GeomContains(s1, s2, {0:1, 0:2, 0:3, 1:4, 1:5})
+        """
+        n_inner = len(inner)
+        n_outer = len(outer)
+        if n_outer != n_inner and index_map is None:
+            raise Exception('inner and outer lists are not of same size, and no map provided')
+        elif index_map is None:
+            ixs = list(range(len(outer)))
+            index_map = [ixs, ixs]
+        elif isinstance(index_map, dict):
+            m1, m2 = [], []
+            for k, v in index_map.items():
+                assert isinstance(k, int) and k < n_outer, 'invalid index %s' % k
+                assert isinstance(v, int) and v < n_inner, 'invalid index %s' % v
+                m1.append(k)
+                m2.append(v)
+            index_map = [m1, m2]
+        else:
+            raise Exception('index map not recognized')
+
+        FormulationR2.__init__(self, [outer, inner], **kwargs)
+        self._index_map = index_map
+
+    def as_constraint(self, **kwargs):
+        outer, inner = self.inputs
+        i_out, ix_in = self._index_map
+        C = [
+            0 <= -outer.y_min[i_out] + inner.y_min[ix_in],    # Hmin < X_min,
+            0 <=  outer.y_max[i_out] - inner.y_max[ix_in],    # Hmax > X_max,
+            0 <= -outer.w_min[i_out] + inner.w_min[ix_in],    # Wmin < X_left,
+            0 <=  outer.w_max[i_out] - inner.w_max[ix_in],    # Wmax > X_right,
+        ]
+        return C
+
+
 # usable/unusable space ------------------------------------------------------------
 class BoundsXYWH(FormulationR2):
     META = {'constraint': True, 'objective': False}
 
     def __init__(self, inputs=None, w=None, h=None, wmin=0, hmin=0, **kwargs):
-        """ the bounding box for a fixed outline floor plan """
+        """
+        todo this is a general case of GeomContains
+        the bounding box for a fixed outline floor plan """
         FormulationR2.__init__(self, inputs, **kwargs)
         self.w_max = w
         self.h_max = h
@@ -65,19 +120,41 @@ class BoundsXYWH(FormulationR2):
 
     def as_constraint(self, **kwargs):
         fp = self.inputs
-        C = [
-            fp.X + 0.5 * fp.W <= self.w_max,   # 0.5 * self.w,
-            fp.Y + 0.5 * fp.H <= self.h_max,   # 0.5 * self.h,
-            fp.X - 0.5 * fp.W >= 0.,        # 0.5 * self.w,
-            fp.Y - 0.5 * fp.H >= 0.,        # 0.5 * self.h,
-        ]
-        return C
+        if hasattr(fp, 'right'):
+            return [
+                0 <= -self.h_min + fp.bottom,   # Hmin < X_min,
+                0 <=  self.h_max - fp.top,      # Hmax > X_max,
+                0 <= -self.w_min + fp.left,     # Wmin < X_left,
+                0 <=  self.w_max - fp.right,    # Wmax > X_right,
+            ]
+        elif hasattr(fp, 'point_vars'):
+            # todo it is an instance of point
+            XY = fp.point_vars
+            return [
+                0 <= self.w_max - XY[0],
+                0 <= self.h_max - XY[1],
+                0 <= -self.w_min + XY[0],
+                0 <= -self.h_min + XY[1],
+            ]
+        # todo it is an instance of Circle (3)
+        raise Exception('cannot interpret input object bounds')
+
+    def canoniclize(self, aff_obj):
+        return
 
     def as_objective(self, **kwargs):
         return None
 
     def describe(self):
         return
+
+    def display(self):
+        display = FormulationR2.display(self)
+        datum = dict(x=self.w_min, y=self.h_min, w=self.w_max,
+                     h=self.h_max, label=False, name='bounds',
+                     index=0, facecolor='None')
+        display['boxes'].append(datum)
+        return display
 
 
 class UnusableZone(FormulationR2):
@@ -195,22 +272,94 @@ class BoxAspect(FormulationR2):
 
 
 class BoxAspectLinear(FormulationR2):
-    def __init__(self, inputs=None, high=None, low=None, **kwargs):
+    def __init__(self, inputs=None, mx_aspect=None, mx_area=None, **kwargs):
         """
+        When Max Area and Max Aspect are known, bound by perimeter and aspect
         """
         FormulationR2.__init__(self, inputs, **kwargs)
-        self._bnd_high = high
-        self._bnd_low = low
+        size = len(inputs)
+        mx_aspect = np.asarray(mx_aspect)
+        mx_area = np.asarray(mx_area)
+        if mx_aspect.ndim == 0:
+            mx_aspect = np.tile(mx_aspect, size)
+        p = np.sqrt(mx_aspect * mx_area) + np.sqrt(mx_area / mx_aspect)
+        self._max_perim = Parameter(shape=size, value=p, name='perim')
+        self._max_aspect = Parameter(shape=size, value=mx_aspect, name='aps')
+        self._max_area = Parameter(shape=size, value=mx_area, name='area')
 
     def as_constraint(self, **kwargs):
         """
-        li < h/w < u_i
+        l_i < h/w < u_i
+        s_max = max(h,w)
+        s_min = min(h,w)
+
+        s_min = s_max / B
+        s_max = s_min * B
+        A = s_max  * s_min
+        sqrt(A * B) = s_max
+        sqrt(A / B) = s_min
+
+        P = s_max + s_min
+        P = sqrt(A * B) + sqrt(A / B)
         """
         _, _, W, H = self.inputs.vars
+        b, p, a = self._max_aspect, self._max_perim, self._max_area
+        M = np.sum(self._max_area.value)
+        u = Variable(shape=W.shape[0], boolean=True, name='pvar')
         C = [
-            self._bnd_high * W >= H
+            b * W <= H + M * u,         # cW < H,  u = 0,
+            H <= b * W + M * (1 - u),   # W > cH,  u = 1
+            W + H <= p,
+
+            # cvx.sqrt(b) * W - M * u <= cvx.sqrt(a) ,
+            # cvx.sqrt(b) * H <= cvx.sqrt(a) + M * (1 - u),
         ]
+        # todo do something with the area! fuck this permiter shit
+        # area if aspect is known
+        # u = Variable(boolean=True)     # W > H => 1
+        # W, H = self._box[2], self._box[3]
+        # b, a = self._aspect, self._area
+        # p = (np.sqrt(b * a) + np.sqrt(a / b))
+        # print('p', p)
+        # C += [
+        #     W >= 1,
+        #     H >= 1,
+        #     # H <= np.ceil(np.sqrt(a)),
+        #     # W <= np.ceil(np.sqrt(a)),
+        #
+        #     b * W <= H + M * u,          # cW < H,  u = 0,
+        #     H <= b * W + M * (1 - u),    # W > cH,  u = 1
+        #     W + H <= p
+        #     # np.sqrt(b) * H + M <= np.sqrt(a),
+        #     # np.sqrt(b) * W + M * u <= np.sqrt(a),
+        #
+        #
+        #     # np.sqrt(b) * W + M * u <= np.sqrt(self._area),
+        #     # np.sqrt(b) * H + M * (1 - u) <= np.sqrt(self._area),
+        #
+        #     # H * np.sqrt(self._aspect) + M * (1 - vasp) <= np.sqrt(self._area),
+        #
+        #     # self._box[3] * self._box[2] <= self._area
+        #     # cvx.log_det(cvx.bmat([[ self._box[3], 0],
+        #     #                       [0, self._box[2]]])) <= np.log(self._area)
+        #     # cvx.log(self._box[3]) + cvx.log(self._box[2]) <= np.log(self._area)
+        #     ]
         return C
+
+    def parameters(self):
+        return self._max_aspect, self._max_perim, self._max_area
+
+    def variables(self):
+        return self.inputs.vars
+
+    def describe(self, **kwargs):
+        b, p, a = [x.value for x in self.parameters()]
+        st = ''
+        for i in range(len(self.inputs)):
+            st += '\n{}: aspect {}, max_area: {}: max_perim: {}'.format(
+                i, b[i], a[i], p[i]
+            )
+        return st
 
 
 # todo ---------------------
@@ -241,7 +390,6 @@ class MaximizeDistance(FormulationR2):
         FormulationR2.__init__(self, inputs, **kwargs)
 
     def as_constraint(self, **kwargs):
-
         return
 
     def as_objective(self, **kwargs):
@@ -393,7 +541,9 @@ class MinFixedPerimeters(FormulationR2):
 # Area as function of some variables F(w,h)
 class MinArea(FormulationR2):
     def __init__(self, inputs, area, method='log', **kwargs):
-        """ Areas as function of 2 scalars """
+        """ Areas as function of 2 scalars
+            todo - throws errors on geo_mean level sets !
+         """
         FormulationR2.__init__(self, inputs, **kwargs)
         self._min_area = area
         self._fn = self.log_area if method == 'log' else self.mean_area

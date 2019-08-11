@@ -131,7 +131,6 @@ class RadiallyConnectedSet(FormulationDisc):
 
     def __init__(self, space, action, r, **kwargs):
         FormulationDisc.__init__(self, space, actions=action, **kwargs)
-        self._bubble = Variable(shape=2, pos=True, name=self.name)
         self._bx = Variable(shape=1, pos=True, name=self.name )
         self._by = Variable(shape=1, pos=True, name=self.name)
         self._r = r #  Variable(shape=1, pos=True)
@@ -159,10 +158,6 @@ class RadiallyConnectedSet(FormulationDisc):
         cx = cvx.multiply(centroids[:, 0], X)
         cy = cvx.multiply(centroids[:, 1], X)
         Xg = cvx.vstack([cx, cy]).T
-
-        # C = [] todo [speedups]- is one of these faster ?
-        # for i in range(N):
-        #     C.append(cvx.norm(cvx.vec(self._bubble - Xg[i, :]), 2) <= r + M * (1 - X[i]))
         v = cvx.vstack([cvx.promote(self._bx, (N,)), cvx.promote(self._by, (N,))]).T
         C = [cvx.norm(v - Xg, 2, axis=1) <= self._r + M * (1 - X)]
         return C
@@ -178,6 +173,117 @@ class RadiallyConnectedSet(FormulationDisc):
         return {'circles': data}
 
 
+class RadiallyBoundSet(FormulationDisc):
+    META = {'constraint': True, 'objective': False}
+
+    def __init__(self, space, action, pointlist, r, **kwargs):
+        FormulationDisc.__init__(self, space, actions=action, **kwargs)
+        self._p = pointlist
+        self._r = r     #  Variable(shape=1, pos=True)
+
+    def as_constraint(self, *args):
+        """
+        Imagine there are bubbles of a fixed size floating about constraining
+        the discrete space
+
+        each face is given a coordinate
+
+         X = 1, Xg is coordinate      dist_real <= r
+         X = 1, Xg is (0, 0)          dist_fake <= r + 1000
+
+        note -
+        2-norm is SIGNIFICANTLY Faster than 1norm.
+        """
+        N = len(self.space.faces)
+        # centroids.shape[N, 2]
+        centroids = np.asarray(self.space.faces.centroids)
+        M = 2 * centroids.max()
+        centroids = Parameter(shape=centroids.shape, value=centroids)
+        px, py = self._p.X, self._p.Y
+        C = []
+        for i, face_set in enumerate(self._actions):
+            X = face_set.vars  # selected faces
+            cx = cvx.multiply(centroids[:, 0], X)
+            cy = cvx.multiply(centroids[:, 1], X)
+            Xg = cvx.vstack([cx, cy]).T
+            v = cvx.vstack([cvx.promote(px[i], (N,)), cvx.promote(py[i], (N,))]).T
+            C = [cvx.norm(v - Xg, 2, axis=1) <= self._r[i] + M * (1 - X)]
+        return C
+
+    def as_objective(self, **kwargs):
+        """ minimize the x and y domain projections """
+        return None # Minimize(self._r)
+
+    def display(self):
+        # v = self._bubble.value
+        v = [self._bx.value, self._by.value]
+        data = [{'x': v[0], 'y': v[1], 'r':self._r, 'index':self.name, 'name':self.name }]
+        return {'circles': data}
+
+
+class BoxBoundedSet(FormulationDisc):
+    META = {'constraint': True, 'objective': False}
+
+    def __init__(self, space, action, boxes, **kwargs):
+        """
+
+        """
+        FormulationDisc.__init__(self, space, actions=action, **kwargs)
+        self._boxlist = boxes
+
+    def as_constraint(self, *args):
+        """
+        todo notes :
+        performance goes with N=6 is around 1 second.
+            when constraints are tightened, goes to 5-6 seconds
+            overall worse than circle-BoundedSet, but more consistent results
+
+            maybe
+        """
+        # centroids.shape[N, 2]
+        cent = np.asarray(self.space.faces.centroids)
+        centrx = Parameter(shape=cent[:, 0].shape, value=cent[:, 0], name='centrx')
+        centry = Parameter(shape=cent[:, 1].shape, value=cent[:, 1], name='centry')
+        bX, bY, bW, bH = self._boxlist.vars
+
+        # base constraints - whatever for now
+        C = [bW >= 1,
+             bH >= 1]
+
+        for i, face_set in enumerate(self._actions):
+            X = face_set.vars   # selected faces
+            M = 100             # todo upper bound
+            cx = cvx.multiply(centrx, X)
+            cy = cvx.multiply(centry, X)
+            # todo maybe lienaerize furda, or use true facemin and face max instead of centroid\
+            #
+            # cx is within box if X_i = 1,
+            C += [bX[i] - bW[i] / 2 <= cx - 0.4 + M * (1 - X),
+                  bX[i] + bW[i] / 2 >= cx + 0.4,
+                  bY[i] - bH[i] / 2 <= cy - 0.4 + M * (1 - X),
+                  bY[i] + bH[i] / 2 >= cy + 0.4,
+            ]
+        return C
+
+    def as_objective(self, **kwargs):
+        """ minimize the x and y domain projections """
+        # return Minimize(self._box[2] + self._box[3])
+        return
+
+    @property
+    def outputs(self):
+        return [self._actions, self._boxlist]
+
+    def display(self):
+        # x, y, w, h = self._box.value
+        # print('area', w* h)
+        # data = {'x': x - w/2, 'y': y - h/2, 'w': w, 'h': w, 'index': self.name, 'name': self.name}
+        # return {'boxes': [data]}
+        return {}
+
+# --------------------------------------------------------------
+# FAILS
+# --------------------------------------------------------------
 class Dissallowed(FormulationDisc):
     def as_constraint(self, *args):
         """
@@ -187,57 +293,6 @@ class Dissallowed(FormulationDisc):
         """
         # dual_space = self.space.dual()
         pass
-
-
-# --------------------------------------------------------------
-# FAILS
-# --------------------------------------------------------------
-class BoxBoundedSet(FormulationDisc):
-    def __init__(self, space, action, area, box=None, **kwargs):
-        """ """
-        FormulationDisc.__init__(self, space, actions=action, **kwargs)
-        # assert box is not None or area is not None, 'need a '
-        from .fp_cont import MinArea, BoxInputList
-        self._box = Variable(shape=4, name='Box_%s' % self.name, pos=True)
-        self._area = area # MinArea(self._box, area, method='log')
-
-    def as_constraint(self, *args):
-        """
-
-        """
-        from .fp_cont import MinArea, BoxInputList
-        X = self.stacked            # selected faces
-        M = 100                     # upper bound
-
-        # centroids.shape[N, 2]
-        centroids = np.asarray(self.space.faces.centroids)
-        centrx = Parameter(shape=centroids[:, 0].shape, value=centroids[:, 0])
-        centry = Parameter(shape=centroids[:, 1].shape, value=centroids[:, 1])
-        cx = cvx.multiply(centrx, X)
-        cy = cvx.multiply(centry, X)
-
-        C = [self._box[0] - self._box[2] / 2 <= cx + M * (1 - X),
-             self._box[0] + self._box[2] / 2 >= cx,
-             self._box[1] - self._box[3] / 2 <= cy + M * (1 - X),
-             self._box[1] + self._box[3] / 2 >= cy,
-             # MinArea.mean_area()
-             self._box[2] >= 1,
-             self._box[3] >= 1,
-             self._box[3] * self._box[2] <= self._area
-             # cvx.geo_mean(cvx.vstack([self._box[3], self._box[2]])) <= np.sqrt(self._area)
-             # cvx.log(self._box[3]) + cvx.log(self._box[2]) <= np.log(self._area)
-             ]
-        return C
-
-    def as_objective(self, **kwargs):
-        """ minimize the x and y domain projections """
-        return self._obj
-
-    def display(self):
-        x, y, w, h = self._box.value
-        print('area', w* h)
-        data = {'x': x, 'y': y, 'w': w, 'h': w, 'index': self.name, 'name': self.name}
-        return {'boxes': [data]}
 
 
 class GloballyConnectedSet(FormulationDisc):

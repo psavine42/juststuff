@@ -18,28 +18,9 @@ limitations under the License.
 import cvxpy as cvx
 import cvxpy.lin_ops.lin_utils as lu
 import numpy.linalg as la
+import cvxpy.transforms.separable_problems
+import cvxpy.transforms.indicator
 
-
-class ConvexSet(cvx.Variable):
-
-    def __init__(self, rows, cols, constr_func):
-        """
-        # elem - a Variable representing an element of the set.
-        # constr_func - a function that takes an affine objective and
-        #               returns a list of affine constraints.
-        :param rows:
-        :param cols:
-        :param constr_func:
-        """
-        self.constr_func = constr_func
-        super(ConvexSet, self).__init__(rows, cols)
-
-    def canonicalize(self):
-        """
-        # Applies the objective to the constr_func to get the affine constraints.
-        """
-        obj = lu.create_var(self.size, self.id)
-        return (obj, self.constr_func(obj))
 
 
 def contains(cvx_set, value):
@@ -101,6 +82,28 @@ def intersect(lh_set, rh_set):
     return ConvexSet(lh_set.size[0], lh_set.size[1], constr_func)
 
 
+class ConvexSet(cvx.Variable):
+
+    def __init__(self, rows, cols, constr_func):
+        """
+        # elem - a Variable representing an element of the set.
+        # constr_func - a function that takes an affine objective and
+        #               returns a list of affine constraints.
+        :param rows:
+        :param cols:
+        :param constr_func:
+        """
+        self.constr_func = constr_func
+        super(ConvexSet, self).__init__(rows, cols)
+
+    def canonicalize(self):
+        """
+        # Applies the objective to the constr_func to get the affine constraints.
+        """
+        obj = lu.create_var(self.size, self.id)
+        return (obj, self.constr_func(obj))
+
+
 class HyperPlane(ConvexSet):
     def __init__(self, A, b):
         """ Ax <= b """
@@ -114,6 +117,18 @@ class HyperPlane(ConvexSet):
             return constraints
         super(HyperPlane, self).__init__(G.size[1], 1, constr_func)
 
+
+class Ball(ConvexSet):
+    def __init__(self, X, r):
+        X, r = map(self.cast_to_const, [X, r])
+
+        def constr_func(aff_obj):
+            G_aff = X.canonical_form[0]
+            h_aff = r.canonical_form[0]
+            Gx = cvx.norm(G_aff - aff_obj, 2, axis=1)
+            constraints = [lu.create_leq(Gx, h_aff)]
+            return constraints
+        ConvexSet.__init__(self, X.size[1], 1, constr_func)
 
 
 class Polyhedron(ConvexSet):
@@ -143,7 +158,8 @@ class Polyhedron(ConvexSet):
 class ConvexHull(ConvexSet):
     # The convex hull of a list of values.
     def __init__(self, values):
-        values = map(self.cast_to_const, values)
+        values = [self.cast_to_const(x) for x in values]
+        print(values)
         rows, cols = values[0].size
 
         def constr_func(aff_obj):

@@ -33,7 +33,11 @@ class Formulation(_FormRecursive):
     DOMAIN = {}
     META = {'constraint': True, 'objective': True}
 
-    def __init__(self, space, is_constraint=None, is_objective=None, name=None):
+    def __init__(self, space,
+                 is_constraint=None,
+                 is_objective=None,
+                 obj=None,
+                 name=None):
         """ Base Class
 
         inputs: Can be formulations, Variables, geometries or matricies
@@ -56,13 +60,22 @@ class Formulation(_FormRecursive):
 
         self._name = name
         self.is_constraint = is_constraint
-        self.is_objective = is_objective
+        self.is_objective = True if is_objective is True or \
+            obj is not None else False
+        self._obj_type = None
+        if obj is not None:
+            if obj in (cvx.Maximize, cvx.Minimize):
+                self._obj_type = obj
 
         self._generated_constraints = False
         self._generated_objectives = False
         self._obj = None
         self._constr = []
         self._solve_args = {}
+
+    @property
+    def solver_args(self):
+        return self._solve_args
 
     @property
     def name(self):
@@ -215,6 +228,11 @@ class Formulation(_FormRecursive):
         return self.as_objective()
 
 
+def form_canon(cls, *args, **kwargs):
+    inst = cls(*args, **kwargs)
+    return inst.objective(), inst.constraints()
+
+
 class Noop(Formulation):
     def as_constraint(self, *args):
         return []
@@ -223,15 +241,24 @@ class Noop(Formulation):
         return None
 
 
+class FeasibleSet(Formulation):
+    META = {'constraint': False, 'objective': True}
+
+    def __init__(self, **kwargs):
+        Formulation.__init__(self, None, is_objective=True, **kwargs)
+
+    def as_objective(self, **kwargs):
+        return cvx.Minimize(0)
+
+    def as_constraint(self, *args):
+        """ list of Constraint Expressions """
+        return []
+
 class ConstaintFormulation(Formulation):
     pass
 
 
 class ObjectiveFormulation(Formulation):
-    pass
-
-
-class Stage(Formulation):
     pass
 
 

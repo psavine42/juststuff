@@ -53,7 +53,7 @@ class FPDiscrete(TestDiscrete):
             draw_formulation_discrete(fs, ax, facecolor=colors[i])
         finalize(ax, save=self._save_loc(save), extents=[w, h])
 
-    def _basic_covering2(self, W, w, h, R, save=None):
+    def _basic_circle(self, W, w, h, R, save=None):
         """
         inputs are:
             - discrete domain
@@ -67,7 +67,7 @@ class FPDiscrete(TestDiscrete):
         P = len(W)
         space = Mesh2d.from_grid(w, h)
         X = [FaceSet(space, i) for i in range(P)]
-        # balls = CircleList(P, r=R)
+        balls = CircleList(P, r=R)
 
         b = []
         fpprob = FloorPlanProp(X)
@@ -101,54 +101,60 @@ class FPDiscrete(TestDiscrete):
             draw_formulation_discrete(fs, ax, facecolor=colors[i], alpha=0.4)
         finalize(ax, save=self._save_loc(save), extents=[w+np.max(R)/2, h+np.max(R)/2])
 
-    def _box_covering2(self, W, w, h, slack, save=None):
+    def _box_covering3(self, A, w, h, save=None):
         """
         inputs are:
             - discrete domain
             - minimum areas of covering elements
 
-        performance:
-            5  x 10 -> 0.2s
-            10 x 10 -> 3.8s
+        Trying to overcome slicing and boxing
+        Creates Boxes in R2 and PlacementSets in Discrete space.
 
         """
-        P = len(W)
+        P = len(A)
         space = Mesh2d.from_grid(w, h)
+        tiles = [BTile(area=A[i], name=str(i)) for i in range(P)]
+
         X = [FaceSet(space, i) for i in range(P)]
-        b = []
-        fpprob = FloorPlanProp(X)
+        box_list = BoxInputList(tiles, name='bx')
 
-        fpprob += NoOverlappingFaces(space, actions=X)
-        fpprob += LocallyConnectedSet(space, actions=X, limit=2)
+        fp_prob = FloorPlanProp(X)
+
+        # continuous constraints
+        bbx = BoxBoundedSet(space, X, box_list)
+        baspect = BoxAspectLinear(box_list, mx_area=A, mx_aspect=3)
+        fp_prob.add_formulations(bbx, baspect)
+
+        # discrete constraints
+        fp_prob += NoOverlappingFaces(space, actions=X)
+        fp_prob += LocallyConnectedSet(space, actions=X, limit=2)
         for i in range(P):
-            bb = BoxBoundedSet(space, X[i], W[i] * slack, name='bubble.{}'.format(i))
-            b.append(bb)
-            fpprob += bb
-            fpprob += TileLimit(space, i, actions=X, lower=W[i])
+            fp_prob += TileLimit(space, i, actions=X, lower=A[i])
 
-        C = fpprob.own_constraints()
-        # obj = cvx.Minimize(w * h - cvx.sum(cvx.hstack([X[i].X for i in range(P)])))
+        C = fp_prob.own_constraints()
         obj = cvx.Minimize(0)
         p = cvx.Problem(obj, C)
+
         print(describe_problem(p))
-        # p.solve(verbose=True)
-        p.solve(method='dccp',
-                   ep=1e-2,
-                   max_slack=1e-2,)
+        p.solve(verbose=True)
         for c in C:
             print(c)
 
         print(obj)
-        print(p.solution)
+        # print(p.solution)
 
         assert p.solution.status == 'optimal'
         fig, ax = plt.subplots(1, figsize=(7, 7))
         colors = cm.viridis(np.linspace(0, 1, P))
         for i, fs in enumerate(X):
             draw_formulation_discrete(fs, ax, facecolor=colors[i], label=False, alpha=0.7)
-        for i, fs in enumerate(b):
-            print(fs._box.value)
-            draw_formulation_discrete(fs, ax, edgecolor='black', alpha=0.0)
+
+        print()
+        print(baspect.describe())
+        print()
+        print(box_list.describe())
+
+        draw_formulation_cont(box_list, ax, edgecolor='black', alpha=0.4)
         finalize(ax, save=self._save_loc(save), extents=[w, h])
 
     def test_basic_mini(self):
@@ -171,19 +177,29 @@ class FPDiscrete(TestDiscrete):
         W = [10, 10, 6, 6, 18]
         R = [2.4, 2.4, 2, 2, 3.2]
         adj = []
-        self._basic_covering2(W, w, h, R, 'basic_cover_bub2')
+        self._box_covering3(W, w, h, 'basic_cover_bub2')
 
     def test_cover_box(self):
         w, h = 5, 10
         W = [10, 10, 6, 6, 18]
         adj = []
-        self._box_covering2(W, w, h, 1.3, 'basic_cover_box')
+        self._box_covering3(W, w, h, 'basic_cover_boxx3')
 
-    def test_cover_bubble_lrg(self):
-        w, h = 10, 10
-        W = [10, 10, 6, 6, 18]
-        R = [2.9, 3, 2, 2, 3.7]
-        W = [2 * x for x in W]
-        R = [2 * x for x in R]
-        self._basic_covering2(W, w, h, R, 'basic_cover_bublarge')
+    def test_cover_box_lrg(self):
+        A = [10, 10, 6, 6, 7, 8, 14, 18]
+        d = np.ceil(np.asarray(A).sum() ** 0.5)
+        d = int(d.astype(int))
+        w, h = d, d
+        print('size', d)
+        self._box_covering3(A, w, h, 'disccont_cover_box_n=8')
+
+    def test_partial_rpm(self):
+        pass
+
+    def test_known_box_locs(self):
+        pass
+
+    def test_disc_adj(self):
+        pass
+
 

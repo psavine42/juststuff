@@ -1,6 +1,7 @@
 from .formulations import Formulation
 from src.cvopt.shape import R2
-from cvxpy import Variable
+from cvxpy import Variable, Minimize
+from cvxpy.expressions.expression import Expression
 
 
 class FormulationR2(Formulation):
@@ -40,6 +41,17 @@ class FormulationR2(Formulation):
 
     def as_objective(self, **kwargs):
         return None
+
+
+class ConstrLambda(FormulationR2):
+    META = {'constraint': True, 'objective': False}
+
+    def as_constraint(self):
+        if isinstance(self._inputs, (tuple, list)):
+            return self._inputs
+        elif isinstance(self._inputs, Expression):
+            return [self._inputs]
+        return []
 
 
 class NumericBound(FormulationR2):
