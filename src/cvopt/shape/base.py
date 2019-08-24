@@ -17,6 +17,10 @@ class BTile(object):
             self.p2 = p2 if p2 else [p1[0] + 1, p1[1] + 1]
 
     @property
+    def axis(self):
+        return None
+
+    @property
     def name(self):
         return self._name
 
@@ -50,7 +54,6 @@ class BTile(object):
         if self._aspect is not None:
             return self._aspect
         return max(self.height, self.width) / min(self.height, self.width)
-
 
 
 class R2(object):

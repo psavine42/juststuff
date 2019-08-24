@@ -6,6 +6,7 @@ from .cont_base import FormulationR2, NumericBound
 from src.cvopt.shape.base import R2
 from .positioning import *
 from .input_structs import BoxInputList
+from typing import List, Set, Dict, Tuple, Optional
 
 """
 Generally, the inputs for a floorplanning problem are given as follows:
@@ -52,7 +53,8 @@ def tris(n):
 class GeomContains(FormulationR2):
     META = {'constraint': True, 'objective': False}
 
-    def __init__(self, outer, inner, index_map=None, **kwargs):
+    def __init__(self, outer: PointList, inner: PointList,
+                 index_map: Optional[dict] = None, **kwargs):
         """
         this contains other
         aka inner[i].exteme[j] is within outer[i].exteme[j]
@@ -64,12 +66,21 @@ class GeomContains(FormulationR2):
             # simple usage
             b1 = BoxInputList(5)
             b2 = BoxInputList(5)
-            container = GeomContains(b1, b2)
+            container2 = GeomContains(b1, b2)
 
             #
             s1 = BoxInputList(2)
             s2 = BoxInputList(5)
             container = GeomContains(s1, s2, {0:1, 0:2, 0:3, 1:4, 1:5})
+
+            nm = NoOvelapMIP(s1)                # regions in s1 will not overlap
+            rg1 = NoOvelapMIP(s2[(4, 5)])       # each region's containted entities do not ovelap
+            rg2 = NoOvelapMIP(s2[(1, 2, 3)])    # each region's containted entities do not ovelap
+            obj = PerimeterObjective(s2, obj='max')
+
+            prob = Problem([s1, s2], [container, obj, nm, rg1, rg2])
+            prob.run()
+            prob.display()
         """
         n_inner = len(inner)
         n_outer = len(outer)
@@ -98,8 +109,8 @@ class GeomContains(FormulationR2):
         C = [
             0 <= -outer.y_min[i_out] + inner.y_min[ix_in],    # Hmin < X_min,
             0 <=  outer.y_max[i_out] - inner.y_max[ix_in],    # Hmax > X_max,
-            0 <= -outer.w_min[i_out] + inner.w_min[ix_in],    # Wmin < X_left,
-            0 <=  outer.w_max[i_out] - inner.w_max[ix_in],    # Wmax > X_right,
+            0 <= -outer.x_min[i_out] + inner.x_min[ix_in],    # Wmin < X_left,
+            0 <=  outer.x_max[i_out] - inner.x_max[ix_in],    # Wmax > X_right,
         ]
         return C
 
@@ -108,7 +119,11 @@ class GeomContains(FormulationR2):
 class BoundsXYWH(FormulationR2):
     META = {'constraint': True, 'objective': False}
 
-    def __init__(self, inputs=None, w=None, h=None, wmin=0, hmin=0, **kwargs):
+    def __init__(self, inputs:PointList,
+                 w: Optional[int] = None,
+                 h: Optional[int] = None,
+                 wmin: Optional[int]=0,
+                 hmin: Optional[int]=0, **kwargs):
         """
         todo this is a general case of GeomContains
         the bounding box for a fixed outline floor plan """
@@ -137,10 +152,15 @@ class BoundsXYWH(FormulationR2):
                 0 <= -self.h_min + XY[1],
             ]
         # todo it is an instance of Circle (3)
-        raise Exception('cannot interpret input object bounds')
+        raise Exception('cannot interpret input object bounds {}'.format(type(fp)))
 
-    def canoniclize(self, aff_obj):
-        return
+    @property
+    def graph_inputs(self):
+        return [self._inputs, self.w_max, self.h_max, self.w_min, self.h_min]
+
+    @property
+    def graph_outputs(self):
+        return []
 
     def as_objective(self, **kwargs):
         return None
@@ -158,8 +178,12 @@ class BoundsXYWH(FormulationR2):
 
 
 class UnusableZone(FormulationR2):
-    def __init__(self, inputs, x=None, y=None, w=None, h=None,
-                 rpm=None,
+    def __init__(self, inputs:PointList,
+                 x:Optional[int] = None,
+                 y:Optional[int] = None,
+                 w:Optional[int] = None,
+                 h:Optional[int] = None,
+                 rpm=None, # todo WHYYYYYYYYY?
                  pts=None,
                  **kwargs):
         """
@@ -237,13 +261,16 @@ class UnusableZone(FormulationR2):
 
 # ------------------------------------------------------------
 class BoxAspect(FormulationR2):
-    def __init__(self, inputs=None, high=None, low=None, **kwargs):
+    def __init__(self, inputs: PointList=None,
+                 high: Optional[float]=None,
+                 low: Optional[float]=None, **kwargs):
         """
         """
         FormulationR2.__init__(self, inputs, **kwargs)
         self.B = Variable(shape=len(inputs), pos=True, name=self.name)
         self._bnd = NumericBound(self.B, high=high, low=low)
 
+    @property
     def vars(self):
         return self.B
 
@@ -272,7 +299,11 @@ class BoxAspect(FormulationR2):
 
 
 class BoxAspectLinear(FormulationR2):
-    def __init__(self, inputs=None, mx_aspect=None, mx_area=None, **kwargs):
+    def __init__(self,
+                 inputs: PointList,
+                 mx_aspect=None,
+                 mx_area=None,
+                 **kwargs):
         """
         When Max Area and Max Aspect are known, bound by perimeter and aspect
         """

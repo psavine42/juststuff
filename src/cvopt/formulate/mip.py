@@ -10,10 +10,12 @@ def emul(lh, rh):
 
 
 class MIPConstraint(FormulationR2):
-    def __init__(self, inputs, indices=None, **kwargs):
+    def __init__(self, inputs, indices=None, m=None, **kwargs):
         """
         continuous X_i
         x_i = values[i, 0] or x_i = values[i, 1]
+        todo - Inteface for setting upper bounds (M) in MIP equations.
+        todo currently just putting 100, but should be done in a preprocess step by FPP or stage
 
         indices
         """
@@ -74,7 +76,6 @@ class DiscreteValueChoice(MIPConstraint):
 
 
 # todo Generalize! ---------------------------------------------------
-
 class OrientationConstr(MIPConstraint):
     def __init__(self, inputs, indices=None, eq=True, **kwargs):
         """
@@ -87,8 +88,13 @@ class OrientationConstr(MIPConstraint):
     @property
     def indicators(self):
         """ see BoxInputList.orientation for details """
-        ovars, _ = self.inputs.orientation
-        return ovars
+        res = []
+        if isinstance(self.inputs, (list, tuple)):
+            for inp in self.inputs:
+                res.append(inp.orientation[0])
+            return res
+        else:
+            return self.inputs.orientation[0]
 
     def as_constraint(self, **kwargs):
         ovars, C = self.inputs.orientation
@@ -99,6 +105,49 @@ class OrientationConstr(MIPConstraint):
             else:
                 # todo - this is wrong FIXME
                 C += [ovars[inds[i]] == 1 - ovars[inds[i + 1]]]
+        return C
+
+
+class OrientationConstr2l(MIPConstraint):
+    def __init__(self, list1, list2, eq=None, **kwargs):
+        """
+        """
+        MIPConstraint.__init__(self, [list1, list2], **kwargs)
+        self._eq = None
+        if eq is not None:
+            eq = np.asarray(eq, dtype=int)
+            if eq.shape[0] == len(list1):
+                self._eq = eq
+            else:
+                raise Exception('incorrect shape for eq array')
+
+    @property
+    def indicators(self):
+        """ see BoxInputList.orientation for details """
+        res = []
+        if isinstance(self.inputs, (list, tuple)):
+            for inp in self.inputs:
+                res.append(inp.orientation[0])
+            return res
+        else:
+            return self.inputs.orientation[0]
+
+    def as_constraint(self, **kwargs):
+        in1, in2 = self.inputs
+        ovars1, c1 = in1.orientation
+        ovars2, c2 = in2.orientation
+        C = []
+        # if self._eq is not None and self._eq
+
+        # if self._indices is not None:
+        # print(self._eq)
+        C += c1
+        C += c2
+        ix1 = np.where(self._eq == 0)
+        ix2 = np.where(self._eq == 1)
+        C += [ovars1[ix1] == ovars2[ix1]]
+        C += [ovars1[ix2] == 1 - ovars2[ix2]]
+        # C += [ovars1 == ovars2]
         return C
 
 

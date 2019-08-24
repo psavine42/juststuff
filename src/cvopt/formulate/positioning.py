@@ -1,36 +1,10 @@
 from .fp_cont import FormulationR2
+from .input_structs import PointList, IOType
 from cvxpy import Variable, Minimize, Parameter
 import numpy as np
 import networkx as nx
 import cvxpy as cvx
-
-
-
-class AdjacencyMatrix(FormulationR2):
-    def __init__(self, mat, inputs=None, constants=None, min_overlap=None, points=None, **kwargs):
-        """
-        todo - not sure about this in SDP context - aka its fucked.
-        overlap has to added directly into the sdp constraint
-        MIP Based -
-        the overlaps between rooms must be of size c
-
-        x i       ≤ x j + w j − c · θ i, j
-        x i + w i ≥ x j + c · θ_i,j
-        y i       ≤ y j + d j − c · (1 − θ i, j )
-        y i + d i ≥ y j + c · (1 − θ i, j ),
-        """
-        FormulationR2.__init__(self, inputs, **kwargs)
-        self.mat = mat
-        self.min_overlap = min_overlap
-        self.constants = constants
-
-    def as_constraint(self, **kwargs):
-        X, Y, W, H = self.inputs.vars
-        n = self.mat.shape[0]
-        theta_ij = Variable()
-        for r, (i, j) in enumerate(zip(*np.triu_indices(n, 1))):
-            pass
-        return
+from typing import List, Set, Dict, Tuple, Optional
 
 
 class RPM(FormulationR2):
@@ -203,6 +177,33 @@ class RPM(FormulationR2):
         if text:
             return 'num_{}\n{}\n{}'.format(cnt, txtlr, txtud)
         return [' '.join(x) for x in arr]
+
+
+class AdjacencyMatrix(FormulationR2):
+    def __init__(self, mat, inputs=None, constants=None, min_overlap=None, points=None, **kwargs):
+        """
+        todo - not sure about this in SDP context - aka its fucked.
+        overlap has to added directly into the sdp constraint
+        MIP Based -
+        the overlaps between rooms must be of size c
+
+        x i       ≤ x j + w j − c · θ i, j
+        x i + w i ≥ x j + c · θ_i,j
+        y i       ≤ y j + d j − c · (1 − θ i, j )
+        y i + d i ≥ y j + c · (1 − θ i, j ),
+        """
+        FormulationR2.__init__(self, inputs, **kwargs)
+        self.mat = mat
+        self.min_overlap = min_overlap
+        self.constants = constants
+
+    def as_constraint(self, **kwargs):
+        X, Y, W, H = self.inputs.vars
+        n = self.mat.shape[0]
+        theta_ij = Variable()
+        for r, (i, j) in enumerate(zip(*np.triu_indices(n, 1))):
+            pass
+        return
 
 
 class ShiftMatrix(FormulationR2):
@@ -412,7 +413,7 @@ class PackCircles(FormulationR2):
 
         # compute radii
         areas = np.asarray([x.area for x in circle_list.inputs])
-        r = np.sqrt(areas / np.pi) # * np.log(1 + areas / (min_area - min_edge ** 2))
+        r = np.sqrt(areas / np.pi)  # * np.log(1 + areas / (min_area - min_edge ** 2))
         self.r = r
 
         # indices of upper tris
@@ -431,6 +432,7 @@ class PackCircles(FormulationR2):
         self._obj = Minimize(cvx.sum(cvx.multiply(weights, dists)))
 
     def _xxx(self, obj):
+        """ testing - todo remove"""
         if obj == 'rect':
             self._obj = Minimize(
                     cvx.max(cvx.abs(X[:, 0]) + r) +
@@ -453,8 +455,6 @@ class PackCircles(FormulationR2):
 
             if obj == 'ar0':
                 print('ar0', f0.shape, cvx.sum(f0).curvature)
-
-
             # elif obj == 'ar1':
             #     self._obj = Minimize(cvx.sum(f1))
             #
@@ -518,34 +518,66 @@ class EuclideanDistanceMatrix(FormulationR2):
 class NoOvelapMIP(FormulationR2):
     META = {'constraint': True, 'objective': False}
 
-    def __init__(self, box_list, others=None, m=100, **kwargs):
+    def __init__(self, box_list: IOType,
+                 others: Optional[IOType] = None,
+                 m: Optional[int] = 100,
+                 **kwargs):
         """
+        MIP formulation of no overlapping objects without requirement of RPM
 
-        if others is specified then, items in box_list will not overlap items in others list
+        approximately doubles the number of Variables in the problem
+
+        Arguments:
+            box_list : BoxInputList or CircleInputList
+            others : Optional - if specified then items in 'box_list'
+                will not overlap items in 'others' list
         """
         FormulationR2.__init__(self, box_list, **kwargs)
         self._m = m
         self._others = others
 
-    def from_2lists(self):
-        # to do
-        in1 = self.inputs
-        in2 = self._others
+    @property
+    def graph_inputs(self):
+        return [self._inputs, self._others, self._m]
 
-        xi, xj = len(in1), len(in2)
-        ntril = len(xi)
-        trili = list(range(ntril))
-        or_vars = Variable(shape=(ntril, 4), boolean=True, name='overlap_or({},{})')
-        C = [
-            in1.right <= in2.left[xj] + self._m * or_vars[trili, 0],
-            in2.right[xj] <= in1.left + self._m * or_vars[trili, 1],
-            X.top[xi] <= X.bottom[xj] + self._m * or_vars[trili, 2],
-            X.top[xj] <= X.bottom[xi] + self._m * or_vars[trili, 3],
-            cvx.sum(or_vars, axis=1) <= 3
+    @property
+    def graph_outputs(self):
+        return [self._inputs, self._others]
+
+    @classmethod
+    def constr_by_index_3d(cls, in1, in2, M, indicators, xi, xj, tij):
+        c2d = cls.constr_by_index(in1, in2, M, indicators, xi, xj, tij, s=5)
+        c2d += [
+            in1.z_max[xi] <= in2.z_min[xj] + M * indicators[tij, 4],
+            in2.z_max[xj] <= in1.z_min[xi] + M * indicators[tij, 5],
         ]
-        return
+        return c2d
 
-    def as_constraint(self, **kwargs):
+    @classmethod
+    def constr_by_index(cls, in1, in2, M, indicators, xi, xj, tij, s=3):
+        return [
+            in1.x_max[xi] <= in2.x_min[xj] + M * indicators[tij, 0],
+            in2.x_max[xj] <= in1.x_min[xi] + M * indicators[tij, 1],
+            in1.y_max[xi] <= in2.y_min[xj] + M * indicators[tij, 2],
+            in2.y_max[xj] <= in1.y_min[xi] + M * indicators[tij, 3],
+            cvx.sum(indicators, axis=1) <= s
+        ]
+
+    @classmethod
+    def from_2lists(cls, in1, in2, M):
+        Ni, Nj = len(in1), len(in2)
+        xi, xj = [x.tolist() for x in np.triu_indices(max(Ni, Nj), 1, min(Ni, Nj))]
+        or_vars = Variable(shape=(len(xi), 4), boolean=True, name='overlap_or({},{})')
+        tij = list(range(len(xi)))
+        # swap
+        if Ni >= Nj:
+            xi, xj = xi, xj
+        else:
+            xi, xj = xj, xi
+        return cls.constr_by_index(in1, in2, M, or_vars, xi, xj, tij)
+
+    @classmethod
+    def from_1list(cls, X, M):
         """
            http://yetanothermathprogrammingconsultant.blogspot.com/2017/07/rectangles-no-overlap-constraints.html
            xi+wi ≤ xj or
@@ -555,21 +587,24 @@ class NoOvelapMIP(FormulationR2):
 
            is transfromed to linear inequalities
         """
-        X = self.inputs
         N = len(X)
-
         xi, xj = [x.tolist() for x in np.triu_indices(N, 1)]
-        ntril = len(xi)
-        trili = list(range(ntril))
-        or_vars = Variable(shape=(ntril, 4), boolean=True, name='overlap_or({},{})')
+        tij = list(range(len(xi)))
+        or_vars = Variable(shape=(len(xi), 4), boolean=True, name='overlap_or({},{})')
         C = [
-            X.right[xi] <= X.left[xj]   + self._m * or_vars[trili, 0],
-            X.right[xj] <= X.left[xi]   + self._m * or_vars[trili, 1],
-            X.top[xi]   <= X.bottom[xj] + self._m * or_vars[trili, 2],
-            X.top[xj]   <= X.bottom[xi] + self._m * or_vars[trili, 3],
+            X.right[xi] <= X.left[xj]   + M * or_vars[tij, 0],
+            X.right[xj] <= X.left[xi]   + M * or_vars[tij, 1],
+            X.top[xi]   <= X.bottom[xj] + M * or_vars[tij, 2],
+            X.top[xj]   <= X.bottom[xi] + M * or_vars[tij, 3],
             cvx.sum(or_vars, axis=1) <= 3
         ]
         return C
+
+    def as_constraint(self, **kwargs):
+        """ generate the constraints """
+        if self._others is not None:
+            return self.from_2lists(self.inputs, self._others, self._m)
+        return self.from_1list(self.inputs, self._m)
 
 
 # ------------------------------------------------------------------------

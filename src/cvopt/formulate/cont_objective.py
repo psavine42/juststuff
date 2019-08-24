@@ -4,12 +4,18 @@ from cvxpy import Variable, Minimize, Maximize, Parameter
 from .cont_base import FormulationR2, NumericBound
 import cvxpy.lin_ops.lin_utils as lu
 import operator
+from .input_structs import PointList
+from typing import List, Set, Dict, Tuple, Optional
 
 
 class ObjectiveR2(FormulationR2):
     META = {'constraint': True, 'objective': True}
 
-    def __init__(self, inputs, weight=None, **kwargs):
+    def __init__(self,
+                 inputs: PointList,
+                 weight: Optional[List]=None,
+                 obj=None,
+                 **kwargs):
         """
 
         :param inputs:
@@ -17,16 +23,22 @@ class ObjectiveR2(FormulationR2):
         :param kwargs:
         """
         kwargs['is_objective'] = True
-        FormulationR2.__init__(self, inputs, **kwargs)
+        if isinstance(obj, str):
+            if obj == 'Maximize':
+                obj = Maximize
+            else:
+                obj = Minimize
+        print(obj)
+        FormulationR2.__init__(self, inputs, obj=obj, **kwargs)
         shape = self.w_shape
-        self._w = None
+        self._weight = None
         if weight is None:
-            self._w = np.ones(shape)
+            self._weight = np.ones(shape)
         elif isinstance(weight, (list, tuple, np.ndarray)):
             w = np.asarray(weight)
             assert w.shape[0] == shape, \
                 'required, {} got {}'.format(w.shape, shape)
-            self._w = w
+            self._weight = w
 
     @property
     def w_shape(self):
@@ -39,6 +51,10 @@ class ObjectiveR2(FormulationR2):
         else:
             return Minimize
 
+    @property
+    def graph_inputs(self):
+        return [self._inputs, self._weight, self.obj_klass]
+
 
 class PointDistObj(ObjectiveR2):
     """
@@ -50,15 +66,8 @@ class PointDistObj(ObjectiveR2):
         inputs: Boxlist
 
     """
-
-    def __init__(self, inputs, weight=None, **kwargs):
-        ObjectiveR2.__init__(self, inputs, weight=weight, **kwargs)
-
     @property
     def w_shape(self):
-
-        # triu = np.triu_indices(len(self.inputs), 1)
-        # print(len(self.inputs))
         shp = np.triu_indices(len(self.inputs), 1)[0].shape[0]
         return shp
 
@@ -122,10 +131,8 @@ class PointDistObj(ObjectiveR2):
                 V <= Y[ti] - Y[tj] + by_eq_1,
                 V <= Y[tj] - Y[ti] + by_eq_0,
             ]
-            self.uv = (U, V)
             expr = U + V
-            self._obj = Maximize(cvx.sum(cvx.multiply(self._w, expr)))
-            # self._obj = Maximize(cvx.sum(cvx.sqrt(expr)))
+            self._obj = Maximize(cvx.sum(cvx.multiply(self._weight, expr)))
         else:
             C = [
                 # linearized absolute value constraints - i guess its faster
@@ -135,7 +142,7 @@ class PointDistObj(ObjectiveR2):
                 V >= Y[ti] - Y[tj],
                 V >= Y[tj] - Y[ti]
             ]
-            self._obj = Minimize(cvx.sum(cvx.multiply(self._w, (U + V))))
+            self._obj = Minimize(cvx.sum(cvx.multiply(self._weight, (U + V))))
         return C
 
     def as_objective(self, **kwargs):
@@ -159,7 +166,13 @@ class DistToSet(ObjectiveR2):
             return Minimize(cvx.sum(cvx.norm(XY - self._cvx_set, 2, axis=1)))
 
 
-class MaxPerimeter(ObjectiveR2):
+class PerimeterObjective(ObjectiveR2):
+
     def as_objective(self, **kwargs):
-        X, Y, W, H = self.inputs.vars
-        return cvx.Maximize(cvx.sum(W+H))
+        _, _, W, H = self.inputs.vars
+        if self.obj_klass == Maximize:
+            return cvx.Maximize(cvx.sum(W+H))
+
+        elif self.obj_klass == Minimize:
+            return cvx.Minimize(cvx.sum(W+H))
+

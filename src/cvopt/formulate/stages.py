@@ -9,24 +9,22 @@ import src.cvopt.utils as du
 class Stage(FPProbllem):
     def __init__(self, inputs, outputs=None, forms=None, **kwargs):
         FPProbllem.__init__(self)
-        self._inputs = [inputs]
-        self._outputs = [outputs]
+        self._inputs = None
+        self._outputs = None
+
+        if isinstance(inputs, (list, tuple)):
+            self._inputs = inputs
+        else:
+            self._inputs = [inputs]
+
         if outputs is None:
-            self._outputs = [inputs]
+            self._outputs = self._inputs
+        elif isinstance(outputs, (list, tuple)):
+            self._outputs = outputs
+        else:
+            self._outputs = [outputs]
         if forms is not None:
             self._formulations.extend(forms)
-
-    # def _pull_pred_vars(self):
-    #     for v in self.vars:
-    #         yield v
-    #     for input in self.inputs:
-    #         for vars_i in input._gather_vars():
-    #             yield vars_i
-    #
-    # def _gather_dict(self):
-    #     for v in self._pull_pred_vars():
-    #         if v.name in self._in_dict and self._in_dict[v.name] is None:
-    #             self._in_dict[v.name] = v
 
     @property
     def is_solved(self):
@@ -37,6 +35,10 @@ class Stage(FPProbllem):
         elif self._problem.solution.status == 'optimal':
             return True
         return False
+
+    @property
+    def serializable(self):
+        return self._formulations + self._inputs
 
     def solve(self, verbose=False, solve_args={}):
         method = None
@@ -64,7 +66,6 @@ class Stage(FPProbllem):
     def own_constraints(self, **kwargs):
         C = []
         for x in self._formulations:
-            print(x.__class__.__name__)
             C += x.constraints()
         return C
 

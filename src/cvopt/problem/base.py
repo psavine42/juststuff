@@ -1,6 +1,8 @@
 from cvxpy import Problem
 import dccp
 import dmcp
+from collections import Counter
+from collections import defaultdict as ddict
 
 
 def describe_problem(problem: Problem):
@@ -41,14 +43,10 @@ class FPProbllem(object):
         print(problem.solution.opt_val)
         print(problem.solution.attr)
 
-    def make(self,
-             verbose=False,
-             obj_args={},
-             const_args={}):
+    def make(self, verbose=False, obj_args={}, const_args={}):
         constraints = self.own_constraints(**const_args)
 
         objective = self.objective(**obj_args)
-        self._problem = Problem(objective, constraints)
         if verbose is True:
             print('Constraints')
             print('---------------------------')
@@ -56,16 +54,12 @@ class FPProbllem(object):
                 print(c)
             print('Objective')
             print('---------------------------')
-            print(self._problem.objective)
+            print(objective)
             print('problem ready')
+        self._problem = Problem(objective, constraints)
         return self._problem
 
-    def run(self, obj_args={},
-            const_args={},
-            solve_args={},
-            verbose=False,
-            show=True,
-            save=None):
+    def run(self, obj_args={}, const_args={}, solve_args={}, verbose=False, **kwargs):
         if self._problem is None:
             self.make(verbose=verbose,
                       const_args=const_args,
@@ -84,6 +78,60 @@ class FPProbllem(object):
 
     def solve(self, **kwargs):
         return self.run(**kwargs)
+
+    def serialize(self):
+        """
+        {'linkToNode': {
+            '_4vnql30j2': ['AdjacencyEdgeJoint.0.output.canonicle',
+                           'GridLine.0.input.edges'],
+            '_gp7xax837': ['GeomContains.0.input.inner',
+                           'AdjacencyEdgeJoint.0.output.canonicle'],
+            '_wam2iykmp': ['AdjacencyEdgeJoint.0.output.canonicle',
+                           'AdjacencyEdgeJoint.0.output.canonicle']},
+        'nodeToLink': {
+            'AdjacencyEdgeJoint.0.output.canonicle': [
+                '_4vnql30j2',
+                '_wam2iykmp',
+                '_gp7xax837'],
+            'GeomContains.0.input.inner': ['_gp7xax837'],
+            'GridLine.0.input.edges': ['_4vnql30j2']}
+        'active': [
+            'AdjacencyEdgeJoint.0' ,
+            'GridLine.0'
+            ]
+        }
+        :return:
+        """
+        node_to_link = {}
+        link_to_node = {}
+        active = []
+        cnt = ddict(int)
+        for f in self._formulations:
+            name = f.__class__.__name__
+            if name in cnt:
+                cnt[name] += 1
+            else:
+                cnt[name] = 0
+
+            inst_name = name + '.' + str(cnt[name])
+            active.append(inst_name)
+
+            # outputs can be
+            inputs = f.inputs
+
+        solution = None
+        if self._problem is not None:
+            if self._problem.solution is not None:
+                solution = str(self._problem.solution)
+
+        json_dict = {
+            'solution': solution,   # todo
+            'image': None,
+            'active': active,
+            'nodeToLink': node_to_link,
+            'linkToNode': link_to_node
+        }
+        return json_dict
 
     @property
     def formulations(self):
@@ -124,4 +172,6 @@ class FPProbllem(object):
 
     def display(self, problem, **kwargs):
         return
+
+
 

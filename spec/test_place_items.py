@@ -10,6 +10,7 @@ from src.cvopt.problem import describe_problem
 import src.cvopt.cvx_objects as cxo
 from src.cvopt.formulate.cont_base import *
 from src.cvopt.formulate import *
+from example.cvopt import bathroom as fixt
 
 
 class TestFurnitures(TestContinuous):
@@ -197,11 +198,7 @@ class TestFurnitures(TestContinuous):
         hs = np.asarray(hs)
 
         # list of repulsive forces to maximize distances with
-        dist_weights = np.ones((len(tiles), len(tiles)))
-        for k, v in data.get('inv_adj', {}).items():
-            ki, kj = k
-            dist_weights[ki, kj] = v
-        dist_weights = dist_weights[np.triu_indices(len(tiles), 1)].tolist()
+        dist_weights = fixt.adj_to_list(data)
 
         # setup of problem objects
         # -------------------------------------------
@@ -234,18 +231,6 @@ class TestFurnitures(TestContinuous):
         choice = OneEdgeMustTouchBoundary(box_list, [0, bh, 0, bw])
         frm.append(choice)
 
-        # 3) Short side restrictions
-        # todo - is it worth modeling these differently?
-        # However, also, the toilets short side must be on wall
-        # and the sinks long-side must be on wall
-        # when fdim[0, i] = 1, then Xi.W > Xi.H
-        # therefore choice of wall is restricted to xmin, xmax
-        # choice[2, i] + choice[3, i] == 1
-        #
-        # w_short = fixdim.indicators[0]
-        # w_long = fixdim.indicators[1]
-        # inds = choice.indicators
-
         # 4) todo There is a bounding box within which turlet exists
         # which can only overlap the door
 
@@ -268,88 +253,80 @@ class TestFurnitures(TestContinuous):
         print(p.value)
         print('edge_choice\n', choice.indicators.value)
         print('dim_choice\n', fixdim.indicators.value)
-        for vr in pld.uv:
-            print(vr.name(), vr.value)
         for t in tiles:
             print(t.area)
 
     def _solvem3(self, data, save=None):
-        """ """
+        """ now with containers """
         if data['boundary'] == 'classical':
             bw, bh = Variable(name='W'), Variable(name='H')
         else:
             bw, bh = data['boundary']['box']
-        centr = np.asarray([bw/2, bh/2])
-        tiles = []
-        stiles = []
+        outer_t, inner_t = [], []
+
         ws, hs = [], []
-        sws, shs = [], []
+        ows, ohs = [], []
+        dom_ax = []
         for k, fixture in data['objects'].items():
-            w, h = fixture['box']
-            ws.append(w)
-            hs.append(h)
-            tiles.append(BTile(area=w * h, name=k))
-
-            small_size = fixture.get('box_s', None)
+            if 'side' in fixture:
+                pass
+            if 'radius' in fixture:
+                pass
+            else:
+                w, h = fixture['inner']
+                ws.append(w)
+                hs.append(h)
+                inner_t.append(BTile(area=w * h, name=k))
+            dom_ax.append(1 - fixture.get('same_axis', 1))
+            small_size = fixture.get('outer', None)
             if small_size is not None:
-                sw, sh = small_size
-                sws.append(sw)
-                shs.append(sh)
-                stiles.append(BTile(area=sw * sh, name=k))
+                sw, sh = small_size[0], small_size[1]
+                ows.append(sw)
+                ohs.append(sh)
+                outer_t.append(BTile(area=sw * sh, name='bbx.' + k))
 
-        ws = np.asarray(ws)
-        hs = np.asarray(hs)
-
+        ws, hs = np.asarray(ws), np.asarray(hs)
+        ows, ohs = np.asarray(ows), np.asarray(ohs)
         # list of repulsive forces to maximize distances with
-        dist_weights = np.ones((len(tiles), len(tiles)))
-        for k, v in data.get('inv_adj', {}).items():
-            ki, kj = k
-            dist_weights[ki, kj] = v
-        dist_weights = dist_weights[np.triu_indices(len(tiles), 1)].tolist()
+        dist_weights = fixt.adj_to_list(data)
 
         # setup of problem objects
         # -------------------------------------------
         # inputs
-        box_list = BoxInputList(tiles)
-        # if it is a classical problem, solve for min boundary
-        pld = PointDistObj(box_list,
-                           weight=dist_weights,
-                           obj=Maximize)
-        fixdim = FixedDimension(box_list, values=[ws, hs],
-                                #, indices=[0, 1, 2]
-                                )
+        boxes_inner = BoxInputList(inner_t)
+        boxes_outer = BoxInputList(outer_t, disp_args=dict(alpha=0.5))
+
         # formulations for problem constraints
-        frm = [BoundsXYWH(box_list, w=bw, h=bh),
-               fixdim,
-               pld,
-               # FeasibleSet(),
-               NoOvelapMIP(box_list)
+        frm = [
+            BoundsXYWH(boxes_outer, w=bw, h=bh),
+            GeomContains(boxes_outer, boxes_inner),
+            FixedDimension(boxes_inner, values=[ws, hs]),
+            FixedDimension(boxes_outer, values=[ows, ohs]),
+            # FeasibleSet(),
+            NoOvelapMIP(boxes_outer, others=boxes_inner),
+            OrientationConstr2l(boxes_outer, boxes_inner, eq=dom_ax)
         ]
+        obj = PointDistObj(boxes_inner, weight=dist_weights, obj=Maximize)
+        frm.append(obj)
         # Add Problem Specific Logic
         # -------------------------------------------
-        # 1) There is a door on the left side of the thing
-        # no box can overlap the Door swing
-        # model the swing as a square
-        door = ConstrLambda([box_list.X[3] == 1])
-        frm.append(door)
+        # 1) There is a door on the left side of the room
+        idr = boxes_inner.index_of_name('door')
+        frm.append(ConstrLambda([boxes_inner.X[idr] == 1/12]))
 
         # 2) each fixture is restricted to a wall
-        # tl == BoundsL or tr == BoundsR ....
-        choice = OneEdgeMustTouchBoundary(box_list, [0, bh, 0, bw])
+        choice = OneEdgeMustTouchBoundary(boxes_inner, [0, bh, 0, bw])
         frm.append(choice)
-
-        # 4) todo There is a bounding box within which turlet exists
-        # which can only overlap the door
-        # there are actually two boxlists 1 is active when door is there
-        # the smaller one
 
         # 5) Toilet is not facing Tub (common architecture crit thing)
         # modeled as same orientation
-        frm.append(OrientationConstr(box_list, [0, 1]))
+        # frm.append(OrientationConstr(boxes_inner, [0, 1]))
+        idr = boxes_inner.index_of_name('tub')
+        frm.append(ConstrLambda([boxes_inner.orientation_vars[idr] == 1]))
 
         # -----------------------------
         # combine into a problem stage
-        stage1 = Stage(box_list, forms=frm)
+        stage1 = Stage([boxes_outer, boxes_inner], forms=frm)
 
         p = stage1.make(verbose=True)
         print(describe_problem(p))
@@ -358,26 +335,26 @@ class TestFurnitures(TestContinuous):
         assert stage1.is_solved is True
         save_pth = self._save_loc(save=save)
         stage1.display(save=save_pth, extents=[-1, 6, -1, 10])
-        print(box_list.describe())
+        print(boxes_inner.describe())
+        print(boxes_outer.describe())
         print(p.value)
         print('edge_choice\n', choice.indicators.value)
-        print('dim_choice\n', fixdim.indicators.value)
-        for vr in pld.uv:
-            print(vr.name(), vr.value)
-        for t in tiles:
-            print(t.area)
 
     def test_solvem2(self):
         data = self._turlet_problem3f()
         self._solvem2(data, save='p2_s1')
 
     def test_f3_01(self):
-        data = self._turlet_problem3f()
-        self._solvem2(data, save='f3_01')
+        data = fixt.bathroom_problem_3f_01()
+        self._solvem3(data, save='f3_01_2')
 
-    def test_misc(self):
-        pts = [[0, 1], [3, 1], [2, 1] ]
-        h = cxo.ConvexHull(pts)
+    def test_f2_01(self):
+        data = fixt.bathroom_problem_2f_01()
+        self._solvem3(data, save='f2_01_2')
+
+    def run_solvers(self):
+        solvers = [self._solvem2, self._solvem3]
+        problems = []
 
     def test_fixed(self):
         data = self._turlet_problem()

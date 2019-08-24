@@ -13,6 +13,8 @@
     <mapping directory="$PROJECT_DIR$/lib/dmcp" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/lib/hessian" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/lib/pythonocc-utils" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/ui/django-vue-template" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/ui/djangoserve" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/../pytorch-a2c-ppo-acktr-gail" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/../pytorch-a3c" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/../pytorch-dnc" vcs="Git" />

@@ -2,6 +2,8 @@ import numpy as np
 from cvxpy import Variable
 import cvxpy as cvx
 from collections import defaultdict as ddict
+import uuid
+from typing import Union, List
 """
 
 """
@@ -24,13 +26,10 @@ def sum_objectives(objs):
     return base
 
 
-class _FormRecursive(object):
-    pass
-
-
-class Formulation(_FormRecursive):
+class Formulation(object):
     creates_var = False
     DOMAIN = {}
+    is_graph_op = True
     META = {'constraint': True, 'objective': True}
 
     def __init__(self, space,
@@ -72,6 +71,19 @@ class Formulation(_FormRecursive):
         self._obj = None
         self._constr = []
         self._solve_args = {}
+        self._uid = uuid.uuid4().__str__()
+
+    @property
+    def uuid(self):
+        return self._uid
+
+    @classmethod
+    def graph_inputs(cls):
+        return []
+
+    @classmethod
+    def graph_outputs(cls):
+        return []
 
     @property
     def solver_args(self):
@@ -81,6 +93,8 @@ class Formulation(_FormRecursive):
     def name(self):
         if self._name is None:
             return self.__class__.__name__
+        else:
+            return self._name
 
     def register_action(self, a):
         """ register an Action/Placement object
@@ -233,6 +247,7 @@ def form_canon(cls, *args, **kwargs):
     return inst.objective(), inst.constraints()
 
 
+# PlaceHolders ---------------------------------------------------
 class Noop(Formulation):
     def as_constraint(self, *args):
         return []
@@ -245,6 +260,18 @@ class FeasibleSet(Formulation):
     META = {'constraint': False, 'objective': True}
 
     def __init__(self, **kwargs):
+        """
+        Equivelant To Not Having an objective in the Problem.
+
+        This means that what you are trying to do is say
+        'all you need to do is give me something which does not violate any constraints'
+
+        Useful for cases when you have a lot of constraints, and you want to just
+        test that they can all be met.
+
+        The case in this context will usually be in testing and building new formulations
+
+        """
         Formulation.__init__(self, None, is_objective=True, **kwargs)
 
     def as_objective(self, **kwargs):
@@ -253,6 +280,7 @@ class FeasibleSet(Formulation):
     def as_constraint(self, *args):
         """ list of Constraint Expressions """
         return []
+
 
 class ConstaintFormulation(Formulation):
     pass
@@ -267,8 +295,22 @@ class TestingFormulation(Formulation):
     pass
 
 
-# ------------------------------------------------
+class FIndex(Formulation):
+    META = {'constraint': False, 'objective': False}
+    creates_var = True
+    is_graph_op = True  # is this an operator on a the canvas graph?
 
+    def __init__(self, space: Formulation, index:Union[List, int], **kwargs):
+        Formulation.__init__(self, None, **kwargs)
+        self._input = space
+        self._index = index
+
+    @property
+    def graph_outputs(self):
+        return [self]
+
+
+# ------------------------------------------------
 class VerticesNotOnInterior(Formulation):
     DOMAIN = {'discrete'}
 

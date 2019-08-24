@@ -2,6 +2,7 @@ from .formulations import Formulation
 from src.cvopt.shape import R2
 from cvxpy import Variable, Minimize
 from cvxpy.expressions.expression import Expression
+from typing import List, Set, Dict, Tuple, Optional
 
 
 class FormulationR2(Formulation):
@@ -42,6 +43,12 @@ class FormulationR2(Formulation):
     def as_objective(self, **kwargs):
         return None
 
+    @property
+    def graph_inputs(self):
+        if isinstance(self._inputs, (list, tuple)):
+            return self._inputs
+        return [self._inputs]
+
 
 class ConstrLambda(FormulationR2):
     META = {'constraint': True, 'objective': False}
@@ -57,7 +64,12 @@ class ConstrLambda(FormulationR2):
 class NumericBound(FormulationR2):
     META = {'constraint': True, 'objective': False}
 
-    def __init__(self, child_var, low=None, high=None, domain=None, **kwargs):
+    def __init__(self,
+                 child_var: Variable,
+                 low: Optional[int]= None,
+                 high: Optional[int] = None,
+                 domain=None,
+                 **kwargs):
         if domain is None:
             domain = R2()
         assert isinstance(child_var, Variable)
@@ -87,3 +99,11 @@ class NumericBound(FormulationR2):
 
     def describe(self):
         return
+
+    @property
+    def graph_inputs(self):
+        return [self._inputs, self._low, self._high, None]
+
+    @property
+    def graph_outputs(self):
+        return []

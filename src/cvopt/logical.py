@@ -51,6 +51,13 @@ def disjunction(x, b, M, a=1):
     return [zsum, expr]
 
 
+def boolean_not(lhs, rhs):
+    assert isinstance(lhs, Variable) and isinstance(rhs, Variable)
+    assert lhs.attributes['boolean'] is True
+    assert rhs.attributes['boolean'] is True
+    return [lhs == 1 - rhs]
+
+
 def implies(iftrue, then):
     """
     MS foundation lanugage
